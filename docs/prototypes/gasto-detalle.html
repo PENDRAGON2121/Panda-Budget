@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Panda Wallet · Gasto</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@500;600;700;800&family=Nunito:wght@600;700;800;900&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#24212b; --fur:#fffdf7; --shade:#ece6db; --cheek:#f6a6b6;
+    --bamboo:#7cc04b; --node:#4c8a2c; --highlight:#b9e28f; --leaf:#4f9e34; --leaf-light:#6db546;
+    --icon-bg:#c4e8c8; --ink-muted:#5d5866; --green-deep:#3c8a2e; --danger:#e0592f;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:#e9edf0;font-family:'Nunito',system-ui,sans-serif;color:var(--ink);
+    display:flex;flex-direction:column;align-items:center;padding:24px 16px 40px;-webkit-font-smoothing:antialiased}
+  .cap{font-family:'Inter';font-size:12px;color:#6a7580;margin-bottom:14px;text-align:center;max-width:360px}
+  .cap b{color:var(--green-deep)}
+
+  .phone{width:344px;height:720px;background:#1b1920;border-radius:48px;padding:11px;
+    box-shadow:0 34px 70px -20px rgba(20,25,20,.5),0 0 0 1px rgba(0,0,0,.2) inset}
+  .screen{width:100%;height:100%;border-radius:38px;overflow:hidden;position:relative;display:flex;flex-direction:column;
+    background:linear-gradient(176deg,#e7f5e4 0%,#f3faee 26%,#f6f8f4 60%)}
+  .status{display:flex;justify-content:space-between;align-items:center;padding:15px 24px 2px;font-size:12px;font-weight:800;font-family:'Inter'}
+  .status .d{display:flex;gap:4px;align-items:center}
+  .status .d i{width:5px;height:5px;border-radius:50%;background:currentColor;opacity:.85}
+
+  .appbar{display:flex;align-items:center;gap:12px;padding:8px 16px 10px}
+  .ab{width:38px;height:38px;border-radius:12px;background:#fff;display:flex;align-items:center;justify-content:center;
+    box-shadow:0 4px 12px -6px rgba(76,138,44,.3);flex-shrink:0}
+  .ab svg{width:20px;height:20px}
+  .appbar .ttl{flex:1;min-width:0}
+  .appbar .ttl b{font-family:'Nunito';font-weight:900;font-size:17px;display:block;line-height:1.05}
+  .appbar .ttl span{font-family:'Inter';font-size:11px;color:#6a7580;font-weight:600}
+
+  .scroll{flex:1;overflow-y:auto;padding:4px 18px 34px;scrollbar-width:none}
+  .scroll::-webkit-scrollbar{display:none}
+
+  .card{background:#fff;border-radius:24px;padding:18px;box-shadow:0 14px 32px -18px rgba(76,138,44,.34);animation:rise .55s both}
+  .srow{display:flex;justify-content:space-between;align-items:center}
+  .lab{font-family:'Inter';font-size:11.5px;font-weight:600;color:#6a7580}
+  .chip2{font-family:'Inter';font-size:10.5px;font-weight:800;padding:3px 10px;border-radius:999px;background:var(--icon-bg);color:var(--green-deep)}
+  .big{font-family:'Inter';font-weight:800;font-variant-numeric:tabular-nums;font-size:29px;letter-spacing:-1px;margin:5px 0 2px}
+  .big small{font-size:15px;font-weight:700;color:#9aa4a0;letter-spacing:0}
+  .bar{height:9px;border-radius:999px;background:#eef1ec;overflow:hidden;position:relative;margin:12px 0 2px}
+  .bar i{position:absolute;inset:0 auto 0 0;border-radius:999px;background:linear-gradient(90deg,var(--bamboo),var(--leaf-light));animation:grow 1s cubic-bezier(.3,.8,.3,1) .2s both}
+  .twin{display:flex;gap:22px;margin-top:11px}
+  .twin .lab{display:block}
+  .twin b{font-family:'Inter';display:block;font-size:14px;font-weight:800;font-variant-numeric:tabular-nums;margin-top:1px}
+  .twin .dot{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:6px}
+
+  .sect{display:flex;justify-content:space-between;align-items:center;margin:18px 2px 12px}
+  .sect h3{font-weight:900;font-size:15px}
+  .sect h3 small{font-weight:700;color:#9aa4a0;font-size:12px}
+
+  /* cuotas timeline */
+  .tl{position:relative;padding-left:28px}
+  .tl::before{content:"";position:absolute;left:9px;top:8px;bottom:14px;width:2px;background:#e1e7df}
+  .cuota{position:relative;margin-bottom:11px;animation:rise .5s both}
+  .cuota:nth-child(2){animation-delay:.04s}.cuota:nth-child(3){animation-delay:.08s}.cuota:nth-child(4){animation-delay:.12s}
+  .cuota:nth-child(5){animation-delay:.16s}.cuota:nth-child(6){animation-delay:.2s}
+  .node{position:absolute;left:-28px;top:12px;width:20px;height:20px;border-radius:50%;background:#fff;border:2px solid #cfd8cd;
+    display:flex;align-items:center;justify-content:center;z-index:2}
+  .node svg{width:12px;height:12px}
+  .cuota.paid .node{background:var(--leaf);border-color:var(--leaf);color:#fff}
+  .cuota.next .node{border-color:var(--leaf);box-shadow:0 0 0 4px rgba(79,158,52,.16)}
+  .ccard{background:#fff;border-radius:15px;padding:10px 12px;box-shadow:0 5px 14px -10px rgba(76,138,44,.34);display:flex;align-items:center;gap:11px}
+  .cuota.next .ccard{box-shadow:0 8px 20px -10px rgba(76,138,44,.5);border:1.4px solid #d4ead0}
+  .ci{flex:1;min-width:0}
+  .cn{font-weight:800;font-size:13px}
+  .cs{font-family:'Inter';font-size:10.5px;color:#7a8580;font-weight:600;margin-top:2px;display:flex;align-items:center;gap:5px}
+  .cs b{color:var(--green-deep)}
+  .cs .pend{color:#b0783a}
+  .camt{font-family:'Inter';font-weight:800;font-variant-numeric:tabular-nums;font-size:13px;flex-shrink:0;text-align:right}
+  .recibo{width:34px;height:34px;border-radius:9px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:15px;
+    background:linear-gradient(135deg,#eaf4e3,#d9ebcf);border:1px solid #d3e6c8}
+  .paybtn{font-family:'Inter';font-size:10.5px;font-weight:800;color:#fff;background:var(--leaf);border:none;border-radius:9px;padding:7px 11px;cursor:pointer;flex-shrink:0}
+
+  .fab{position:absolute;right:20px;bottom:86px;height:52px;padding:0 20px 0 16px;border-radius:17px;background:var(--leaf);color:#fff;border:none;cursor:pointer;
+    display:flex;align-items:center;gap:8px;font-family:'Nunito';font-weight:800;font-size:14px;box-shadow:0 14px 26px -6px rgba(60,138,46,.6);animation:pop .5s .45s both}
+  .fab svg{width:22px;height:22px}
+  .nav{display:flex;justify-content:space-around;align-items:center;padding:12px 10px 22px;font-family:'Inter';font-size:10px;font-weight:700;background:rgba(255,255,255,.6);backdrop-filter:blur(6px)}
+  .nav div{display:flex;flex-direction:column;align-items:center;gap:4px;opacity:.45}
+  .nav div.on{opacity:1;color:var(--leaf)}
+  .nav svg{width:22px;height:22px}
+
+  @keyframes rise{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
+  @keyframes grow{from{width:0 !important}}
+  @keyframes pop{from{transform:scale(0);opacity:0}to{transform:scale(1);opacity:1}}
+</style>
+</head>
+<body>
+  <div class="cap">Panda Wallet · <b>Detalle de Gasto</b> (tipo Cuotas) — planeado vs pagado + cronograma de cuotas con recibo</div>
+  <div class="phone">
+    <div class="screen">
+      <div class="status"><span>9:41</span><div class="d"><i></i><i></i><i></i><span style="margin-left:5px">◗</span></div></div>
+
+      <div class="appbar">
+        <div class="ab"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 6l-6 6 6 6"/></svg></div>
+        <div class="ttl"><b>Constructora</b><span>🧱 Gasto de Construir casa</span></div>
+        <div class="ab"><svg viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="5" r="1.6"/><circle cx="12" cy="12" r="1.6"/><circle cx="12" cy="19" r="1.6"/></svg></div>
+      </div>
+
+      <div class="scroll">
+        <div class="card">
+          <div class="srow"><span class="lab">Planeado</span><span class="chip2">Cuotas · 4/8 pagadas</span></div>
+          <div class="big">₡20.000.000</div>
+          <div class="bar"><i style="width:60%"></i></div>
+          <div class="twin">
+            <div><span class="lab"><span class="dot" style="background:var(--leaf)"></span>Pagado</span><b>₡12.000.000</b></div>
+            <div><span class="lab"><span class="dot" style="background:#dfe4dc"></span>Restante</span><b>₡8.000.000</b></div>
+          </div>
+        </div>
+
+        <div class="sect"><h3>Cuotas <small>· 8</small></h3></div>
+
+        <div class="tl">
+          <div class="cuota paid">
+            <div class="node"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><path d="M5 12l5 5L20 6"/></svg></div>
+            <div class="ccard"><div class="ci"><div class="cn">Cuota 1 · Anticipo</div><div class="cs">Pagada · <b>15 ene 2026</b></div></div><div class="camt">₡4.000.000</div><div class="recibo">🧾</div></div>
+          </div>
+          <div class="cuota paid">
+            <div class="node"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><path d="M5 12l5 5L20 6"/></svg></div>
+            <div class="ccard"><div class="ci"><div class="cn">Cuota 2</div><div class="cs">Pagada · <b>14 feb 2026</b></div></div><div class="camt">₡3.000.000</div><div class="recibo">🧾</div></div>
+          </div>
+          <div class="cuota paid">
+            <div class="node"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><path d="M5 12l5 5L20 6"/></svg></div>
+            <div class="ccard"><div class="ci"><div class="cn">Cuota 3</div><div class="cs">Pagada · <b>13 mar 2026</b> · sin recibo</div></div><div class="camt">₡3.000.000</div></div>
+          </div>
+          <div class="cuota paid">
+            <div class="node"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><path d="M5 12l5 5L20 6"/></svg></div>
+            <div class="ccard"><div class="ci"><div class="cn">Cuota 4</div><div class="cs">Pagada · <b>11 abr 2026</b></div></div><div class="camt">₡2.000.000</div><div class="recibo">🖼️</div></div>
+          </div>
+          <div class="cuota next">
+            <div class="node"></div>
+            <div class="ccard"><div class="ci"><div class="cn">Cuota 5</div><div class="cs"><span class="pend">Próxima · vence 15 may 2026</span></div></div><button class="paybtn">Pagar</button></div>
+          </div>
+          <div class="cuota">
+            <div class="node"></div>
+            <div class="ccard"><div class="ci"><div class="cn">Cuota 6</div><div class="cs"><span class="pend">Pendiente · vence 15 jun 2026</span></div></div><div class="camt" style="color:#aeb6ad">₡2.000.000</div></div>
+          </div>
+          <div class="cuota">
+            <div class="node"></div>
+            <div class="ccard"><div class="ci"><div class="cn">Cuota 7</div><div class="cs"><span class="pend">Pendiente · vence 15 jul 2026</span></div></div><div class="camt" style="color:#aeb6ad">₡2.000.000</div></div>
+          </div>
+          <div class="cuota">
+            <div class="node"></div>
+            <div class="ccard"><div class="ci"><div class="cn">Cuota 8 · Retención</div><div class="cs"><span class="pend">Pendiente · vence 15 ago 2026</span></div></div><div class="camt" style="color:#aeb6ad">₡1.000.000</div></div>
+          </div>
+        </div>
+      </div>
+
+      <button class="fab" aria-label="Registrar pago"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>Registrar pago</button>
+      <div class="nav">
+        <div><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 10l9-7 9 7v9a1 1 0 01-1 1h-5v-6H9v6H4a1 1 0 01-1-1z"/></svg>Inicio</div>
+        <div class="on"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="16" rx="3"/><path d="M3 9h18"/></svg>Proyectos</div>
+        <div><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="17" rx="3"/><path d="M3 9h18M8 2v4M16 2v4"/></svg>Calendario</div>
+        <div><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/></svg>Perfil</div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Panda Wallet · Calendario</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@500;600;700;800&family=Nunito:wght@600;700;800;900&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#24212b; --fur:#fffdf7; --cheek:#f6a6b6;
+    --bamboo:#7cc04b; --highlight:#b9e28f; --leaf:#4f9e34; --leaf-light:#6db546;
+    --icon-bg:#c4e8c8; --ink-muted:#5d5866; --green-deep:#3c8a2e; --danger:#e0592f;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:#e9edf0;font-family:'Nunito',system-ui,sans-serif;color:var(--ink);
+    display:flex;flex-direction:column;align-items:center;padding:24px 16px 40px;-webkit-font-smoothing:antialiased}
+  .cap{font-family:'Inter';font-size:12px;color:#6a7580;margin-bottom:14px;text-align:center;max-width:360px}
+  .cap b{color:var(--green-deep)}
+
+  .phone{width:344px;height:720px;background:#1b1920;border-radius:48px;padding:11px;
+    box-shadow:0 34px 70px -20px rgba(20,25,20,.5),0 0 0 1px rgba(0,0,0,.2) inset}
+  .screen{width:100%;height:100%;border-radius:38px;overflow:hidden;position:relative;display:flex;flex-direction:column;
+    background:linear-gradient(176deg,#e7f5e4 0%,#f3faee 26%,#f6f8f4 60%)}
+  .status{display:flex;justify-content:space-between;align-items:center;padding:15px 24px 4px;font-size:12px;font-weight:800;font-family:'Inter'}
+  .status .d{display:flex;gap:4px;align-items:center}
+  .status .d i{width:5px;height:5px;border-radius:50%;background:currentColor;opacity:.85}
+
+  .scroll{flex:1;overflow-y:auto;padding:4px 18px 16px;scrollbar-width:none}
+  .scroll::-webkit-scrollbar{display:none}
+  h1.title{font-weight:900;font-size:22px;padding:6px 2px 12px}
+
+  .calwrap{background:#fff;border-radius:22px;padding:14px 14px 16px;box-shadow:0 14px 32px -18px rgba(76,138,44,.32)}
+  .monthnav{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+  .mlabel{font-family:'Nunito';font-weight:900;font-size:16px}
+  .navbtn{width:34px;height:34px;border-radius:11px;background:#f2f6f0;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center}
+  .navbtn svg{width:18px;height:18px}
+  .wk{display:grid;grid-template-columns:repeat(7,1fr);margin-bottom:5px}
+  .wk span{text-align:center;font-family:'Inter';font-size:10px;font-weight:800;color:#aeb6ad}
+  .grid7{display:grid;grid-template-columns:repeat(7,1fr);gap:2px}
+  .cell{aspect-ratio:1;display:flex;align-items:center;justify-content:center;border-radius:11px;position:relative;
+    font-family:'Inter';font-weight:700;font-size:13px;color:var(--ink);cursor:pointer;transition:background .15s}
+  .cell:not(.out):not(.sel):active{background:#eef4ea}
+  .cell.out{color:#cfd5cd;pointer-events:none}
+  .cell.sel{background:var(--leaf);color:#fff}
+  .cell .dotrow{position:absolute;bottom:5px;display:flex;gap:2px}
+  .cell .dot{width:4px;height:4px;border-radius:50%;background:var(--leaf)}
+  .cell.sel .dot{background:#fff}
+
+  .panel{margin-top:16px}
+  .pday{font-family:'Nunito';font-weight:900;font-size:15px;text-transform:capitalize}
+  .ptot{font-family:'Inter';font-size:11.5px;color:#8a938d;font-weight:600;margin:2px 0 11px}
+  .rec{display:flex;align-items:center;gap:11px;background:#fff;border-radius:16px;padding:10px 12px;margin-bottom:8px;box-shadow:0 6px 16px -11px rgba(76,138,44,.3)}
+  .re{width:38px;height:38px;border-radius:12px;background:var(--icon-bg);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
+  .rm{flex:1;min-width:0}
+  .rn{font-weight:800;font-size:13px}
+  .rp{font-family:'Inter';font-size:10.5px;color:#8a938d;margin-top:1px}
+  .rthumb{width:32px;height:32px;border-radius:9px;background:linear-gradient(135deg,#eaf4e3,#d9ebcf);border:1px solid #d3e6c8;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0}
+  .ramt{font-family:'Inter';font-weight:800;font-size:13px;font-variant-numeric:tabular-nums;flex-shrink:0}
+  .empty{padding:22px;text-align:center;color:#9aa4a0;font-family:'Inter';font-size:12.5px;font-weight:600;background:#fff;border-radius:16px;box-shadow:0 6px 16px -12px rgba(76,138,44,.3)}
+
+  .nav{display:flex;justify-content:space-around;align-items:center;padding:12px 10px 22px;font-family:'Inter';font-size:10px;font-weight:700;background:rgba(255,255,255,.6);backdrop-filter:blur(6px)}
+  .nav div{display:flex;flex-direction:column;align-items:center;gap:4px;opacity:.45}
+  .nav div.on{opacity:1;color:var(--leaf)}
+  .nav svg{width:22px;height:22px}
+</style>
+</head>
+<body>
+  <div class="cap">Panda Wallet · <b>Calendario</b> (reemplaza Historial) — navegá meses y <b>tocá una fecha</b> para ver los registros de ese día.</div>
+  <div class="phone">
+    <div class="screen">
+      <div class="status"><span>9:41</span><div class="d"><i></i><i></i><i></i><span style="margin-left:5px">◗</span></div></div>
+
+      <div class="scroll">
+        <h1 class="title">Calendario</h1>
+
+        <div class="calwrap">
+          <div class="monthnav">
+            <button class="navbtn" id="prev" aria-label="Mes anterior"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 6l-6 6 6 6"/></svg></button>
+            <div class="mlabel" id="mlabel">Mayo 2026</div>
+            <button class="navbtn" id="next" aria-label="Mes siguiente"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></button>
+          </div>
+          <div class="wk"><span>L</span><span>M</span><span>M</span><span>J</span><span>V</span><span>S</span><span>D</span></div>
+          <div class="grid7" id="cal"></div>
+        </div>
+
+        <div class="panel" id="panel"></div>
+      </div>
+
+      <div class="nav">
+        <div><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 10l9-7 9 7v9a1 1 0 01-1 1h-5v-6H9v6H4a1 1 0 01-1-1z"/></svg>Inicio</div>
+        <div><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="16" rx="3"/><path d="M3 9h18"/></svg>Proyectos</div>
+        <div class="on"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="17" rx="3"/><path d="M3 9h18M8 2v4M16 2v4"/></svg>Calendario</div>
+        <div><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/></svg>Perfil</div>
+      </div>
+    </div>
+  </div>
+
+<script>
+  const activity={
+    '2026-05-08':[{emoji:'🧰',name:'Materiales',proj:'Construir casa',amt:'₡1.200.000',rec:true}],
+    '2026-05-15':[{emoji:'🧱',name:'Constructora',proj:'Construir casa · Cuota 5',amt:'₡3.000.000',rec:true}],
+    '2026-05-20':[{emoji:'🏨',name:'Hospedaje',proj:'Viaje familia',amt:'₡200.000',rec:false}],
+    '2026-05-28':[
+      {emoji:'🪑',name:'Muebles a medida',proj:'Remodelar cocina',amt:'₡600.000',rec:true},
+      {emoji:'🎨',name:'Pintura',proj:'Remodelar cocina',amt:'₡150.000',rec:false}
+    ],
+  };
+  const MES=['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+  const DOW=['Lunes','Martes','Miércoles','Jueves','Viernes','Sábado','Domingo'];
+  let vy=2026, vm=4, selected='2026-05-15';
+
+  const cal=document.getElementById('cal'), panel=document.getElementById('panel'), mlabel=document.getElementById('mlabel');
+  const key=(y,m,d)=>`${y}-${String(m+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+  const fmt=n=>n.toLocaleString('de-DE');
+
+  function renderCal(){
+    mlabel.textContent=MES[vm]+' '+vy;
+    const offset=(new Date(vy,vm,1).getDay()+6)%7;
+    const days=new Date(vy,vm+1,0).getDate();
+    const prev=new Date(vy,vm,0).getDate();
+    let h='';
+    for(let i=0;i<offset;i++) h+=`<div class="cell out">${prev-offset+1+i}</div>`;
+    for(let d=1;d<=days;d++){
+      const k=key(vy,vm,d);
+      h+=`<div class="cell${k===selected?' sel':''}" data-k="${k}">${d}${activity[k]?'<span class="dotrow"><i class="dot"></i></span>':''}</div>`;
+    }
+    const trail=(7-((offset+days)%7))%7;
+    for(let i=1;i<=trail;i++) h+=`<div class="cell out">${i}</div>`;
+    cal.innerHTML=h;
+    cal.querySelectorAll('.cell:not(.out)').forEach(c=>c.addEventListener('click',()=>{selected=c.dataset.k;renderCal();renderPanel();}));
+  }
+  function renderPanel(){
+    const [y,m,d]=selected.split('-').map(Number);
+    const dow=DOW[(new Date(y,m-1,d).getDay()+6)%7];
+    const recs=activity[selected]||[];
+    let h=`<div class="pday">${dow} ${d} de ${MES[m-1].toLowerCase()}</div>`;
+    if(recs.length){
+      const tot=recs.reduce((s,r)=>s+parseInt(r.amt.replace(/\D/g,'')),0);
+      h+=`<div class="ptot">₡${fmt(tot)} · ${recs.length} ${recs.length===1?'pago':'pagos'}</div>`;
+      h+=recs.map(r=>`<div class="rec"><div class="re">${r.emoji}</div><div class="rm"><div class="rn">${r.name}</div><div class="rp">${r.proj}</div></div>${r.rec?'<div class="rthumb">🧾</div>':''}<div class="ramt">${r.amt}</div></div>`).join('');
+    } else {
+      h+=`<div class="ptot">Sin movimientos</div><div class="empty">Sin registros este día</div>`;
+    }
+    panel.innerHTML=h;
+    [...panel.children].forEach((el,i)=>el.animate(
+      [{opacity:0,transform:'translateY(8px)'},{opacity:1,transform:'none'}],
+      {duration:290,delay:i*45,easing:'cubic-bezier(.2,.75,.25,1)',fill:'both'}));
+  }
+  document.getElementById('prev').onclick=()=>{vm--;if(vm<0){vm=11;vy--;}renderCal();};
+  document.getElementById('next').onclick=()=>{vm++;if(vm>11){vm=0;vy++;}renderCal();};
+  renderCal();renderPanel();
+</script>
+</body>
+</html>

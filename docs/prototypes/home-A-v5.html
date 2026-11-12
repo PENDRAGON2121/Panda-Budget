@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Panda Wallet · Inicio (A · v5)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@500;600;700;800&family=Nunito:wght@600;700;800;900&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#24212b; --fur:#fffdf7; --shade:#ece6db; --cheek:#f6a6b6;
+    --bamboo:#7cc04b; --node:#4c8a2c; --highlight:#b9e28f; --leaf:#4f9e34; --leaf-light:#6db546;
+    --icon-bg:#c4e8c8; --ink-muted:#5d5866; --green-deep:#3c8a2e; --danger:#e0592f;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:#e9edf0;font-family:'Nunito',system-ui,sans-serif;color:var(--ink);
+    display:flex;flex-direction:column;align-items:center;padding:24px 16px 40px;-webkit-font-smoothing:antialiased}
+  .cap{font-family:'Inter';font-size:12px;color:#6a7580;margin-bottom:14px;text-align:center}
+  .cap b{color:var(--green-deep)}
+
+  .phone{width:344px;height:720px;background:#1b1920;border-radius:48px;padding:11px;
+    box-shadow:0 34px 70px -20px rgba(20,25,20,.5),0 0 0 1px rgba(0,0,0,.2) inset}
+  .screen{width:100%;height:100%;border-radius:38px;overflow:hidden;position:relative;display:flex;flex-direction:column;
+    background:linear-gradient(176deg,#e4f4e2 0%,#f3faee 30%,#fffdf7 72%)}
+  .status{display:flex;justify-content:space-between;align-items:center;padding:15px 24px 2px;font-size:12px;font-weight:800;font-family:'Inter'}
+  .status .d{display:flex;gap:4px;align-items:center}
+  .status .d i{width:5px;height:5px;border-radius:50%;background:currentColor;opacity:.85}
+  .body{flex:1;overflow:hidden;padding:4px 0 0}
+  .px{padding:0 18px}
+
+  .greet{display:flex;align-items:center;gap:12px;padding:8px 2px 14px;animation:rise .5s both}
+  .logo{width:46px;height:46px;border-radius:15px;overflow:hidden;box-shadow:0 6px 14px -6px rgba(76,138,44,.5);flex-shrink:0}
+  .logo img{width:100%;height:100%;object-fit:cover;display:block}
+  .greet .hi{font-family:'Inter';font-size:12px;opacity:.6;font-weight:600}
+  .greet .nm{font-weight:900;font-size:18px;line-height:1.05}
+
+  .carousel{display:flex;gap:12px;overflow-x:auto;scroll-snap-type:x mandatory;padding:2px 9%;scrollbar-width:none}
+  .carousel::-webkit-scrollbar{display:none}
+  .slide{flex:0 0 82%;scroll-snap-align:center}
+  .hero{background:#fff;border-radius:26px;padding:18px 18px 16px;box-shadow:0 16px 34px -16px rgba(76,138,44,.34);
+    min-height:150px;display:flex;flex-direction:column;justify-content:center}
+  .hero .row{display:flex;justify-content:space-between;align-items:center;gap:8px}
+  .mini{font-family:'Inter';font-size:11.5px;font-weight:600;opacity:.7}
+  .mini.ttl{font-family:'Nunito';font-weight:800;opacity:.92;font-size:13.5px;display:flex;align-items:center;gap:6px;white-space:normal;line-height:1.15}
+  .pct{font-family:'Inter';font-size:12px;font-weight:800;color:var(--green-deep);flex-shrink:0}
+  .pct.over{color:var(--danger)}
+  .tot{font-family:'Inter';font-weight:800;font-variant-numeric:tabular-nums;font-size:27px;letter-spacing:-.8px;margin-top:5px}
+  .bar{height:9px;border-radius:999px;background:#eef1ec;overflow:hidden;position:relative;margin-top:13px}
+  .bar i{position:absolute;inset:0 auto 0 0;border-radius:999px;background:linear-gradient(90deg,var(--bamboo),var(--leaf-light))}
+  .bar i.over{background:linear-gradient(90deg,#f2a07e,var(--danger))}
+  .legend{display:flex;gap:18px;margin-top:12px}
+  .legend .mini{display:block}
+  .legend b{font-family:'Inter';display:block;font-size:13px;font-weight:800;font-variant-numeric:tabular-nums;margin-top:1px}
+  .dot{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:6px;vertical-align:1px}
+  .dot.paid{background:var(--leaf-light)} .dot.avail{background:#dfe4dc}
+
+  .pager{display:flex;justify-content:center;margin:12px 0 2px}
+  .pager .pd{display:flex;gap:6px}
+  .pager .pd i{width:7px;height:7px;border-radius:50%;background:#cdd6cc;transition:.3s}
+  .pager .pd i.on{width:20px;border-radius:99px;background:var(--leaf)}
+
+  .sect{display:flex;justify-content:space-between;align-items:center;margin:14px 2px 10px}
+  .sect h3{font-weight:900;font-size:15px}
+  .sect span{font-family:'Inter';font-size:11px;font-weight:700;color:var(--green-deep)}
+
+  .gasto{display:flex;align-items:center;gap:12px;background:#fff;border-radius:18px;padding:11px 13px;margin-bottom:9px;
+    box-shadow:0 6px 16px -11px rgba(76,138,44,.3)}
+  .gasto .gi{width:40px;height:40px;border-radius:13px;background:var(--icon-bg);display:flex;align-items:center;justify-content:center;font-size:19px;flex-shrink:0}
+  .gasto .m{flex:1;min-width:0}
+  .gasto .r1{display:flex;align-items:center;gap:7px;flex-wrap:wrap}
+  .gasto .nm2{font-weight:800;font-size:13.5px;white-space:normal}
+  .chip{font-family:'Inter';font-size:9px;font-weight:800;padding:2px 7px;border-radius:999px;background:var(--icon-bg);color:var(--green-deep);letter-spacing:.2px;text-transform:uppercase}
+  .chip.one{background:#efeae1;color:#938a7b}
+  .gasto .amt2{font-family:'Inter';font-size:11px;opacity:.6;font-variant-numeric:tabular-nums;margin:3px 0 6px}
+  .gasto .amt2.over{color:var(--danger);opacity:.95;font-weight:700}
+  .gasto .bar{height:6px;margin-top:0}
+  .check{width:22px;height:22px;border-radius:50%;background:var(--leaf);display:flex;align-items:center;justify-content:center;color:#fff;font-size:12px;flex-shrink:0}
+
+  .fab{position:absolute;right:20px;bottom:88px;width:56px;height:56px;border-radius:19px;background:var(--leaf);color:#fff;
+    display:flex;align-items:center;justify-content:center;font-size:30px;font-weight:300;box-shadow:0 14px 26px -6px rgba(60,138,46,.6);animation:pop .5s .45s both}
+  .nav{display:flex;justify-content:space-around;align-items:center;padding:12px 10px 22px;font-family:'Inter';font-size:10px;font-weight:700;background:rgba(255,255,255,.55);backdrop-filter:blur(6px)}
+  .nav div{display:flex;flex-direction:column;align-items:center;gap:4px;opacity:.45}
+  .nav div.on{opacity:1;color:var(--leaf)}
+  .nav svg{width:22px;height:22px}
+
+  @keyframes rise{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
+  @keyframes pop{from{transform:scale(0);opacity:0}to{transform:scale(1);opacity:1}}
+</style>
+</head>
+<body>
+  <div class="cap">Panda Wallet · Inicio <b>A</b> — carrusel infinito + Gastos con transición direccional</div>
+  <div class="phone">
+    <div class="screen">
+      <div class="status"><span>9:41</span><div class="d"><i></i><i></i><i></i><span style="margin-left:5px">◗</span></div></div>
+      <div class="body">
+
+        <div class="greet px">
+          <div class="logo"><img src="panda-icon.png" alt="Panda Wallet"></div>
+          <div><div class="hi">¡Hola! 👋</div><div class="nm">Mauricio</div></div>
+        </div>
+
+        <div class="carousel" id="car"></div>
+        <div class="pager"><div class="pd" id="dots"></div></div>
+
+        <div class="px">
+          <div class="sect"><h3>Gastos</h3><span>Ver todos</span></div>
+          <div id="gastos"></div>
+        </div>
+
+      </div>
+      <div class="fab">+</div>
+      <div class="nav">
+        <div class="on"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 10l9-7 9 7v9a1 1 0 01-1 1h-5v-6H9v6H4a1 1 0 01-1-1z"/></svg>Inicio</div>
+        <div><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="16" rx="3"/><path d="M3 9h18"/></svg>Proyectos</div>
+        <div><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="17" rx="3"/><path d="M3 9h18M8 2v4M16 2v4"/></svg>Calendario</div>
+        <div><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/></svg>Perfil</div>
+      </div>
+    </div>
+  </div>
+
+<script>
+  const projects=[
+    {emoji:'🏠',name:'Construir casa',total:'₡38.000.000',paid:'₡21.500.000',avail:'₡16.500.000',pct:57,over:false,gastos:[
+      {emoji:'🧱',name:'Constructora',type:'Cuotas',paid:'₡12.000.000',plan:'₡20.000.000',pct:60,state:'normal'},
+      {emoji:'📄',name:'Patentes',type:'Único',paid:'₡1.500.000',plan:'₡1.500.000',pct:100,state:'done'},
+      {emoji:'👷',name:'Mano de obra extra',type:'Cuotas',paid:'₡2.400.000',plan:'₡2.000.000',pct:120,overPct:20,state:'over'},
+    ]},
+    {emoji:'🍳',name:'Remodelar cocina',total:'₡4.000.000',paid:'₡2.800.000',avail:'₡1.200.000',pct:70,over:false,gastos:[
+      {emoji:'🪑',name:'Muebles a medida',type:'Cuotas',paid:'₡1.800.000',plan:'₡2.500.000',pct:72,state:'normal'},
+      {emoji:'🔌',name:'Electrodomésticos',type:'Único',paid:'₡900.000',plan:'₡900.000',pct:100,state:'done'},
+      {emoji:'🎨',name:'Pintura',type:'Único',paid:'₡0',plan:'₡600.000',pct:0,state:'normal'},
+    ]},
+    {emoji:'✈️',name:'Viaje familia',total:'₡1.500.000',paid:'₡400.000',avail:'₡1.100.000',pct:27,over:false,gastos:[
+      {emoji:'🎫',name:'Tiquetes aéreos',type:'Único',paid:'₡600.000',plan:'₡600.000',pct:100,state:'done'},
+      {emoji:'🏨',name:'Hospedaje',type:'Cuotas',paid:'₡200.000',plan:'₡500.000',pct:40,state:'normal'},
+      {emoji:'🧭',name:'Tours',type:'Único',paid:'₡0',plan:'₡400.000',pct:0,state:'normal'},
+    ]},
+  ];
+
+  const car=document.getElementById('car');
+  const dotsEl=document.getElementById('dots');
+  const gBox=document.getElementById('gastos');
+
+  const slideHTML=p=>`<div class="slide"><div class="hero">
+      <div class="row"><span class="mini ttl">${p.emoji} ${p.name}</span><span class="pct${p.over?' over':''}">${p.pct}%</span></div>
+      <div class="tot">${p.total}</div>
+      <div class="bar"><i class="${p.over?'over':''}" style="width:${Math.min(p.pct,100)}%"></i></div>
+      <div class="legend">
+        <div><span class="mini"><span class="dot paid"></span>Pagado</span><b>${p.paid}</b></div>
+        <div><span class="mini"><span class="dot avail"></span>Disponible</span><b>${p.avail}</b></div>
+      </div>
+    </div></div>`;
+
+  const gastoHTML=g=>{
+    const over=g.state==='over', done=g.state==='done';
+    let amt = done ? `${g.plan} · pagado completo`
+            : over ? `${g.paid} de ${g.plan} · +${g.overPct}%`
+            : `${g.paid} de ${g.plan}`;
+    return `<div class="gasto">
+      <div class="gi">${g.emoji}</div>
+      <div class="m">
+        <div class="r1"><span class="nm2">${g.name}</span><span class="chip ${g.type==='Único'?'one':''}">${g.type}</span></div>
+        <div class="amt2 ${over?'over':''}">${amt}</div>
+        <div class="bar"><i class="${over?'over':''}" style="width:${done?100:over?100:g.pct}%"></i></div>
+      </div>
+      ${done?'<div class="check">✓</div>':''}
+    </div>`;
+  };
+
+  // build carousel with clones for seamless infinite loop: [last, ...all, first]
+  const seq=[projects[projects.length-1],...projects,projects[0]];
+  car.innerHTML=seq.map(slideHTML).join('');
+  const slides=[...car.children];
+  dotsEl.innerHTML=projects.map((_,i)=>`<i class="${i===0?'on':''}"></i>`).join('');
+  const dots=[...dotsEl.children];
+
+  const slidePos=s=>s.offsetLeft-car.offsetLeft;               // slide left within scroll content
+  const centerTo=(idx,instant)=>{
+    const s=slides[idx];
+    car.scrollTo({left:slidePos(s)-(car.clientWidth-s.clientWidth)/2, behavior:instant?'auto':'smooth'});
+  };
+  const activeIdx=()=>{
+    const cc=car.scrollLeft+car.clientWidth/2;let best=0,bd=1e9;
+    slides.forEach((s,i)=>{const sc=slidePos(s)+s.clientWidth/2,d=Math.abs(sc-cc);if(d<bd){bd=d;best=i;}});
+    return best;
+  };
+
+  // ---- Gastos: paint + directional transition (setTimeout-based; pane throttles animation finish events) ----
+  const paintRows=(idx,inX)=>{
+    gBox.innerHTML=projects[idx].gastos.map(gastoHTML).join('');
+    [...gBox.children].forEach((row,k)=>row.animate(
+      [{opacity:0,transform:`translate(${inX}px,10px)`},{opacity:1,transform:'none'}],
+      {duration:340,delay:k*65,easing:'cubic-bezier(.2,.75,.25,1)',fill:'both'}));
+  };
+  const setGastos=(idx,dir)=>{
+    if(dir===0){ paintRows(idx,0); return; }
+    const outX=dir>0?-46:46;                                   // banish toward swipe direction
+    gBox.animate([{opacity:1,transform:'translateX(0)'},{opacity:0,transform:`translateX(${outX}px)`}],
+      {duration:165,easing:'cubic-bezier(.4,0,1,1)'});
+    setTimeout(()=>paintRows(idx, dir>0?46:-46),160);         // enter following the same swipe
+  };
+
+  // ---- infinite loop + direction tracking ----
+  let jumping=false,t,prevSL=0,lastDir=0,currentReal=0;
+  const doJump=idx=>{jumping=true;centerTo(idx,true);setTimeout(()=>{prevSL=car.scrollLeft;jumping=false;},60);};
+  const onSettle=()=>{
+    let i=activeIdx(),real;
+    if(i===0){real=projects.length-1;doJump(slides.length-2);}
+    else if(i===slides.length-1){real=0;doJump(1);}
+    else real=i-1;
+    dots.forEach((d,k)=>d.classList.toggle('on',k===real));
+    if(real!==currentReal){ setGastos(real, lastDir||1); currentReal=real; }
+  };
+  car.addEventListener('scroll',()=>{
+    if(jumping){prevSL=car.scrollLeft;return;}
+    const d=car.scrollLeft-prevSL;prevSL=car.scrollLeft;
+    if(Math.abs(d)>0.5) lastDir=d>0?1:-1;
+    clearTimeout(t);t=setTimeout(onSettle,120);   // fallback for engines without scrollend
+  });
+  car.addEventListener('scrollend',()=>{ if(!jumping){ clearTimeout(t); onSettle(); } });
+
+  // initial state — paint immediately so the list is never empty, then center the first project
+  paintRows(0,0);
+  const init=()=>{centerTo(1,true);prevSL=car.scrollLeft;};
+  requestAnimationFrame(init);
+  window.addEventListener('load',init);
+</script>
+</body>
+</html>

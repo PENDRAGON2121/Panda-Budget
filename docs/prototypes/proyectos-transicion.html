@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Panda Wallet · Proyectos (container transform)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@500;600;700;800&family=Nunito:wght@600;700;800;900&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#24212b; --fur:#fffdf7; --cheek:#f6a6b6;
+    --bamboo:#7cc04b; --highlight:#b9e28f; --leaf:#4f9e34; --leaf-light:#6db546;
+    --icon-bg:#c4e8c8; --ink-muted:#5d5866; --green-deep:#3c8a2e; --danger:#e0592f;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:#e9edf0;font-family:'Nunito',system-ui,sans-serif;color:var(--ink);
+    display:flex;flex-direction:column;align-items:center;padding:24px 16px 40px;-webkit-font-smoothing:antialiased}
+  .cap{font-family:'Inter';font-size:12px;color:#6a7580;margin-bottom:14px;text-align:center;max-width:360px}
+  .cap b{color:var(--green-deep)}
+
+  .phone{width:344px;height:720px;background:#1b1920;border-radius:48px;padding:11px;
+    box-shadow:0 34px 70px -20px rgba(20,25,20,.5),0 0 0 1px rgba(0,0,0,.2) inset}
+  .screen{width:100%;height:100%;border-radius:38px;overflow:hidden;position:relative;display:flex;flex-direction:column;
+    background:linear-gradient(176deg,#e7f5e4 0%,#f3faee 26%,#f6f8f4 60%)}
+  .status{display:flex;justify-content:space-between;align-items:center;padding:15px 24px 4px;font-size:12px;font-weight:800;font-family:'Inter'}
+  .status .d{display:flex;gap:4px;align-items:center}
+  .status .d i{width:5px;height:5px;border-radius:50%;background:currentColor;opacity:.85}
+
+  .main{flex:1;position:relative;overflow:hidden}
+  .scrollin{height:100%;overflow-y:auto;padding:4px 16px 16px;scrollbar-width:none}
+  .scrollin::-webkit-scrollbar{display:none}
+
+  .toptab{display:flex;align-items:baseline;gap:9px;padding:6px 4px 12px}
+  .toptab h1{font-weight:900;font-size:22px}
+  .toptab span{font-family:'Inter';font-size:11px;font-weight:700;color:#9aa4a0}
+
+  .grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  .pcard{text-align:left;background:#fff;border:none;cursor:pointer;border-radius:20px;padding:14px;
+    box-shadow:0 8px 20px -12px rgba(76,138,44,.34);display:flex;flex-direction:column;gap:2px;animation:rise .5s both;font-family:inherit;color:inherit}
+  .pcard:nth-child(2){animation-delay:.05s}.pcard:nth-child(3){animation-delay:.1s}.pcard:nth-child(4){animation-delay:.15s}
+  .pcard:active{transform:scale(.97)}
+  .pcard .pe{width:38px;height:38px;border-radius:12px;background:var(--icon-bg);display:flex;align-items:center;justify-content:center;font-size:18px;margin-bottom:8px}
+  .pcard .pn{font-weight:800;font-size:13.5px;line-height:1.15}
+  .pcard .pt{font-family:'Inter';font-weight:800;font-variant-numeric:tabular-nums;font-size:15px;margin-top:3px;letter-spacing:-.3px}
+  .pcard .pb{height:6px;border-radius:999px;background:#eef1ec;overflow:hidden;margin-top:9px;position:relative}
+  .pcard .pb i{position:absolute;inset:0 auto 0 0;border-radius:999px;background:linear-gradient(90deg,var(--bamboo),var(--leaf-light))}
+  .pcard .ps{font-family:'Inter';font-size:10px;font-weight:700;color:#9aa4a0;margin-top:5px}
+
+  .addcard{border:1.6px dashed #cfe6cb;background:rgba(255,255,255,.4);border-radius:20px;cursor:pointer;color:var(--green-deep);
+    display:flex;flex-direction:column;align-items:center;justify-content:center;gap:9px;min-height:132px;font-family:inherit;animation:rise .5s .2s both}
+  .addcard .plus{width:40px;height:40px;border-radius:50%;background:var(--leaf);color:#fff;display:flex;align-items:center;justify-content:center;box-shadow:0 10px 18px -6px rgba(60,138,46,.55)}
+  .addcard .plus svg{width:22px;height:22px}
+  .addcard span{font-family:'Nunito';font-weight:800;font-size:12.5px}
+
+  .nav{display:flex;justify-content:space-around;align-items:center;padding:12px 10px 22px;font-family:'Inter';font-size:10px;font-weight:700;background:rgba(255,255,255,.6);backdrop-filter:blur(6px);z-index:30}
+  .nav div{display:flex;flex-direction:column;align-items:center;gap:4px;opacity:.45}
+  .nav div.on{opacity:1;color:var(--leaf)}
+  .nav svg{width:22px;height:22px}
+
+  /* ---- detail overlay (container transform target) ---- */
+  .detail{position:absolute;display:none;background:#fff;overflow:hidden;z-index:20;
+    will-change:top,left,width,height,border-radius}
+  .dhead{display:flex;align-items:center;gap:11px;padding:16px 16px 8px}
+  .dh-ic{width:40px;height:40px;border-radius:13px;background:var(--icon-bg);display:flex;align-items:center;justify-content:center;font-size:19px;flex-shrink:0}
+  .back{width:36px;height:36px;border-radius:11px;background:#f1f4ef;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;opacity:0;transition:opacity .25s .12s}
+  .back svg{width:20px;height:20px}
+  .detail.open .back{opacity:1}
+  .dtitle{flex:1;min-width:0}
+  .dtitle b{font-family:'Nunito';font-weight:900;font-size:17px;display:block;line-height:1.1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .dtitle span{font-family:'Inter';font-size:11px;color:#8a938d;font-weight:600}
+
+  .dbody{padding:6px 16px 20px;opacity:0;transform:translateY(16px);transition:opacity .3s,transform .34s}
+  .detail.open .dbody{opacity:1;transform:none}
+  .dcard{background:#f7f9f5;border-radius:20px;padding:16px}
+  .lab{font-family:'Inter';font-size:11px;font-weight:600;color:#6a7580}
+  .dbig{font-family:'Inter';font-weight:800;font-variant-numeric:tabular-nums;font-size:26px;letter-spacing:-.8px;margin:4px 0 2px}
+  .dbar{height:9px;border-radius:999px;background:#e9ece7;overflow:hidden;position:relative;margin:12px 0 10px}
+  .dbar i{position:absolute;inset:0 auto 0 0;border-radius:999px;background:linear-gradient(90deg,var(--bamboo),var(--leaf-light))}
+  .dtwin{display:flex;gap:22px}
+  .dtwin b{font-family:'Inter';display:block;font-size:13px;font-weight:800;font-variant-numeric:tabular-nums}
+  .dsect{font-weight:900;font-size:14px;margin:16px 2px 10px}
+  .g{display:flex;align-items:center;gap:11px;background:#fff;border-radius:16px;padding:10px 12px;margin-bottom:8px;box-shadow:0 5px 14px -10px rgba(76,138,44,.3)}
+  .g .ge{width:36px;height:36px;border-radius:11px;background:var(--icon-bg);display:flex;align-items:center;justify-content:center;font-size:17px}
+  .g .gm{flex:1}.g .gn{font-weight:800;font-size:13px}.g .gs{font-family:'Inter';font-size:10.5px;color:#8a938d;margin-top:2px}
+
+  @keyframes rise{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
+</style>
+</head>
+<body>
+  <div class="cap">Panda Wallet · <b>Proyectos</b> como tarjetas + crear desde tarjeta. <b>Tocá una tarjeta</b> → se transforma en su detalle (container transform). El botón ‹ vuelve.</div>
+  <div class="phone">
+    <div class="screen">
+      <div class="status"><span>9:41</span><div class="d"><i></i><i></i><i></i><span style="margin-left:5px">◗</span></div></div>
+
+      <div class="main" id="main">
+        <div class="scrollin">
+          <div class="toptab"><h1>Proyectos</h1><span>3 activos</span></div>
+          <div class="grid" id="grid">
+            <button class="pcard" data-name="Construir casa" data-emoji="🏠" data-total="₡38.000.000" data-pct="57" data-paid="₡21.500.000" data-avail="₡16.500.000">
+              <div class="pe">🏠</div><div class="pn">Construir casa</div><div class="pt">₡38.000.000</div>
+              <div class="pb"><i style="width:57%"></i></div><div class="ps">57% · 4 gastos</div>
+            </button>
+            <button class="pcard" data-name="Remodelar cocina" data-emoji="🍳" data-total="₡4.000.000" data-pct="70" data-paid="₡2.800.000" data-avail="₡1.200.000">
+              <div class="pe">🍳</div><div class="pn">Remodelar cocina</div><div class="pt">₡4.000.000</div>
+              <div class="pb"><i style="width:70%"></i></div><div class="ps">70% · 3 gastos</div>
+            </button>
+            <button class="pcard" data-name="Viaje familia" data-emoji="✈️" data-total="₡1.500.000" data-pct="27" data-paid="₡400.000" data-avail="₡1.100.000">
+              <div class="pe">✈️</div><div class="pn">Viaje familia</div><div class="pt">₡1.500.000</div>
+              <div class="pb"><i style="width:27%"></i></div><div class="ps">27% · 3 gastos</div>
+            </button>
+            <button class="addcard" onclick="return false;">
+              <div class="plus"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg></div>
+              <span>Nuevo proyecto</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- detail morph target -->
+        <div class="detail" id="detail">
+          <div class="dhead">
+            <button class="back" id="back" aria-label="Volver"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 6l-6 6 6 6"/></svg></button>
+            <div class="dh-ic" id="dIc">🏠</div>
+            <div class="dtitle"><b id="dName">Construir casa</b><span>Proyecto</span></div>
+          </div>
+          <div class="dbody">
+            <div class="dcard">
+              <span class="lab">Presupuesto total</span>
+              <div class="dbig" id="dTotal">₡38.000.000</div>
+              <div class="dbar"><i id="dBar" style="width:57%"></i></div>
+              <div class="dtwin">
+                <div><span class="lab">Pagado</span><b id="dPaid">₡21.500.000</b></div>
+                <div><span class="lab">Disponible</span><b id="dAvail">₡16.500.000</b></div>
+              </div>
+            </div>
+            <div class="dsect">Gastos</div>
+            <div class="g"><div class="ge">🧱</div><div class="gm"><div class="gn">Constructora</div><div class="gs">₡12.000.000 de ₡20.000.000 · 60%</div></div></div>
+            <div class="g"><div class="ge">🧰</div><div class="gm"><div class="gn">Materiales</div><div class="gs">₡5.600.000 de ₡8.000.000 · 70%</div></div></div>
+            <div class="g"><div class="ge">📄</div><div class="gm"><div class="gn">Patentes</div><div class="gs">₡1.500.000 · pagado completo ✓</div></div></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="nav">
+        <div><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 10l9-7 9 7v9a1 1 0 01-1 1h-5v-6H9v6H4a1 1 0 01-1-1z"/></svg>Inicio</div>
+        <div class="on"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="16" rx="3"/><path d="M3 9h18"/></svg>Proyectos</div>
+        <div><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="17" rx="3"/><path d="M3 9h18M8 2v4M16 2v4"/></svg>Calendario</div>
+        <div><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/></svg>Perfil</div>
+      </div>
+    </div>
+  </div>
+
+<script>
+  const main=document.getElementById('main');
+  const detail=document.getElementById('detail');
+  const EASE='cubic-bezier(.33,.84,.28,1)';
+  let lastRect=null;
+
+  function fill(card){
+    document.getElementById('dName').textContent=card.dataset.name;
+    document.getElementById('dIc').textContent=card.dataset.emoji;
+    document.getElementById('dTotal').textContent=card.dataset.total;
+    document.getElementById('dBar').style.width=card.dataset.pct+'%';
+    document.getElementById('dPaid').textContent=card.dataset.paid;
+    document.getElementById('dAvail').textContent=card.dataset.avail;
+  }
+  function expand(card){
+    fill(card);
+    const mr=main.getBoundingClientRect(), cr=card.getBoundingClientRect();
+    lastRect={top:cr.top-mr.top,left:cr.left-mr.left,w:cr.width,h:cr.height};
+    detail.style.transition='none';
+    detail.style.display='block';
+    detail.style.top=lastRect.top+'px';detail.style.left=lastRect.left+'px';
+    detail.style.width=lastRect.w+'px';detail.style.height=lastRect.h+'px';
+    detail.style.borderRadius='20px';
+    detail.style.boxShadow='0 12px 26px -12px rgba(76,138,44,.45)';
+    detail.offsetHeight; // reflow
+    detail.style.transition='top .44s '+EASE+',left .44s '+EASE+',width .44s '+EASE+',height .44s '+EASE+',border-radius .44s '+EASE+',box-shadow .5s';
+    detail.style.top='0px';detail.style.left='0px';detail.style.width='100%';detail.style.height='100%';
+    detail.style.borderRadius='0px';
+    detail.style.boxShadow='0 0 0 rgba(0,0,0,0)';
+    setTimeout(()=>detail.classList.add('open'),200);
+  }
+  function collapse(){
+    if(!lastRect)return;
+    detail.classList.remove('open');
+    detail.style.transition='top .4s '+EASE+',left .4s '+EASE+',width .4s '+EASE+',height .4s '+EASE+',border-radius .4s '+EASE+',box-shadow .4s';
+    detail.style.top=lastRect.top+'px';detail.style.left=lastRect.left+'px';
+    detail.style.width=lastRect.w+'px';detail.style.height=lastRect.h+'px';
+    detail.style.borderRadius='20px';
+    detail.style.boxShadow='0 12px 26px -12px rgba(76,138,44,.45)';
+    setTimeout(()=>{detail.style.display='none';},430);
+  }
+  document.querySelectorAll('.pcard').forEach(c=>c.addEventListener('click',()=>expand(c)));
+  document.getElementById('back').addEventListener('click',collapse);
+</script>
+</body>
+</html>

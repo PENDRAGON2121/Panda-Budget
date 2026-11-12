@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Panda Wallet · Registrar pago</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@500;600;700;800&family=Nunito:wght@600;700;800;900&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#24212b; --fur:#fffdf7; --cheek:#f6a6b6;
+    --bamboo:#7cc04b; --highlight:#b9e28f; --leaf:#4f9e34; --leaf-light:#6db546;
+    --icon-bg:#c4e8c8; --ink-muted:#5d5866; --green-deep:#3c8a2e; --danger:#e0592f;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:#e9edf0;font-family:'Nunito',system-ui,sans-serif;color:var(--ink);
+    display:flex;flex-direction:column;align-items:center;padding:24px 16px 40px;-webkit-font-smoothing:antialiased}
+  .cap{font-family:'Inter';font-size:12px;color:#6a7580;margin-bottom:14px;text-align:center;max-width:360px}
+  .cap b{color:var(--green-deep)}
+
+  .phone{width:344px;height:720px;background:#1b1920;border-radius:48px;padding:11px;
+    box-shadow:0 34px 70px -20px rgba(20,25,20,.5),0 0 0 1px rgba(0,0,0,.2) inset}
+  .screen{width:100%;height:100%;border-radius:38px;overflow:hidden;position:relative;display:flex;flex-direction:column;
+    background:linear-gradient(176deg,#e7f5e4 0%,#f3faee 26%,#f6f8f4 60%)}
+  .status{display:flex;justify-content:space-between;align-items:center;padding:15px 24px 4px;font-size:12px;font-weight:800;font-family:'Inter'}
+  .status .d{display:flex;gap:4px;align-items:center}
+  .status .d i{width:5px;height:5px;border-radius:50%;background:currentColor;opacity:.85}
+
+  /* dimmed background context (gasto detail) */
+  .bg{flex:1;padding:4px 18px}
+  .appbar{display:flex;align-items:center;gap:12px;padding:8px 0 12px}
+  .ab{width:38px;height:38px;border-radius:12px;background:#fff;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 12px -6px rgba(76,138,44,.3)}
+  .ab svg{width:20px;height:20px}
+  .appbar .ttl b{font-family:'Nunito';font-weight:900;font-size:17px;display:block}
+  .appbar .ttl span{font-family:'Inter';font-size:11px;color:#8a938d;font-weight:600}
+  .bgcard{background:#fff;border-radius:22px;padding:16px;box-shadow:0 14px 32px -20px rgba(76,138,44,.3)}
+  .bgcard .lab{font-family:'Inter';font-size:11px;color:#8a938d;font-weight:600}
+  .bgcard .big{font-family:'Inter';font-weight:800;font-size:25px;font-variant-numeric:tabular-nums;letter-spacing:-.8px;margin-top:3px}
+
+  .nav{display:flex;justify-content:space-around;align-items:center;padding:12px 10px 22px;font-family:'Inter';font-size:10px;font-weight:700;background:rgba(255,255,255,.6)}
+  .nav div{display:flex;flex-direction:column;align-items:center;gap:4px;opacity:.45}
+  .nav div.on{opacity:1;color:var(--leaf)}
+  .nav svg{width:22px;height:22px}
+
+  /* backdrop + sheet */
+  .backdrop{position:absolute;inset:0;background:rgba(22,27,20,.5);z-index:20;animation:fade .3s both}
+  .sheet{position:absolute;left:0;right:0;bottom:0;z-index:25;background:#fff;border-radius:28px 28px 0 0;
+    padding:8px 20px 22px;box-shadow:0 -18px 44px -12px rgba(20,25,20,.35);animation:slideup .42s cubic-bezier(.2,.85,.25,1) both}
+  .handle{width:42px;height:4px;border-radius:999px;background:#dfe3dd;margin:4px auto 12px}
+  .shead{display:flex;align-items:center;gap:10px;margin-bottom:16px}
+  .shead h2{font-family:'Nunito';font-weight:900;font-size:18px;flex:1}
+  .ctxchip{font-family:'Inter';font-size:10.5px;font-weight:800;padding:4px 10px;border-radius:999px;background:var(--icon-bg);color:var(--green-deep)}
+  .x{width:32px;height:32px;border-radius:10px;background:#f1f4ef;border:none;display:flex;align-items:center;justify-content:center;cursor:pointer}
+  .x svg{width:16px;height:16px}
+
+  .flabel{font-family:'Inter';font-size:10.5px;font-weight:800;color:#9aa4a0;letter-spacing:.4px;text-transform:uppercase;margin:0 2px 7px;display:block}
+  .amount{display:flex;align-items:center;gap:10px;background:#f4f7f2;border:1.6px solid #d9e7d3;border-radius:17px;padding:14px 16px;margin-bottom:15px}
+  .amount .cur{font-family:'Inter';font-weight:800;font-size:22px;color:#9aa4a0}
+  .amount .val{font-family:'Inter';font-weight:800;font-size:27px;letter-spacing:-.6px;color:var(--ink);font-variant-numeric:tabular-nums;flex:1}
+  .amount .caret{width:2px;height:28px;background:var(--leaf);border-radius:2px;animation:blink 1.1s steps(1) infinite}
+
+  .row2{display:flex;gap:11px;margin-bottom:15px}
+  .row2>div{flex:1;min-width:0}
+  .inp{background:#f4f7f2;border:1.6px solid #e4ece0;border-radius:14px;padding:12px 13px;display:flex;align-items:center;gap:9px;
+    font-family:'Inter';font-weight:700;font-size:13px}
+  .inp svg{width:17px;height:17px;color:#7a8580;flex-shrink:0}
+  .inp .chev{margin-left:auto;color:#b7c0b4}
+
+  .upload{border:1.7px dashed #cfe0c9;border-radius:17px;padding:14px;display:flex;align-items:center;gap:12px;background:rgba(196,232,200,.16);margin-bottom:15px}
+  .upload .uic{width:44px;height:44px;border-radius:13px;background:var(--icon-bg);display:flex;align-items:center;justify-content:center;font-size:21px;flex-shrink:0}
+  .upload .ut{flex:1;min-width:0}
+  .upload .ut b{font-family:'Nunito';font-weight:800;font-size:13px;display:block}
+  .upload .ut span{font-family:'Inter';font-size:10.5px;color:#8a938d}
+  .ubtn{width:40px;height:40px;border-radius:12px;background:#fff;border:1px solid #e2ebdd;display:flex;align-items:center;justify-content:center;cursor:pointer}
+  .ubtn svg{width:19px;height:19px;color:var(--green-deep)}
+
+  .save{width:100%;height:53px;border-radius:17px;background:var(--leaf);color:#fff;border:none;cursor:pointer;
+    font-family:'Nunito';font-weight:800;font-size:15.5px;display:flex;align-items:center;justify-content:center;gap:8px;
+    box-shadow:0 14px 26px -8px rgba(60,138,46,.55)}
+  .save svg{width:19px;height:19px}
+
+  @keyframes fade{from{opacity:0}to{opacity:1}}
+  @keyframes slideup{from{transform:translateY(102%)}to{transform:translateY(0)}}
+  @keyframes blink{50%{opacity:0}}
+</style>
+</head>
+<body>
+  <div class="cap">Panda Wallet · <b>Registrar pago</b> — bottom-sheet sobre el Gasto. Monto, fecha, cuota y <b>captura del giro opcional</b>.</div>
+  <div class="phone">
+    <div class="screen">
+      <div class="status"><span>9:41</span><div class="d"><i></i><i></i><i></i><span style="margin-left:5px">◗</span></div></div>
+
+      <!-- dimmed context behind -->
+      <div class="bg">
+        <div class="appbar">
+          <div class="ab"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 6l-6 6 6 6"/></svg></div>
+          <div class="ttl"><b>Constructora</b><span>🧱 Gasto de Construir casa</span></div>
+        </div>
+        <div class="bgcard"><span class="lab">Planeado · Cuotas 4/8</span><div class="big">₡20.000.000</div></div>
+      </div>
+      <div class="nav">
+        <div><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 10l9-7 9 7v9a1 1 0 01-1 1h-5v-6H9v6H4a1 1 0 01-1-1z"/></svg>Inicio</div>
+        <div class="on"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="16" rx="3"/><path d="M3 9h18"/></svg>Proyectos</div>
+        <div><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="17" rx="3"/><path d="M3 9h18M8 2v4M16 2v4"/></svg>Calendario</div>
+        <div><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/></svg>Perfil</div>
+      </div>
+
+      <!-- sheet -->
+      <div class="backdrop"></div>
+      <div class="sheet">
+        <div class="handle"></div>
+        <div class="shead">
+          <h2>Registrar pago</h2>
+          <span class="ctxchip">🧱 Cuota 5</span>
+          <button class="x" aria-label="Cerrar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+        </div>
+
+        <span class="flabel">Monto del pago</span>
+        <div class="amount"><span class="cur">₡</span><span class="val">3.000.000</span><span class="caret"></span></div>
+
+        <div class="row2">
+          <div>
+            <span class="flabel">Fecha</span>
+            <div class="inp"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="17" rx="3"/><path d="M3 9h18M8 2v4M16 2v4"/></svg>15 may 2026</div>
+          </div>
+          <div>
+            <span class="flabel">Aplicar a</span>
+            <div class="inp"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 7h16M4 12h16M4 17h10"/></svg>Cuota 5<span class="chev"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M7 10l5 5 5-5"/></svg></span></div>
+          </div>
+        </div>
+
+        <span class="flabel">Captura del giro · opcional</span>
+        <div class="upload">
+          <div class="uic">🧾</div>
+          <div class="ut"><b>Agregá el comprobante</b><span>Foto del giro, recibo o factura</span></div>
+          <button class="ubtn" aria-label="Tomar foto"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 8h3l1.5-2h7L17 8h3a1 1 0 011 1v9a1 1 0 01-1 1H4a1 1 0 01-1-1V9a1 1 0 011-1z"/><circle cx="12" cy="13" r="3.2"/></svg></button>
+          <button class="ubtn" aria-label="Elegir de galería"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="16" rx="2.5"/><circle cx="8.5" cy="9.5" r="1.6"/><path d="M4 18l5-5 4 4 3-3 4 4"/></svg></button>
+        </div>
+
+        <button class="save"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 13l4 4L19 7"/></svg>Guardar pago</button>
+      </div>
+    </div>
+  </div>
+</body>
+</html>
