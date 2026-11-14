@@ -1,5 +1,6 @@
 import { BrowserRouter, Outlet, Route, Routes } from 'react-router-dom';
 import { TabBar } from './TabBar';
+import { ProjectsScreen } from '../features/projects/ProjectsScreen';
 
 function Layout() {
   return (
@@ -22,7 +23,7 @@ export function App() {
       <Routes>
         <Route element={<Layout />}>
           <Route index element={<Placeholder title="Inicio" />} />
-          <Route path="proyectos" element={<Placeholder title="Proyectos" />} />
+          <Route path="proyectos" element={<ProjectsScreen />} />
           <Route path="calendario" element={<Placeholder title="Calendario" />} />
           <Route path="perfil" element={<Placeholder title="Perfil" />} />
         </Route>
