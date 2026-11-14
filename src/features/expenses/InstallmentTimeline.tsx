@@ -1,7 +1,8 @@
-import { Card } from '@heroui/react';
+import { Button, Card } from '@heroui/react';
 import type { Installment, Payment } from '../../db/types';
 import { installmentStatus } from '../../lib/calc';
 import { formatCRC } from '../../lib/money';
+import { ReceiptThumb } from '../payments/ReceiptThumb';
 
 const fmtDate = (ms: number) =>
   new Date(ms).toLocaleDateString('es-CR', { day: 'numeric', month: 'short', year: 'numeric' });
@@ -9,9 +10,11 @@ const fmtDate = (ms: number) =>
 export function InstallmentTimeline({
   installments,
   payments,
+  onPay,
 }: {
   installments: Installment[];
   payments: Payment[];
+  onPay?: (installmentId: string) => void;
 }) {
   return (
     <ol className="relative flex flex-col gap-2.5 pl-7 before:absolute before:bottom-3 before:left-[9px] before:top-2 before:w-0.5 before:bg-shade">
@@ -19,7 +22,8 @@ export function InstallmentTimeline({
         const status = installmentStatus(inst, payments, installments);
         const mine = payments.filter((p) => p.installmentId === inst.id);
         const lastPaid = mine.length ? Math.max(...mine.map((p) => p.date)) : undefined;
-        const hasReceipt = mine.some((p) => p.receiptId);
+        const receiptId = mine.find((p) => p.receiptId)?.receiptId;
+        const hasReceipt = !!receiptId;
         const title = `Cuota ${inst.index}${inst.label ? ` · ${inst.label}` : ''}`;
         return (
           <li
@@ -67,14 +71,16 @@ export function InstallmentTimeline({
                 >
                   {formatCRC(inst.plannedAmount)}
                 </div>
-                {hasReceipt && (
-                  <span
-                    role="img"
-                    aria-label="Recibo adjunto"
-                    className="flex h-[34px] w-[34px] shrink-0 items-center justify-center rounded-[9px] border border-highlight bg-icon-bg text-[15px]"
+                {receiptId && <ReceiptThumb receiptId={receiptId} />}
+                {status !== 'pagada' && onPay && (
+                  <Button
+                    size="sm"
+                    variant="secondary"
+                    aria-label={`Pagar cuota ${inst.index}`}
+                    onPress={() => onPay(inst.id)}
                   >
-                    🧾
-                  </span>
+                    Pagar
+                  </Button>
                 )}
               </Card.Content>
             </Card>

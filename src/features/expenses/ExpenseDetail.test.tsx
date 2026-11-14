@@ -75,3 +75,11 @@ test('unknown id shows not-found with back link', async () => {
   renderAt('nope');
   expect(await screen.findByText('Gasto no encontrado')).toBeInTheDocument();
 });
+
+test('FAB and per-cuota Pagar open the payment sheet', async () => {
+  const { e } = await seedInstallments();
+  renderAt(e.id);
+  const user = (await import('@testing-library/user-event')).default.setup();
+  await user.click(await screen.findByRole('button', { name: /pagar cuota 2/i }));
+  expect(await screen.findByRole('heading', { name: /registrar pago/i })).toBeInTheDocument();
+});

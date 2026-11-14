@@ -51,3 +51,8 @@ export function useAllExpenses() {
 export function useAllPayments() {
   return useLiveQuery(() => db.payments.toArray(), []);
 }
+
+export function useReceipt(id: string | undefined) {
+  /** undefined = loading; null = none/not found. */
+  return useLiveQuery(async () => (id ? ((await db.receipts.get(id)) ?? null) : null), [id]);
+}

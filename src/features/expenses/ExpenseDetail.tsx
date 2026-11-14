@@ -1,8 +1,10 @@
 import { Button, Card, Chip, ProgressBar } from '@heroui/react';
+import { useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { useExpense, useInstallments, usePayments } from '../../db/hooks';
 import { expenseProgress, installmentStatus } from '../../lib/calc';
 import { formatCRC } from '../../lib/money';
+import { PaymentSheet } from '../payments/PaymentSheet';
 import { InstallmentTimeline } from './InstallmentTimeline';
 
 export function ExpenseDetail() {
@@ -10,6 +12,8 @@ export function ExpenseDetail() {
   const expense = useExpense(id);
   const installments = useInstallments(id);
   const payments = usePayments(id);
+  const [sheetOpen, setSheetOpen] = useState(false);
+  const [targetInst, setTargetInst] = useState<string>();
 
   if (expense === null) {
     return (
@@ -96,7 +100,14 @@ export function ExpenseDetail() {
               <h2 className="font-display text-[15px] font-black text-ink">
                 Cuotas <small className="font-bold text-ink-muted">· {installments.length}</small>
               </h2>
-              <InstallmentTimeline installments={installments} payments={payments} />
+              <InstallmentTimeline
+                installments={installments}
+                payments={payments}
+                onPay={(instId) => {
+                  setTargetInst(instId);
+                  setSheetOpen(true);
+                }}
+              />
             </section>
           )}
         </>
@@ -104,13 +115,17 @@ export function ExpenseDetail() {
         <div aria-busy="true" className="h-40 rounded-lg bg-white shadow-card" />
       )}
 
-      {/* Payment registration is Task 8; trigger present, wiring pending. */}
       <Button
         aria-label="Registrar pago"
+        onPress={() => {
+          setTargetInst(undefined);
+          setSheetOpen(true);
+        }}
         className="fixed bottom-24 right-5 h-[52px] rounded-[17px] bg-leaf px-5 font-display text-sm font-extrabold text-white shadow-fab"
       >
         + Registrar pago
       </Button>
+      {id && <PaymentSheet expenseId={id} installmentId={targetInst} isOpen={sheetOpen} onOpenChange={setSheetOpen} />}
     </div>
   );
 }
