@@ -1,4 +1,5 @@
-import { render, screen } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { MemoryRouter, Route, Routes } from 'react-router-dom';
 import { beforeEach } from 'vitest';
 import { db } from '../../db/db';
@@ -76,10 +77,18 @@ test('unknown id shows not-found with back link', async () => {
   expect(await screen.findByText('Gasto no encontrado')).toBeInTheDocument();
 });
 
-test('FAB and per-cuota Pagar open the payment sheet', async () => {
+test('FAB and per-cuota Pagar open the payment sheet, the latter pre-selecting its cuota', async () => {
   const { e } = await seedInstallments();
   renderAt(e.id);
-  const user = (await import('@testing-library/user-event')).default.setup();
-  await user.click(await screen.findByRole('button', { name: /pagar cuota 2/i }));
+  const user = userEvent.setup();
+
+  await user.click(await screen.findByRole('button', { name: 'Registrar pago' }));
   expect(await screen.findByRole('heading', { name: /registrar pago/i })).toBeInTheDocument();
+  expect(screen.getByRole('button', { name: /aplicar a/i })).toHaveTextContent(/sin cuota/i);
+  await user.keyboard('{Escape}');
+  await waitFor(() => expect(screen.queryByRole('heading', { name: /registrar pago/i })).not.toBeInTheDocument());
+
+  await user.click(screen.getByRole('button', { name: /pagar cuota 2/i }));
+  expect(await screen.findByRole('heading', { name: /registrar pago/i })).toBeInTheDocument();
+  expect(screen.getByRole('button', { name: /aplicar a/i })).toHaveTextContent(/cuota 2/i);
 });

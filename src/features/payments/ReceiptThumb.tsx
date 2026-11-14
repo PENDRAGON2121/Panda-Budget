@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Modal } from '@heroui/react';
+import { Button, Modal } from '@heroui/react';
 import { useReceipt } from '../../db/hooks';
 
 /** Tiny receipt preview; tapping it opens a full-size viewer. Object URLs are revoked on unmount. */
@@ -21,14 +21,15 @@ export function ReceiptThumb({ receiptId }: { receiptId: string }) {
   if (!url) return null;
   return (
     <>
-      <button
-        type="button"
+      <Button
+        isIconOnly
+        variant="ghost"
         aria-label="Ver recibo"
-        onClick={() => setOpen(true)}
-        className="h-[34px] w-[34px] shrink-0 overflow-hidden rounded-[9px] border border-highlight bg-icon-bg p-0"
+        onPress={() => setOpen(true)}
+        className="h-[34px] w-[34px] min-w-0 shrink-0 overflow-hidden rounded-[9px] border border-highlight p-0"
       >
         <img src={url} alt="Recibo adjunto" className="h-full w-full object-cover" />
-      </button>
+      </Button>
       <Modal.Backdrop isOpen={open} onOpenChange={setOpen}>
         <Modal.Container scroll="inside">
           <Modal.Dialog>

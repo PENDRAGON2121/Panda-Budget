@@ -1,8 +1,10 @@
 import { render, screen } from '@testing-library/react';
-import { beforeEach, expect, test, vi } from 'vitest';
+import { afterEach, beforeEach, expect, test, vi } from 'vitest';
 import { db } from '../../db/db';
 import { addPayment } from '../../db/repos';
 import { ReceiptThumb } from './ReceiptThumb';
+
+afterEach(() => vi.unstubAllGlobals());
 
 beforeEach(async () => {
   await Promise.all(db.tables.map((t) => t.clear()));
@@ -11,8 +13,13 @@ beforeEach(async () => {
 test('creates an objectURL for the receipt and revokes it on unmount', async () => {
   const create = vi.fn(() => 'blob:fake-1');
   const revoke = vi.fn();
-  URL.createObjectURL = create;
-  URL.revokeObjectURL = revoke;
+  vi.stubGlobal(
+    'URL',
+    class extends URL {
+      static createObjectURL = create;
+      static revokeObjectURL = revoke;
+    },
+  );
   const pay = await addPayment(
     { expenseId: 'e1', amount: 1000, date: Date.now() },
     { blob: new Blob(['x'], { type: 'image/jpeg' }), mime: 'image/jpeg' },

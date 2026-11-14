@@ -1,9 +1,11 @@
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { beforeEach, expect, test } from 'vitest';
+import { afterEach, beforeEach, expect, test, vi } from 'vitest';
 import { db } from '../../db/db';
 import { createExpense, createProject } from '../../db/repos';
 import { PaymentSheet } from './PaymentSheet';
+
+afterEach(() => vi.unstubAllGlobals());
 
 beforeEach(async () => {
   await Promise.all(db.tables.map((t) => t.clear()));
@@ -64,4 +66,26 @@ test('save is disabled until an amount is entered', async () => {
   const { e } = await seed();
   render(<PaymentSheet expenseId={e.id} isOpen onOpenChange={() => {}} />);
   expect(await screen.findByRole('button', { name: /guardar pago/i })).toBeDisabled();
+});
+
+test('saves an attached receipt: receiptId set and one receipt stored', async () => {
+  vi.stubGlobal(
+    'URL',
+    class extends URL {
+      static createObjectURL = vi.fn(() => 'blob:preview');
+      static revokeObjectURL = vi.fn();
+    },
+  );
+  const { e } = await seed();
+  const user = userEvent.setup();
+  render(<PaymentSheet expenseId={e.id} isOpen onOpenChange={() => {}} />);
+  await user.type(screen.getByLabelText(/monto/i), '7000');
+  const file = new File(['img'], 'recibo.jpg', { type: 'image/jpeg' });
+  await user.upload(screen.getByLabelText('Elegir de galería'), file);
+  expect(await screen.findByAltText(/vista previa/i)).toBeInTheDocument();
+  await user.click(screen.getByRole('button', { name: /guardar pago/i }));
+  await waitFor(async () => expect(await db.payments.count()).toBe(1));
+  const [pay] = await db.payments.toArray();
+  expect(pay.receiptId).toBeTruthy();
+  expect(await db.receipts.count()).toBe(1);
 });
