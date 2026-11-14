@@ -6,7 +6,8 @@ export function useProjects() {
 }
 
 export function useProject(id: string | undefined) {
-  return useLiveQuery(() => (id ? db.projects.get(id) : undefined), [id]);
+  /** undefined = still loading; null = resolved, not found. */
+  return useLiveQuery(async () => (id ? ((await db.projects.get(id)) ?? null) : null), [id]);
 }
 
 export function useExpenses(projectId: string | undefined) {

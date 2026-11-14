@@ -41,21 +41,35 @@ export function ProjectDetail() {
   const expenses = useExpenses(id);
   const payments = useAllPayments();
 
-  if (!project || !expenses || !payments) return null;
+  if (project === null) {
+    return (
+      <div className="flex flex-col items-start gap-3">
+        <h1 className="font-display text-[17px] font-black text-ink">Proyecto no encontrado</h1>
+        <Link to="/proyectos" className="text-sm font-bold text-green-deep">‹ Volver a proyectos</Link>
+      </div>
+    );
+  }
+
+  const ready = project !== undefined && expenses !== undefined && payments !== undefined;
 
   return (
     <div className="flex flex-col gap-4">
       <header className="flex items-center gap-3">
         <Link to="/proyectos" aria-label="Volver a proyectos" className="text-ink no-underline">‹</Link>
-        <h1 className="break-words font-display text-[17px] font-black text-ink">{project.name}</h1>
+        <h1 className="break-words font-display text-[17px] font-black text-ink">{project?.name ?? ''}</h1>
       </header>
 
-      {/* Container transform: shares layoutId with ProjectCard. App wraps in MotionConfig reducedMotion="user",
-          so the layout animation is skipped under prefers-reduced-motion. */}
-      <motion.div layoutId={`project-card-${project.id}`} className="rounded-lg">
-        <ProjectSummaryCard project={project} expenses={expenses} payments={payments} />
+      {/* Container transform: the layoutId element mounts on first render (before data resolves) so Motion can
+          match the exiting ProjectCard. App wraps in MotionConfig reducedMotion="user". */}
+      <motion.div layoutId={`project-card-${id}`} className="rounded-lg" data-testid="detail-container">
+        {ready ? (
+          <ProjectSummaryCard project={project} expenses={expenses} payments={payments} />
+        ) : (
+          <div aria-busy="true" className="h-40 rounded-lg bg-white shadow-card" />
+        )}
       </motion.div>
 
+      {ready && (
       <section aria-label="Gastos" className="flex flex-col gap-2.5">
         <h2 className="font-display text-[15px] font-black text-ink">
           Gastos <small className="font-bold text-ink-muted">· {expenses.length}</small>
@@ -72,6 +86,7 @@ export function ProjectDetail() {
           expenses.map((e) => <ExpenseRow key={e.id} expense={e} payments={payments} />)
         )}
       </section>
+      )}
 
       {/* Expense creation form is Task 7; trigger is present, wiring pending. */}
       <Button

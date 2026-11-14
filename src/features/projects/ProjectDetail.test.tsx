@@ -80,3 +80,15 @@ test('empty state when there are no expenses', async () => {
   renderAt(p.id);
   expect(await screen.findByText(/agregá tu primer gasto/i)).toBeInTheDocument();
 });
+
+test('layoutId container renders before data resolves', () => {
+  renderAt('does-not-matter-yet');
+  expect(screen.getByTestId('detail-container')).toBeInTheDocument();
+});
+
+test('non-existent id shows not-found state with back link', async () => {
+  renderAt('nope');
+  expect(await screen.findByText('Proyecto no encontrado')).toBeInTheDocument();
+  expect(screen.getByRole('link', { name: /volver a proyectos/i })).toHaveAttribute('href', '/proyectos');
+  expect(screen.queryByTestId('detail-container')).not.toBeInTheDocument();
+});
