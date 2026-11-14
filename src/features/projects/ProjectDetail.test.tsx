@@ -1,4 +1,5 @@
 import { render, screen, within } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { MemoryRouter, Route, Routes } from 'react-router-dom';
 import { beforeEach } from 'vitest';
 import { db } from '../../db/db';
@@ -91,4 +92,12 @@ test('non-existent id shows not-found state with back link', async () => {
   expect(await screen.findByText('Proyecto no encontrado')).toBeInTheDocument();
   expect(screen.getByRole('link', { name: /volver a proyectos/i })).toHaveAttribute('href', '/proyectos');
   expect(screen.queryByTestId('detail-container')).not.toBeInTheDocument();
+});
+
+test('Agregar gasto FAB opens the expense form', async () => {
+  const { p } = await seed([100000]);
+  renderAt(p.id);
+  await screen.findByText('Casa nueva');
+  await userEvent.setup().click(screen.getByRole('button', { name: /agregar gasto/i }));
+  expect(await screen.findByText('Nuevo gasto')).toBeInTheDocument();
 });

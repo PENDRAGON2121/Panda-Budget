@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { Button, Card, ProgressBar } from '@heroui/react';
 import { motion } from 'motion/react';
 import { Link, useParams } from 'react-router-dom';
@@ -5,6 +6,7 @@ import { useAllPayments, useExpenses, useProject } from '../../db/hooks';
 import type { Expense, Payment } from '../../db/types';
 import { expenseProgress } from '../../lib/calc';
 import { formatCRC } from '../../lib/money';
+import { ExpenseForm } from '../expenses/ExpenseForm';
 import { ProjectSummaryCard } from './ProjectSummaryCard';
 
 function ExpenseRow({ expense, payments }: { expense: Expense; payments: Payment[] }) {
@@ -40,6 +42,7 @@ export function ProjectDetail() {
   const project = useProject(id);
   const expenses = useExpenses(id);
   const payments = useAllPayments();
+  const [formOpen, setFormOpen] = useState(false);
 
   if (project === null) {
     return (
@@ -88,13 +91,14 @@ export function ProjectDetail() {
       </section>
       )}
 
-      {/* Expense creation form is Task 7; trigger is present, wiring pending. */}
       <Button
         aria-label="Agregar gasto"
+        onPress={() => setFormOpen(true)}
         className="fixed bottom-24 right-5 h-14 w-14 min-w-0 rounded-[19px] bg-leaf text-2xl text-white shadow-fab"
       >
         +
       </Button>
+      {id && <ExpenseForm projectId={id} isOpen={formOpen} onOpenChange={setFormOpen} />}
     </div>
   );
 }

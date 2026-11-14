@@ -10,6 +10,11 @@ export function useProject(id: string | undefined) {
   return useLiveQuery(async () => (id ? ((await db.projects.get(id)) ?? null) : null), [id]);
 }
 
+export function useExpense(id: string | undefined) {
+  /** undefined = still loading; null = resolved, not found. */
+  return useLiveQuery(async () => (id ? ((await db.expenses.get(id)) ?? null) : null), [id]);
+}
+
 export function useExpenses(projectId: string | undefined) {
   return useLiveQuery(
     () => (projectId ? db.expenses.where('projectId').equals(projectId).toArray() : []),

@@ -3,6 +3,7 @@ import { BrowserRouter, Outlet, Route, Routes } from 'react-router-dom';
 import { TabBar } from './TabBar';
 import { ProjectsScreen } from '../features/projects/ProjectsScreen';
 import { ProjectDetail } from '../features/projects/ProjectDetail';
+import { ExpenseDetail } from '../features/expenses/ExpenseDetail';
 
 function Layout() {
   return (
@@ -28,6 +29,7 @@ export function App() {
           <Route index element={<Placeholder title="Inicio" />} />
           <Route path="proyectos" element={<ProjectsScreen />} />
           <Route path="proyectos/:id" element={<ProjectDetail />} />
+          <Route path="gastos/:id" element={<ExpenseDetail />} />
           <Route path="calendario" element={<Placeholder title="Calendario" />} />
           <Route path="perfil" element={<Placeholder title="Perfil" />} />
         </Route>
