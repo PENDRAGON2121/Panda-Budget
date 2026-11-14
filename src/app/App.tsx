@@ -4,6 +4,7 @@ import { TabBar } from './TabBar';
 import { ProjectsScreen } from '../features/projects/ProjectsScreen';
 import { ProjectDetail } from '../features/projects/ProjectDetail';
 import { ExpenseDetail } from '../features/expenses/ExpenseDetail';
+import { HomeScreen } from '../features/home/HomeScreen';
 
 function Layout() {
   return (
@@ -26,7 +27,7 @@ export function App() {
     <BrowserRouter>
       <Routes>
         <Route element={<Layout />}>
-          <Route index element={<Placeholder title="Inicio" />} />
+          <Route index element={<HomeScreen />} />
           <Route path="proyectos" element={<ProjectsScreen />} />
           <Route path="proyectos/:id" element={<ProjectDetail />} />
           <Route path="gastos/:id" element={<ExpenseDetail />} />
