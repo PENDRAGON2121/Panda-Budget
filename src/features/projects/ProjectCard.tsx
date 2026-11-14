@@ -1,4 +1,5 @@
 import { Card, ProgressBar } from '@heroui/react';
+import { motion } from 'motion/react';
 import { Link } from 'react-router-dom';
 import type { Project } from '../../db/types';
 import { formatCRC } from '../../lib/money';
@@ -13,6 +14,7 @@ export function ProjectCard({ project, pct, expenseCount }: Props) {
   const shown = Math.min(100, Math.max(0, pct));
   return (
     <Link to={`/proyectos/${project.id}`} className="block no-underline">
+      <motion.div layoutId={`project-card-${project.id}`} className="h-full rounded-lg">
       <Card className="h-full rounded-lg shadow-card">
         <Card.Content className="flex flex-col gap-2">
           <div aria-hidden className="text-2xl">{project.icon ?? '📁'}</div>
@@ -30,6 +32,7 @@ export function ProjectCard({ project, pct, expenseCount }: Props) {
           </div>
         </Card.Content>
       </Card>
+      </motion.div>
     </Link>
   );
 }

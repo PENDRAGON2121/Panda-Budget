@@ -1,6 +1,8 @@
+import { MotionConfig } from 'motion/react';
 import { BrowserRouter, Outlet, Route, Routes } from 'react-router-dom';
 import { TabBar } from './TabBar';
 import { ProjectsScreen } from '../features/projects/ProjectsScreen';
+import { ProjectDetail } from '../features/projects/ProjectDetail';
 
 function Layout() {
   return (
@@ -19,15 +21,18 @@ const Placeholder = ({ title }: { title: string }) => (
 
 export function App() {
   return (
+    <MotionConfig reducedMotion="user">
     <BrowserRouter>
       <Routes>
         <Route element={<Layout />}>
           <Route index element={<Placeholder title="Inicio" />} />
           <Route path="proyectos" element={<ProjectsScreen />} />
+          <Route path="proyectos/:id" element={<ProjectDetail />} />
           <Route path="calendario" element={<Placeholder title="Calendario" />} />
           <Route path="perfil" element={<Placeholder title="Perfil" />} />
         </Route>
       </Routes>
     </BrowserRouter>
+    </MotionConfig>
   );
 }
