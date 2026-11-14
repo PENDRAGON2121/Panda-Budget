@@ -32,6 +32,17 @@ test('form blocks names over 60 chars and accepts exactly 60', async () => {
   await user.type(input, 'a'.repeat(75));
   expect(input.value).toHaveLength(60);
   expect(input.value).toBe('a'.repeat(60));
+  // exactly 60 enables submit
+  expect(screen.getByRole('button', { name: /crear proyecto/i })).toBeEnabled();
+  // further input is blocked, stays at 60 and still valid
+  await user.type(input, 'b');
+  expect(input.value).toBe('a'.repeat(60));
+  expect(screen.getByRole('button', { name: /crear proyecto/i })).toBeEnabled();
+});
+
+test('submit is disabled for an empty name', () => {
+  render(<ProjectForm isOpen onOpenChange={() => {}} />);
+  expect(screen.getByRole('button', { name: /crear proyecto/i })).toBeDisabled();
 });
 
 test('creating a project persists it', async () => {

@@ -37,3 +37,11 @@ export function usePaymentsBetween(startMs: number, endMs: number) {
     [startMs, endMs],
   );
 }
+
+export function useAllExpenses() {
+  return useLiveQuery(() => db.expenses.toArray(), []);
+}
+
+export function useAllPayments() {
+  return useLiveQuery(() => db.payments.toArray(), []);
+}

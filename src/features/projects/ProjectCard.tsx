@@ -1,4 +1,4 @@
-import { Card } from '@heroui/react';
+import { Card, ProgressBar } from '@heroui/react';
 import { Link } from 'react-router-dom';
 import type { Project } from '../../db/types';
 import { formatCRC } from '../../lib/money';
@@ -20,9 +20,11 @@ export function ProjectCard({ project, pct, expenseCount }: Props) {
           <div className="font-sans text-base font-bold tabular-nums text-ink">
             {formatCRC(project.totalBudget)}
           </div>
-          <div className="h-1.5 w-full overflow-hidden rounded-full bg-track" aria-hidden>
-            <div className="h-full rounded-full bg-leaf" style={{ width: `${shown}%` }} />
-          </div>
+          <ProgressBar aria-label={`Progreso de ${project.name}`} value={shown} className="w-full">
+            <ProgressBar.Track className="h-1.5">
+              <ProgressBar.Fill className="bg-leaf" />
+            </ProgressBar.Track>
+          </ProgressBar>
           <div className="text-xs text-ink-muted">
             {Math.round(pct)}% · {expenseCount} {expenseCount === 1 ? 'gasto' : 'gastos'}
           </div>

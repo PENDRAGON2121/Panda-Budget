@@ -1,8 +1,6 @@
 import { useState } from 'react';
 import { Button } from '@heroui/react';
-import { useLiveQuery } from 'dexie-react-hooks';
-import { db } from '../../db/db';
-import { useProjects } from '../../db/hooks';
+import { useAllExpenses, useAllPayments, useProjects } from '../../db/hooks';
 import { projectSummary } from '../../lib/calc';
 import { EmptyProjects } from './EmptyProjects';
 import { ProjectCard } from './ProjectCard';
@@ -10,8 +8,8 @@ import { ProjectForm } from './ProjectForm';
 
 export function ProjectsScreen() {
   const projects = useProjects();
-  const expenses = useLiveQuery(() => db.expenses.toArray(), []);
-  const payments = useLiveQuery(() => db.payments.toArray(), []);
+  const expenses = useAllExpenses();
+  const payments = useAllPayments();
   const [open, setOpen] = useState(false);
 
   if (!projects || !expenses || !payments) return null;
