@@ -51,3 +51,10 @@ describe('ProfileScreen', () => {
     expect(screen.getByRole('radio', { name: /dólares/i })).toBeChecked();
   });
 });
+
+describe('ProfileScreen version', () => {
+  it('shows the app version injected at build time', () => {
+    render(ui());
+    expect(screen.getByText(`Panda Wallet · versión ${__APP_VERSION__}`)).toBeInTheDocument();
+  });
+});

@@ -119,7 +119,7 @@ export function ProfileScreen() {
       </Card>
 
       <p className="pt-1 text-center text-xs font-semibold text-ink-muted">
-        Panda Wallet · versión 0.1
+        Panda Wallet · versión {__APP_VERSION__}
       </p>
     </div>
   );
