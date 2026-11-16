@@ -40,6 +40,7 @@
 | `green-deep` | `#3c8a2e` | **Verde interactivo accesible** — texto/porcentajes sobre claro, fills de botón |
 | `node` | `#4c8a2c` | Verde oscuro — detalles |
 | `danger` | `#e0592f` | **Rojo de alerta** — sobre-giro / sobre-asignación |
+| `bamboo-ink` | `#b0783a` | **Texto** ámbar de estados pendientes/advertencia ("Pendiente", sin conexión, almacenamiento no protegido). Nunca como relleno |
 | `danger-ink` | `#b23f1d` | **Texto** de sobre-giro/negativos (5.8:1 sobre blanco). `danger` solo para rellenos/barras |
 
 **Reglas de color (accesibilidad):**

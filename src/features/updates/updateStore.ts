@@ -24,6 +24,15 @@ export function dismissUpdate(): void {
   emit();
 }
 
+/** Web/PWA: lets Perfil trigger the same "Recargar" as the toast (the handler lives with the service worker hook). */
+let webReload: (() => void) | null = null;
+export function registerWebReload(fn: (() => void) | null): void {
+  webReload = fn;
+}
+export function reloadWebApp(): void {
+  webReload?.();
+}
+
 function subscribe(cb: () => void) {
   listeners.add(cb);
   return () => {

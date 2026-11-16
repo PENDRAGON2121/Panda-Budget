@@ -25,6 +25,16 @@ describe('user name', () => {
     expect(s.getUserName()).toBe('Mauri');
   });
 
+  it('a failed newer name write is not shadowed by a stale stored name', async () => {
+    const s = await load();
+    s.setUserName('Vieja');
+    vi.spyOn(Storage.prototype, 'setItem').mockImplementation(() => {
+      throw new Error('quota');
+    });
+    s.setUserName('Nueva'); // getItem still works and still returns "Vieja"
+    expect(s.getUserName()).toBe('Nueva');
+  });
+
   it('falls back to memory when localStorage.getItem throws', async () => {
     const s = await load();
     vi.spyOn(Storage.prototype, 'setItem').mockImplementation(() => {
@@ -76,6 +86,16 @@ describe('last update check timestamp', () => {
     s.setLastUpdateCheck(42);
     localStorage.clear();
     expect(s.getLastUpdateCheck()).toBe(0);
+  });
+
+  it('a failed newer write is not shadowed by a stale stored value', async () => {
+    const s = await load();
+    s.setLastUpdateCheck(10);
+    vi.spyOn(Storage.prototype, 'setItem').mockImplementation(() => {
+      throw new Error('quota');
+    });
+    s.setLastUpdateCheck(99); // getItem still works and still returns 10
+    expect(s.getLastUpdateCheck()).toBe(99);
   });
 
   it('shouldAutoCheckUpdates allows at most one check per 24h', async () => {

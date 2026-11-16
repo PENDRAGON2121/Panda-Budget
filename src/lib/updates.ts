@@ -20,7 +20,11 @@ export type UpdateCheck = { status: 'available'; update: UpdateInfo } | { status
 
 const stripV = (v: string) => v.trim().replace(/^v/i, '');
 
-/** Compares dotted numeric versions (a leading "v" and any pre-release suffix are ignored). Returns -1, 0 or 1. */
+/**
+ * Compares dotted numeric versions (a leading "v" and any pre-release suffix are ignored). Returns -1, 0 or 1.
+ * Pre-release suffixes are dropped on purpose, so "1.2.3-beta" equals "1.2.3". That is safe here because GitHub's
+ * /releases/latest never returns pre-releases (or drafts), so we never compare against one.
+ */
 export function compareSemver(a: string, b: string): number {
   const parts = (v: string) =>
     stripV(v)
@@ -34,6 +38,19 @@ export function compareSemver(a: string, b: string): number {
     if (d !== 0) return d > 0 ? 1 : -1;
   }
   return 0;
+}
+
+const ALLOWED_HOSTS = new Set(['github.com', 'objects.githubusercontent.com', 'release-assets.githubusercontent.com']);
+
+/** True only for https URLs on GitHub's own hosts (the APK is handed to the system browser, so be strict). */
+function isTrustedUrl(u: unknown): u is string {
+  if (typeof u !== 'string') return false;
+  try {
+    const url = new URL(u);
+    return url.protocol === 'https:' && ALLOWED_HOSTS.has(url.hostname);
+  } catch {
+    return false;
+  }
 }
 
 interface GitHubAsset {
@@ -59,16 +76,16 @@ export async function checkForUpdateDetailed(current: string): Promise<UpdateChe
     if (compareSemver(version, current) <= 0) return { status: 'none' };
     const assets = Array.isArray(data.assets) ? (data.assets as GitHubAsset[]) : [];
     const apk = assets.find(
-      (a) => typeof a.name === 'string' && a.name.toLowerCase().endsWith('.apk') && typeof a.browser_download_url === 'string',
+      (a) => typeof a.name === 'string' && a.name.toLowerCase().endsWith('.apk') && isTrustedUrl(a.browser_download_url),
     );
-    if (!apk) return { status: 'none' }; // nothing installable
+    if (!apk) return { status: 'none' }; // nothing installable (or its URL is not a trusted GitHub https URL)
     return {
       status: 'available',
       update: {
         version,
         notes: typeof data.body === 'string' ? data.body.trim() : '',
         apkUrl: apk.browser_download_url as string,
-        htmlUrl: typeof data.html_url === 'string' ? data.html_url : '',
+        htmlUrl: isTrustedUrl(data.html_url) ? data.html_url : '',
       },
     };
   } catch {

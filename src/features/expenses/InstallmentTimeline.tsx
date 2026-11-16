@@ -133,7 +133,7 @@ export function InstallmentTimeline({
                         {!hasReceipt && ' · sin recibo'}
                       </>
                     ) : (
-                      <span className="text-[#b0783a]">
+                      <span className="text-bamboo-ink">
                         {status === 'proxima' ? 'Próxima' : 'Pendiente'}
                         {inst.dueDate ? ` · vence ${fmtDate(inst.dueDate)}` : ''}
                       </span>

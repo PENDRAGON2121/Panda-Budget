@@ -21,6 +21,7 @@
   --color-node: #4c8a2c;
   --color-danger-panda: #e0592f;
   --color-danger-ink: #b23f1d; /* danger as TEXT: 5.8:1 on white (#e0592f is fills only) */
+  --color-bamboo-ink: #b0783a; /* warm amber as TEXT: pending / offline / unprotected states */
   --color-track-strong: #dfe4dc;
 
   --color-hairline: rgba(36, 33, 43, 0.07);

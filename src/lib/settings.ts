@@ -32,8 +32,8 @@ export function normalizeName(raw: string): string {
 
 export function getUserName(): string {
   try {
-    // `||`, not `??`: a name set while setItem threw is not in storage (getItem → null) but must still show.
-    return localStorage.getItem(NAME_KEY) || memoryName;
+    // The in-memory value exists only when the latest write failed, so it is newer than anything stored.
+    return memoryName || localStorage.getItem(NAME_KEY) || '';
   } catch {
     return memoryName;
   }
@@ -69,12 +69,13 @@ let memoryUpdateCheck = 0; // set only when a localStorage write failed
 
 /** Epoch ms of the last completed update check (0 = never). */
 export function getLastUpdateCheck(): number {
+  if (memoryUpdateCheck) return memoryUpdateCheck; // set only when the latest write failed: newer than storage
   try {
     const raw = localStorage.getItem(UPDATE_CHECK_KEY);
     const n = raw === null ? NaN : Number(raw);
-    return Number.isFinite(n) && n > 0 ? n : memoryUpdateCheck;
+    return Number.isFinite(n) && n > 0 ? n : 0;
   } catch {
-    return memoryUpdateCheck;
+    return 0;
   }
 }
 

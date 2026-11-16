@@ -2,7 +2,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { act, render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { UpdateCheckCard } from './UpdateCheckCard';
-import { dismissUpdate, getAvailableUpdate } from './updateStore';
+import { dismissUpdate, getAvailableUpdate, registerWebReload } from './updateStore';
 
 const m = vi.hoisted(() => ({ native: true, check: vi.fn(), web: vi.fn() }));
 vi.mock('@capacitor/core', () => ({ Capacitor: { isNativePlatform: () => m.native } }));
@@ -50,6 +50,28 @@ describe('UpdateCheckCard (native)', () => {
     expect(getAvailableUpdate()).toEqual(update);
   });
 
+  it('"Ver novedades" reopens the modal after it was dismissed', async () => {
+    m.check.mockResolvedValue({ status: 'available', update });
+    render(<UpdateCheckCard />);
+    await press();
+    act(() => dismissUpdate());
+    expect(getAvailableUpdate()).toBeNull();
+    await userEvent.setup().click(await screen.findByRole('button', { name: 'Ver novedades' }));
+    expect(getAvailableUpdate()).toEqual(update);
+  });
+
+  it('does not set state after unmount', async () => {
+    const d = deferred<{ status: 'none' }>();
+    m.check.mockReturnValue(d.promise);
+    const err = vi.spyOn(console, 'error').mockImplementation(() => {});
+    const { unmount } = render(<UpdateCheckCard />);
+    await press();
+    unmount();
+    await act(async () => d.resolve({ status: 'none' }));
+    expect(err).not.toHaveBeenCalled();
+    err.mockRestore();
+  });
+
   it('sin conexión', async () => {
     m.check.mockResolvedValue({ status: 'error' });
     render(<UpdateCheckCard />);
@@ -76,6 +98,11 @@ describe('UpdateCheckCard (web)', () => {
     render(<UpdateCheckCard />);
     await press();
     expect(await screen.findByText('Hay una versión nueva. Tocá «Recargar» para usarla.')).toBeInTheDocument();
+    const reload = vi.fn();
+    registerWebReload(reload);
+    await userEvent.setup().click(screen.getByRole('button', { name: 'Recargar' }));
+    expect(reload).toHaveBeenCalled();
+    registerWebReload(null);
   });
 
   it('sin conexión on the web', async () => {

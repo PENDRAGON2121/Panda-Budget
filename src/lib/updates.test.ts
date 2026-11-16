@@ -76,18 +76,60 @@ describe('checkForUpdate', () => {
     expect(await checkForUpdate('0.0.1')).toBeNull();
   });
 
+  it('returns an error when res.json() throws', async () => {
+    vi.stubGlobal('fetch', vi.fn().mockResolvedValue({ ok: true, status: 200, json: () => Promise.reject(new SyntaxError('bad')) }));
+    expect(await checkForUpdateDetailed('0.0.1')).toEqual({ status: 'error' });
+  });
+
+  it('treats a non-string tag_name as an error', async () => {
+    vi.stubGlobal('fetch', respond({ ...release('v0.0.2'), tag_name: 2 }));
+    expect(await checkForUpdateDetailed('0.0.1')).toEqual({ status: 'error' });
+  });
+
+  it('accepts an uppercase .APK asset name', async () => {
+    vi.stubGlobal('fetch', respond(release('v0.0.2', [{ ...apk, name: 'PANDA.APK' }])));
+    expect((await checkForUpdateDetailed('0.0.1')).status).toBe('available');
+  });
+
+  it('accepts GitHub asset hosts', async () => {
+    for (const host of ['objects.githubusercontent.com', 'release-assets.githubusercontent.com']) {
+      vi.stubGlobal('fetch', respond(release('v0.0.2', [{ ...apk, browser_download_url: `https://${host}/a.apk` }])));
+      expect((await checkForUpdateDetailed('0.0.1')).status).toBe('available');
+    }
+  });
+
+  it.each([
+    'http://github.com/x/a.apk',
+    'javascript:alert(1)',
+    'https://evil.example.com/a.apk',
+    'https://github.com.evil.com/a.apk',
+    'not a url',
+  ])('ignores an APK asset with an untrusted URL (%s)', async (url) => {
+    vi.stubGlobal('fetch', respond(release('v0.0.2', [{ ...apk, browser_download_url: url }])));
+    expect(await checkForUpdateDetailed('0.0.1')).toEqual({ status: 'none' });
+  });
+
+  it('drops an untrusted html_url', async () => {
+    vi.stubGlobal('fetch', respond({ ...release('v0.0.2'), html_url: 'javascript:alert(1)' }));
+    const r = await checkForUpdateDetailed('0.0.1');
+    expect(r.status === 'available' && r.update.htmlUrl).toBe('');
+  });
+
   it('aborts after the timeout and returns null', async () => {
     vi.useFakeTimers();
-    vi.stubGlobal(
-      'fetch',
-      vi.fn((_url: string, init: RequestInit) =>
-        new Promise((_res, rej) => init.signal!.addEventListener('abort', () => rej(new DOMException('aborted', 'AbortError')))),
-      ),
-    );
-    const pending = checkForUpdate('0.0.1');
-    await vi.advanceTimersByTimeAsync(6000);
-    await expect(pending).resolves.toBeNull();
-    vi.useRealTimers();
+    try {
+      vi.stubGlobal(
+        'fetch',
+        vi.fn((_url: string, init: RequestInit) =>
+          new Promise((_res, rej) => init.signal!.addEventListener('abort', () => rej(new DOMException('aborted', 'AbortError')))),
+        ),
+      );
+      const pending = checkForUpdate('0.0.1');
+      await vi.advanceTimersByTimeAsync(6000);
+      await expect(pending).resolves.toBeNull();
+    } finally {
+      vi.useRealTimers();
+    }
   });
 });
 

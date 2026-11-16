@@ -1,16 +1,16 @@
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Capacitor } from '@capacitor/core';
 import { Button, Card, Spinner } from '@heroui/react';
-import { checkForUpdateDetailed } from '../../lib/updates';
+import { checkForUpdateDetailed, type UpdateInfo } from '../../lib/updates';
 import { setLastUpdateCheck } from '../../lib/settings';
-import { offerUpdate } from './updateStore';
+import { offerUpdate, reloadWebApp } from './updateStore';
 import { checkWebUpdate } from './webUpdate';
 
 type State =
   | { kind: 'idle' }
   | { kind: 'checking' }
   | { kind: 'none' }
-  | { kind: 'available'; version?: string }
+  | { kind: 'available'; update?: UpdateInfo }
   | { kind: 'offline' };
 
 /**
@@ -19,7 +19,17 @@ type State =
  * - Web/PWA: asks the service worker to update; a new build surfaces the "Recargar" toast.
  */
 export function UpdateCheckCard() {
-  const [state, setState] = useState<State>({ kind: 'idle' });
+  const [state, setStateRaw] = useState<State>({ kind: 'idle' });
+  const alive = useRef(true);
+  useEffect(() => {
+    alive.current = true;
+    return () => {
+      alive.current = false;
+    };
+  }, []);
+  const setState = (s: State) => {
+    if (alive.current) setStateRaw(s);
+  };
 
   const check = async () => {
     setState({ kind: 'checking' });
@@ -28,7 +38,7 @@ export function UpdateCheckCard() {
       if (r.status === 'error') return setState({ kind: 'offline' });
       setLastUpdateCheck(Date.now());
       if (r.status === 'none') return setState({ kind: 'none' });
-      setState({ kind: 'available', version: r.update.version });
+      setState({ kind: 'available', update: r.update });
       offerUpdate(r.update);
       return;
     }
@@ -56,13 +66,22 @@ export function UpdateCheckCard() {
           {state.kind === 'none' && <span className="text-green-deep">Estás al día</span>}
           {state.kind === 'available' && (
             <span className="text-green-deep">
-              {state.version
-                ? `Nueva versión v${state.version} disponible`
+              {state.update
+                ? `Nueva versión v${state.update.version} disponible`
                 : 'Hay una versión nueva. Tocá «Recargar» para usarla.'}
             </span>
           )}
-          {state.kind === 'offline' && <span className="text-[#b0783a]">Sin conexión. Intentá más tarde.</span>}
+          {state.kind === 'offline' && <span className="text-bamboo-ink">Sin conexión. Intentá más tarde.</span>}
         </div>
+        {state.kind === 'available' && (
+          <Button
+            type="button"
+            variant="secondary"
+            onPress={() => (state.update ? offerUpdate(state.update) : reloadWebApp())}
+          >
+            {state.update ? 'Ver novedades' : 'Recargar'}
+          </Button>
+        )}
       </Card.Content>
     </Card>
   );

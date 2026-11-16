@@ -95,13 +95,13 @@ export function ProfileScreen() {
         <Card.Content className="flex flex-col gap-1.5">
           <h2 className="font-display text-[15px] font-extrabold text-ink">Datos locales</h2>
           <p className="text-[13px] leading-snug text-ink-muted">
-            Tus proyectos, gastos y pagos se guardan solo en este dispositivo. Nada se envía a
-            ningún servidor, y funciona sin conexión.
+            Tus proyectos, gastos y pagos se guardan solo en este dispositivo. Funciona sin
+            conexión. Nada se envía a ningún servidor; solo se consulta si hay versiones nuevas.
           </p>
           {persisted !== undefined && (
             <p
               data-testid="storage-status"
-              className={`text-[12.5px] font-bold ${persisted ? 'text-green-deep' : 'text-[#b0783a]'}`}
+              className={`text-[12.5px] font-bold ${persisted ? 'text-green-deep' : 'text-bamboo-ink'}`}
             >
               <span aria-hidden>{persisted ? '🔒 ' : '⚠ '}</span>
               <span>{persisted ? 'Almacenamiento protegido' : 'El navegador podría borrar los datos'}</span>
