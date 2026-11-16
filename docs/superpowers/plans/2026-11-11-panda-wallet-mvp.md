@@ -274,3 +274,23 @@ test('renders the four persistent tabs', () => {
 - [ ] **Step 5: Commit** `feat(projects): movimientos history (entradas y salidas)`.
 
 Note for a future "editar proyecto" task: changing `totalBudget` after creation must surface as its own movement (e.g. "Ajuste de presupuesto"), which will require storing budget changes.
+
+---
+
+### Task 13: Rediseño — contorno y elevación (aplicar el lienzo aprobado)
+
+*Added 2026-11-16 — user approved applying the redesign from the Design canvas "Panda Wallet — contorno y elevación" (Inicio, Proyecto, Gasto, Calendario + "Sistema de elevación" board). Problem it solves: white cards and the bottom nav blended into the background.*
+
+**Files (expected):** `src/styles.css` (tokens), `src/app/TabBar.tsx`, the card/row components across `src/features/{home,projects,expenses,calendar,payments,profile}`, `src/features/expenses/InstallmentTimeline.tsx`, `docs/design-system.md` (update §2/§4/§5/§7 with the new rules). Tests: adjust/add where structure changes (TabBar active state, timeline).
+
+**Exact values (from the "Sistema de elevación" board):**
+- Ground: `linear-gradient(180deg, #dcefd8 0%, #eaf5e7 34%, #f1f6ef 100%)` — never ends in white.
+- Card (level 1): bg `#ffffff`; border `1px solid rgba(36,33,43,0.07)`; shadow `0 1px 2px rgba(36,33,43,0.05), 0 14px 30px -16px rgba(46,90,34,0.34)`; radius 22 (hero/summary), 18 (rows, shadow `0 1px 2px rgba(36,33,43,0.05), 0 8px 20px -14px rgba(46,90,34,0.30)`), 16 (cuota/calendar rows).
+- Floating (level 2): bottom nav = island `left/right 12px, bottom 14px, height 66px, radius 24, bg #fff, border 1px rgba(36,33,43,0.08), shadow 0 1px 2px rgba(36,33,43,0.06), 0 16px 34px -14px rgba(36,64,30,0.38)`; page content gets bottom padding so nothing hides under it. FAB: add ring `0 0 0 4px rgba(255,255,255,0.92)` + `0 14px 26px -8px rgba(46,110,30,0.6)`, positioned above the island (bottom ≈ 96px).
+- Inside cards: rails `#eef1ec` + `inset 0 0 0 1px rgba(36,33,43,0.04)`; separators `1px #eef1ec`; secondary controls `#f4f8f2`. Never a shadow inside a card.
+- Active tab (nav): pill `#dcefd8`, icon `#2f6f22`, label ink `#24212b` 800; inactive `#5d5866` (no opacity). **The active pill glides between tabs** (Motion shared `layoutId`), respecting reduced motion.
+- App-bar icon buttons (back, ⋯): 40px, radius 13, white, hairline border + `0 1px 2px rgba(36,33,43,0.06), 0 6px 14px -8px rgba(46,90,34,0.35)`.
+- Over-spend rows: border `1px solid rgba(203,71,36,0.22)`, shadow tinted `rgba(203,71,36,0.30)`, text `#b23f1d`.
+- **Bamboo timeline** (gasto detail cuotas): the vertical line is a bamboo cane — pale rail `#e1ead9` full height, and the grown cane (8px wide, radius 4, `linear-gradient(90deg,#6db546,#7cc04b 30%,#b9e28f 50%,#7cc04b 70%,#5fa83c)`, knots `3px #4c8a2c` between cuotas) that grows on mount (~1.8s ease-out) from the top down to the próxima cuota (or the full length when all paid); two leaves (`#4f9e34`, `#6db546`) at the growing tip, rendered above the status dots, sitting just before the próxima dot, gently swaying (rotate ±7°, 3.2s loop). Reduced motion: static, fully grown.
+
+**Steps:** TDD where behaviour changes (nav active state, timeline grown length = paid progress); then restyle; `tsc`, full `vitest run`, `npm run build`; commit `feat(ui): contorno y elevación redesign`.
