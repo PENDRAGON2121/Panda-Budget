@@ -308,3 +308,21 @@ Note for a future "editar proyecto" task: changing `totalBudget` after creation 
 ### Task 16: CI de GitHub — APK release firmado
 
 *Added 2026-11-16. Repo: github.com/PENDRAGON2121/Panda-Budget. User decision: signed release APK.* `.github/workflows/android.yml`: on push to `main`, on tags `v*` and `workflow_dispatch`; jobs: checkout → setup Node (LTS, npm cache) → `npm ci` → `npx vitest run` → `npm run build` → `npx cap sync android` → setup Java 21 + Gradle cache → decode keystore from secret → `./gradlew assembleRelease` with signing from env → upload `app-release.apk` as an artifact; on `v*` tags also attach it to a GitHub Release. Signing reads ONLY repo secrets `ANDROID_KEYSTORE_BASE64`, `ANDROID_KEYSTORE_PASSWORD`, `ANDROID_KEY_ALIAS`, `ANDROID_KEY_PASSWORD` (Gradle `signingConfigs.release` from env vars; no credential ever committed; keystore/`*.jks` in `.gitignore`). If secrets are missing, the workflow fails with a clear message (or falls back to a debug APK — state which). Add `docs/android-release.md`: how to generate the keystore with `keytool`, base64 it, and add the four secrets. versionCode from `github.run_number`, versionName from the tag or `package.json`.
+
+---
+
+### Versioning policy (added 2026-11-16, user request)
+
+- Semantic versioning; this implementation ships as **0.0.1**. Single source of truth: `package.json` `version`.
+- Exposed to the app at build time (Vite `define: { __APP_VERSION__ }`), shown in Perfil (replace the hard-coded "versión 0.1").
+- Android: `versionName` = package version; `versionCode` = `major*10000 + minor*100 + patch` (monotonic with semver).
+- `CHANGELOG.md` (Keep a Changelog format); release = bump `package.json` + changelog section + tag `vX.Y.Z` → CI builds and publishes the signed APK to a GitHub Release whose notes are that changelog section. Folded into **Task 16** (first release v0.0.1).
+
+### Task 17: Actualizaciones dentro de la app
+
+*Added 2026-11-16 (user request).* Ruling: the update check is the app's only network call and touches no user data — an explicit exception to "no network for data".
+- `src/lib/updates.ts`: `compareSemver(a,b)`, `checkForUpdate(current): Promise<{version, notes, apkUrl, htmlUrl} | null>` → GET `https://api.github.com/repos/PENDRAGON2121/Panda-Budget/releases/latest` (unauthenticated; timeout ~5s; any error/offline → `null`, never throws to UI); picks the `.apk` asset.
+- Android (Capacitor): on startup (at most once per 24h, timestamp in local settings) and from Perfil "Buscar actualizaciones": if newer, a HeroUI Modal "Nueva versión vX.Y.Z" with the release notes and "Descargar e instalar" (opens the APK URL via `@capacitor/browser`; Android handles install), plus "Más tarde".
+- Web/PWA: vite-plugin-pwa `registerType: 'prompt'` → a HeroUI toast/banner "Hay una versión nueva — Recargar" using `useRegisterSW`.
+- Perfil: "Versión 0.0.1" + "Buscar actualizaciones" with states (buscando / al día / nueva versión / sin conexión).
+- Tests: `compareSemver` table; `checkForUpdate` with mocked fetch (newer, same, older, no apk asset, network error → null); Perfil states.
