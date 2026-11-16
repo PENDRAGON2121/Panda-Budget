@@ -30,6 +30,8 @@
   --color-rail: #eef1ec;
   --color-control: #f4f8f2;
   --color-nav-pill: #dcefd8;
+  --color-icon-tile: #e3f2df; /* soft mint tile behind record emojis */
+  --color-day-out: #b7bfb4; /* calendar days outside the viewed month */
   --color-cane-rail: #e1ead9;
 
   --radius-sm: 12px;

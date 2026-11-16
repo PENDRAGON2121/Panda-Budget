@@ -3,7 +3,7 @@ import { Button } from '@heroui/react';
 import { useAllExpenses, useAllPayments, useProjects } from '../../db/hooks';
 import { useUserName } from '../../lib/useUserName';
 import pandaIcon from '../../assets/panda-app-icon.svg';
-import { ProjectForm } from '../projects/ProjectForm';
+import { ExpenseForm } from '../expenses/ExpenseForm';
 import { EmptyHome } from './EmptyHome';
 import { HomeGastos } from './HomeGastos';
 import { ProjectCarousel } from './ProjectCarousel';
@@ -79,13 +79,13 @@ export function HomeScreen() {
       <HomeGastos projectId={active.id} direction={direction} />
       <Button
         isIconOnly
-        aria-label="Nuevo proyecto"
+        aria-label={`Nuevo gasto en ${active.name}`}
         onPress={() => setFormOpen(true)}
         className="fixed bottom-[96px] right-5 size-14 min-w-0 rounded-full bg-leaf text-2xl text-white shadow-fab"
       >
         +
       </Button>
-      <ProjectForm isOpen={formOpen} onOpenChange={setFormOpen} />
+      <ExpenseForm projectId={active.id} isOpen={formOpen} onOpenChange={setFormOpen} />
     </div>
   );
 }

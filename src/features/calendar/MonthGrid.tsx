@@ -16,9 +16,9 @@ export function MonthGrid({ year, month, selected, activeDays, onSelect }: Props
   const cells = monthGrid(year, month);
   return (
     <div>
-      <div className="mb-1 grid grid-cols-7">
+      <div className="grid grid-cols-7">
         {WEEK.map((w, i) => (
-          <span key={i} data-testid="weekday" className="text-center text-[10px] font-extrabold text-ink-muted">
+          <span key={i} data-testid="weekday" className="text-center text-[11px] font-extrabold text-ink-muted">
             {w}
           </span>
         ))}
@@ -28,7 +28,7 @@ export function MonthGrid({ year, month, selected, activeDays, onSelect }: Props
           const day = Number(c.iso.slice(8));
           if (!c.inMonth) {
             return (
-              <span key={c.iso} aria-hidden className="flex aspect-square items-center justify-center text-[13px] font-bold text-ink-muted/40">
+              <span key={c.iso} aria-hidden className="flex h-10 items-center justify-center text-[13px] font-semibold text-day-out">
                 {day}
               </span>
             );
@@ -42,14 +42,16 @@ export function MonthGrid({ year, month, selected, activeDays, onSelect }: Props
               aria-label={`${day} de ${MONTHS_ES[month].toLowerCase()}${active ? ', con pagos' : ''}`}
               aria-pressed={isSel}
               onPress={() => onSelect(c.iso)}
-              className="relative flex aspect-square h-auto min-w-0 items-center justify-center rounded-[11px] p-0 text-[13px] font-bold"
+              className={`flex h-10 w-full min-w-0 flex-col items-center justify-center gap-[3px] rounded-sm p-0 text-[13px] ${
+                isSel ? 'bg-green-deep font-extrabold text-white shadow-[0_6px_14px_-6px_rgba(46,110,30,0.6)]' : 'font-bold text-ink'
+              }`}
             >
               {day}
               {active && (
                 <span
                   data-testid="dot"
                   aria-hidden
-                  className={`absolute bottom-[5px] h-1 w-1 rounded-full ${isSel ? 'bg-white' : 'bg-leaf'}`}
+                  className={`size-1 rounded-full ${isSel ? 'bg-white' : 'bg-green-deep'}`}
                 />
               )}
             </Button>

@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react';
 import { Button, Card } from '@heroui/react';
-import { useAllExpenses, usePaymentsBetween, useProjects } from '../../db/hooks';
+import { useAllExpenses, useAllInstallments, usePaymentsBetween, useProjects } from '../../db/hooks';
 import { isoFromDate, isoOf, MONTHS_ES } from '../../lib/calendar';
 import { DayRecords, type DayRecord } from './DayRecords';
 import { MonthGrid } from './MonthGrid';
@@ -22,6 +22,7 @@ export function CalendarScreen({ initialDate }: { initialDate?: Date }) {
   );
   const expenses = useAllExpenses();
   const projects = useProjects();
+  const installments = useAllInstallments();
 
   const go = (delta: number) => {
     const d = new Date(view.year, view.month + delta, 1);
@@ -33,9 +34,10 @@ export function CalendarScreen({ initialDate }: { initialDate?: Date }) {
   const activeDays = useMemo(() => new Set((payments ?? []).map((p) => isoOf(p.date))), [payments]);
 
   const records: DayRecord[] | undefined = useMemo(() => {
-    if (!payments || !expenses || !projects) return undefined;
+    if (!payments || !expenses || !projects || !installments) return undefined;
     const ex = new Map(expenses.map((e) => [e.id, e]));
     const pr = new Map(projects.map((p) => [p.id, p]));
+    const inst = new Map(installments.map((i) => [i.id, i]));
     return payments
       .filter((p) => isoOf(p.date) === selected)
       .sort((a, b) => a.createdAt - b.createdAt)
@@ -46,25 +48,44 @@ export function CalendarScreen({ initialDate }: { initialDate?: Date }) {
           expenseName: e?.name ?? 'Gasto',
           expenseIcon: e?.icon,
           projectName: (e && pr.get(e.projectId)?.name) ?? '',
+          installmentIndex: payment.installmentId ? inst.get(payment.installmentId)?.index : undefined,
           currency: (e && pr.get(e.projectId)?.currency) ?? 'CRC',
         };
       });
-  }, [payments, expenses, projects, selected]);
+  }, [payments, expenses, projects, installments, selected]);
 
   return (
-    <div>
-      <h1 className="mb-3 font-display text-[22px] font-black">Calendario</h1>
+    <div className="flex flex-col gap-3.5">
+      <h1 className="m-0 font-display text-2xl font-black text-ink">Calendario</h1>
       <Card className="rounded-card border border-hairline shadow-card">
-        <Card.Content className="p-3.5">
-          <div className="mb-3 flex items-center justify-between">
-            <Button isIconOnly variant="ghost" aria-label="Mes anterior" onPress={() => go(-1)}>‹</Button>
-            <span className="font-display text-base font-black">{MONTHS_ES[view.month]} {view.year}</span>
-            <Button isIconOnly variant="ghost" aria-label="Mes siguiente" onPress={() => go(1)}>›</Button>
+        <Card.Content className="flex flex-col gap-2 px-3.5 pb-4 pt-3.5">
+          <div className="flex items-center justify-between">
+            <MonthNavButton label="Mes anterior" path="M15 6l-6 6 6 6" onPress={() => go(-1)} />
+            <span className="font-display text-base font-black text-ink">
+              {MONTHS_ES[view.month]} {view.year}
+            </span>
+            <MonthNavButton label="Mes siguiente" path="M9 6l6 6-6 6" onPress={() => go(1)} />
           </div>
           <MonthGrid year={view.year} month={view.month} selected={selected} activeDays={activeDays} onSelect={setSelected} />
         </Card.Content>
       </Card>
       {records && <DayRecords iso={selected} records={records} />}
     </div>
+  );
+}
+
+function MonthNavButton({ label, path, onPress }: { label: string; path: string; onPress: () => void }) {
+  return (
+    <Button
+      isIconOnly
+      variant="ghost"
+      aria-label={label}
+      onPress={onPress}
+      className="size-9 min-w-0 rounded-[11px] border border-hairline-strong bg-control text-ink"
+    >
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+        <path d={path} />
+      </svg>
+    </Button>
   );
 }

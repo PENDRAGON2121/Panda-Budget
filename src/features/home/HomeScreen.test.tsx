@@ -92,15 +92,16 @@ test('empty Inicio also shows the greeting header (logo, ¡Hola! 👋, Bienvenid
   expect(screen.getByAltText('Panda Wallet')).toBeInTheDocument();
 });
 
-test('with projects, the circular + FAB "Nuevo proyecto" opens the project form', async () => {
+test('with projects, the circular + FAB adds a gasto to the project on screen', async () => {
   await seed();
   const user = userEvent.setup();
   renderHome();
   await screen.findByLabelText('Proyecto Proyecto A');
-  const fab = screen.getByRole('button', { name: 'Nuevo proyecto' });
+  // newest-first: Proyecto B is the active slide
+  const fab = screen.getByRole('button', { name: 'Nuevo gasto en Proyecto B' });
   expect(fab).toHaveClass('rounded-full');
   await user.click(fab);
-  expect(await screen.findByRole('heading', { name: 'Nuevo proyecto' })).toBeInTheDocument();
+  expect(await screen.findByRole('heading', { name: 'Nuevo gasto' })).toBeInTheDocument();
 });
 
 test('a USD project never flashes ₡ in the Inicio gastos while currency loads', async () => {

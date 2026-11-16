@@ -12,6 +12,8 @@ export interface DayRecord {
   expenseName: string;
   expenseIcon?: string;
   projectName: string;
+  /** 1-based installment number when the payment was applied to a cuota. */
+  installmentIndex?: number;
   currency: string;
 }
 
@@ -24,28 +26,36 @@ export function DayRecords({ iso, records }: { iso: string; records: DayRecord[]
   for (const r of records) totals.set(r.currency, (totals.get(r.currency) ?? 0) + r.payment.amount);
   const totalText = [...totals].sort(([a], [b]) => a.localeCompare(b)).map(([c, n]) => formatMoney(n, c)).join(' + ');
   return (
-    <section aria-label="Registros del día" className="mt-4">
-      <h2 className="font-display text-[15px] font-black text-ink">{title}</h2>
+    <section aria-label="Registros del día" className="flex flex-col gap-[9px]">
+      <div className="flex flex-col gap-0.5 px-0.5">
+        <h2 className="m-0 font-display text-base font-black text-ink">{title}</h2>
+        {records.length > 0 && (
+          <span className="text-xs font-semibold tabular-nums text-ink-muted">
+            {totalText} · {records.length} {records.length === 1 ? 'pago' : 'pagos'}
+          </span>
+        )}
+      </div>
       {records.length === 0 ? (
-        <Card className="mt-3 rounded-card border border-hairline shadow-card">
+        <Card className="rounded-card border border-hairline shadow-card">
           <Card.Content className="py-5 text-center text-[12.5px] font-semibold text-ink-muted">
             Sin registros este día
           </Card.Content>
         </Card>
       ) : (
-        <>
-          <p className="mb-3 mt-0.5 text-[11.5px] font-semibold tabular-nums text-ink-muted">
-            {totalText} · {records.length} {records.length === 1 ? 'pago' : 'pagos'}
-          </p>
-          <ul className="m-0 flex list-none flex-col gap-2 p-0">
+          <ul className="m-0 flex list-none flex-col gap-[9px] p-0">
             {records.map((r) => (
               <li key={r.payment.id}>
                 <Card className="rounded-cuota border border-hairline shadow-row">
-                  <Card.Content className="flex flex-row items-center gap-3 p-3">
-                    <span aria-hidden className="text-lg">{r.expenseIcon ?? '🧾'}</span>
+                  <Card.Content className="flex flex-row items-center gap-[11px] px-3 py-2.5">
+                    <span aria-hidden className="flex size-[38px] shrink-0 items-center justify-center rounded-sm bg-icon-tile text-lg">
+                      {r.expenseIcon ?? '🧾'}
+                    </span>
                     <div className="min-w-0 flex-1">
                       <div className="break-words font-display text-[13px] font-extrabold text-ink">{r.expenseName}</div>
-                      <div className="text-[10.5px] text-ink-muted">{r.projectName}</div>
+                      <div className="text-[11px] text-ink-muted">
+                        {r.projectName}
+                        {r.installmentIndex !== undefined && ` · Cuota ${r.installmentIndex}`}
+                      </div>
                     </div>
                     {r.payment.receiptId && <ReceiptThumb receiptId={r.payment.receiptId} />}
                     <span className="shrink-0 text-[13px] font-extrabold tabular-nums">{formatMoney(r.payment.amount, r.currency)}</span>
@@ -64,7 +74,6 @@ export function DayRecords({ iso, records }: { iso: string; records: DayRecord[]
               </li>
             ))}
           </ul>
-        </>
       )}
       <ConfirmDialog
         isOpen={toDelete !== null}
