@@ -1,0 +1,49 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512" role="img" aria-label="Panda con bambú">
+  <title>Panda con bambú</title>
+  <rect width="512" height="512" rx="112" fill="#c4e8c8"></rect>
+  <g transform="translate(0 -14)">
+
+  <circle cx="130" cy="150" r="60" fill="#24212b"></circle>
+  <circle cx="382" cy="150" r="60" fill="#24212b"></circle>
+
+  <ellipse cx="256" cy="270" rx="172" ry="152" fill="#fffdf7"></ellipse>
+  <path d="M95 320 A172 152 0 0 0 417 320 A172 112 0 0 1 95 320 Z" fill="#ece6db"></path>
+
+  <ellipse cx="188" cy="262" rx="40" ry="54" transform="rotate(32 188 262)" fill="#24212b"></ellipse>
+  <ellipse cx="324" cy="262" rx="40" ry="54" transform="rotate(-32 324 262)" fill="#24212b"></ellipse>
+
+  <circle cx="198" cy="252" r="16" fill="#fffdf7"></circle>
+  <circle cx="200" cy="255" r="10.5" fill="#24212b"></circle>
+  <circle cx="196" cy="250" r="4" fill="#fffdf7"></circle>
+  <circle cx="314" cy="252" r="16" fill="#fffdf7"></circle>
+  <circle cx="312" cy="255" r="10.5" fill="#24212b"></circle>
+  <circle cx="308" cy="250" r="4" fill="#fffdf7"></circle>
+
+  <ellipse cx="150" cy="318" rx="25" ry="15" fill="#f6a6b6"></ellipse>
+  <ellipse cx="362" cy="318" rx="25" ry="15" fill="#f6a6b6"></ellipse>
+
+  <path d="M238 297 Q256 289 274 297 Q278 302 268 310 L262 315 Q256 319 250 315 L244 310 Q234 302 238 297 Z" fill="#24212b"></path>
+  <path d="M256 316 L256 324 M256 324 Q247 337 236 327 M256 324 Q265 337 276 327" fill="none" stroke="#24212b" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"></path>
+
+  <g transform="rotate(-14 256 404)">
+    <path d="M372 394 C388 364 414 346 452 340 C440 372 410 392 372 394 Z" fill="#4f9e34"></path>
+    <path d="M376 406 C406 396 436 400 466 418 C434 430 404 424 376 406 Z" fill="#6db546"></path>
+    <rect x="120" y="388" width="262" height="32" rx="16" fill="#7cc04b"></rect>
+    <rect x="132" y="394" width="238" height="7" rx="3.5" fill="#b9e28f"></rect>
+    <rect x="252" y="384" width="9" height="40" rx="4.5" fill="#4c8a2c"></rect>
+    <rect x="334" y="384" width="9" height="40" rx="4.5" fill="#4c8a2c"></rect>
+    <rect x="160" y="384" width="9" height="40" rx="4.5" fill="#4c8a2c"></rect>
+
+    <g fill="#24212b">
+      <ellipse cx="206" cy="412" rx="36" ry="30"></ellipse>
+      <circle cx="184" cy="390" r="13"></circle>
+      <circle cx="206" cy="384" r="13"></circle>
+      <circle cx="228" cy="390" r="13"></circle>
+      <ellipse cx="306" cy="412" rx="36" ry="30"></ellipse>
+      <circle cx="284" cy="390" r="13"></circle>
+      <circle cx="306" cy="384" r="13"></circle>
+      <circle cx="328" cy="390" r="13"></circle>
+    </g>
+  </g>
+  </g>
+</svg>

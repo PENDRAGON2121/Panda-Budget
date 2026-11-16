@@ -1,0 +1,108 @@
+@import "tailwindcss";
+@import "@heroui/styles";
+
+/* Panda Bambú tokens (design-system.md §2-§4, §10) */
+@theme {
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-display: "Nunito", ui-sans-serif, system-ui, sans-serif;
+
+  --color-ink: #24212b;
+  --color-ink-muted: #5d5866;
+  --color-fur: #fffdf7;
+  --color-shade: #ece6db;
+  --color-cheek: #f6a6b6;
+  --color-icon-bg: #c4e8c8;
+  --color-menta: #c4e8c8;
+  --color-highlight: #b9e28f;
+  --color-bamboo: #7cc04b;
+  --color-leaf-light: #6db546;
+  --color-leaf: #4f9e34;
+  --color-green-deep: #3c8a2e;
+  --color-node: #4c8a2c;
+  --color-danger-panda: #e0592f;
+  --color-danger-ink: #b23f1d; /* danger as TEXT: 5.8:1 on white (#e0592f is fills only) */
+  --color-bamboo-ink: #8a5a24; /* warm amber as TEXT: pending / offline / unprotected states */
+  --color-track-strong: #dfe4dc;
+
+  --color-hairline: rgba(36, 33, 43, 0.07);
+  --color-hairline-strong: rgba(36, 33, 43, 0.08);
+  --color-hairline-over: rgba(203, 71, 36, 0.22);
+  --color-rail: #eef1ec;
+  --color-control: #f4f8f2;
+  --color-nav-pill: #dcefd8;
+  --color-cane-rail: #e1ead9;
+
+  --radius-sm: 12px;
+  --radius-md: 17px;
+  --radius-lg: 24px;
+  --radius-card: 22px;
+  --radius-row: 18px;
+  --radius-cuota: 16px;
+
+  /* Elevation: level 1 (cards/rows) and level 2 (floating) — design-system.md §4 */
+  --shadow-card: 0 1px 2px rgba(36, 33, 43, 0.05), 0 14px 30px -16px rgba(46, 90, 34, 0.34);
+  --shadow-row: 0 1px 2px rgba(36, 33, 43, 0.05), 0 8px 20px -14px rgba(46, 90, 34, 0.3);
+  --shadow-over: 0 1px 2px rgba(36, 33, 43, 0.05), 0 8px 20px -14px rgba(203, 71, 36, 0.3);
+  --shadow-float: 0 1px 2px rgba(36, 33, 43, 0.06), 0 16px 34px -14px rgba(36, 64, 30, 0.38);
+  --shadow-appbar: 0 1px 2px rgba(36, 33, 43, 0.06), 0 6px 14px -8px rgba(46, 90, 34, 0.35);
+  --shadow-fab: 0 0 0 4px rgba(255, 255, 255, 0.92), 0 14px 26px -8px rgba(46, 110, 30, 0.6);
+
+  --animate-leaf-sway: leaf-sway 3.2s ease-in-out infinite;
+  --animate-leaf-sway-alt: leaf-sway 3.2s ease-in-out -1.6s infinite;
+  @keyframes leaf-sway {
+    0%,
+    100% {
+      transform: rotate(-7deg);
+    }
+    50% {
+      transform: rotate(7deg);
+    }
+  }
+}
+
+/* HeroUI semantic variables */
+:root {
+  --accent: #4f9e34;
+  --accent-foreground: #ffffff;
+  --danger: #e0592f;
+  --danger-foreground: #ffffff;
+  --background: #fffdf7;
+  --foreground: #24212b;
+  --surface: #ffffff;
+  --radius: 17px;
+}
+
+html,
+body,
+#root {
+  min-height: 100%;
+}
+
+body {
+  margin: 0;
+  font-family: var(--font-sans);
+  color: var(--color-ink);
+  background: linear-gradient(180deg, #dcefd8 0%, #eaf5e7 34%, #f1f6ef 100%) fixed;
+}
+
+/* Inner rail (progress tracks, distribution bar): sunken, never a shadow outside */
+.rail {
+  background: var(--color-rail);
+  box-shadow: inset 0 0 0 1px rgba(36, 33, 43, 0.04);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-leaf-sway,
+  .animate-leaf-sway-alt {
+    animation: none !important;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

@@ -1,0 +1,143 @@
+import { useState } from 'react';
+import { Button, Card, ProgressBar } from '@heroui/react';
+import { motion } from 'motion/react';
+import { Link, useNavigate, useParams } from 'react-router-dom';
+import { AppBar } from '../../components/AppBar';
+import { AppBarMenu } from '../../components/AppBarMenu';
+import { ConfirmDialog } from '../../components/ConfirmDialog';
+import { useAllPayments, useExpenses, useProject } from '../../db/hooks';
+import { deleteProject } from '../../db/repos';
+import type { Expense, Payment } from '../../db/types';
+import { expenseProgress } from '../../lib/calc';
+import { formatMoney } from '../../lib/money';
+import { ExpenseForm } from '../expenses/ExpenseForm';
+import { MovementsList } from './MovementsList';
+import { ProjectSummaryCard } from './ProjectSummaryCard';
+import { ProjectTabs, type TabId } from './ProjectTabs';
+
+function ExpenseRow({ expense, payments, currency }: { expense: Expense; payments: Payment[]; currency: string }) {
+  const p = expenseProgress(expense, payments);
+  const shown = Math.min(100, Math.max(0, p.pct));
+  return (
+    <Link to={`/gastos/${expense.id}`} className="block no-underline">
+      <Card className={`rounded-row border ${p.over ? 'border-hairline-over shadow-over' : 'border-hairline shadow-row'}`}>
+        <Card.Content className="flex flex-col gap-1.5">
+          <div className="flex items-center gap-2">
+            <span aria-hidden className="text-lg">{expense.icon ?? '🧾'}</span>
+            <span className="break-words font-display text-[13.5px] font-extrabold text-ink">{expense.name}</span>
+            <span className="rounded-full bg-icon-bg px-1.5 py-0.5 text-[9px] font-extrabold uppercase text-green-deep">
+              {expense.type === 'installments' ? 'Cuotas' : 'Único'}
+            </span>
+          </div>
+          <div className={`text-[11px] tabular-nums ${p.over ? 'font-bold text-danger-ink' : 'text-ink-muted'}`}>
+            {formatMoney(p.paid, currency)} de {formatMoney(expense.plannedAmount, currency)}
+          </div>
+          <ProgressBar aria-label={`Progreso de ${expense.name}`} value={shown} className="w-full">
+            <ProgressBar.Track className="rail h-1.5">
+              <ProgressBar.Fill className={p.over ? 'bg-danger' : 'bg-leaf'} />
+            </ProgressBar.Track>
+          </ProgressBar>
+        </Card.Content>
+      </Card>
+    </Link>
+  );
+}
+
+export function ProjectDetail() {
+  const { id } = useParams();
+  const project = useProject(id);
+  const expenses = useExpenses(id);
+  const payments = useAllPayments();
+  const [formOpen, setFormOpen] = useState(false);
+  const [confirmDelete, setConfirmDelete] = useState(false);
+  const [tab, setTab] = useState<TabId>('gastos');
+  const navigate = useNavigate();
+
+  if (project === null) {
+    return (
+      <div className="flex flex-col items-start gap-3">
+        <h1 className="font-display text-[17px] font-black text-ink">Proyecto no encontrado</h1>
+        <Link to="/proyectos" className="text-sm font-bold text-green-deep">‹ Volver a proyectos</Link>
+      </div>
+    );
+  }
+
+  const ready = project !== undefined && expenses !== undefined && payments !== undefined;
+
+  return (
+    <div className="flex flex-col gap-4">
+      <AppBar
+        backTo="/proyectos"
+        backLabel="Volver a proyectos"
+        title={project?.name ?? ''}
+        subtitle={project ? `Proyecto · ${project.currency}` : undefined}
+        menu={
+          project && (
+            <AppBarMenu
+              label="Más opciones del proyecto"
+              actions={[{ id: 'delete', label: 'Eliminar proyecto', danger: true, onAction: () => setConfirmDelete(true) }]}
+            />
+          )
+        }
+      />
+
+      {/* Container transform: the layoutId element mounts on first render (before data resolves) so Motion can
+          match the exiting ProjectCard. App wraps in MotionConfig reducedMotion="user". */}
+      <motion.div layoutId={`project-card-${id}`} className="rounded-card" data-testid="detail-container">
+        {ready ? (
+          <ProjectSummaryCard project={project} expenses={expenses} payments={payments} />
+        ) : (
+          <div aria-busy="true" className="h-40 rounded-card border border-hairline bg-white shadow-card" />
+        )}
+      </motion.div>
+
+      {ready && (
+        <ProjectTabs
+          value={tab}
+          onChange={setTab}
+          panels={{
+            gastos: (
+          <section aria-label="Gastos" className="flex flex-col gap-2.5">
+            <h2 className="font-display text-[15px] font-black text-ink">
+              Gastos <small className="font-bold text-ink-muted">· {expenses.length}</small>
+            </h2>
+            {expenses.length === 0 ? (
+              <Card className="rounded-card border border-hairline shadow-card text-center">
+                <Card.Content className="flex flex-col items-center gap-1 py-6">
+                  <div aria-hidden className="text-4xl">🐼</div>
+                  <p className="font-display text-[15px] font-black text-ink">Agregá tu primer gasto</p>
+                  <p className="text-sm text-ink-muted">Dividí el presupuesto en gastos para ver en qué se va la plata.</p>
+                </Card.Content>
+              </Card>
+            ) : (
+              expenses.map((e) => <ExpenseRow key={e.id} expense={e} payments={payments} currency={project.currency} />)
+            )}
+          </section>
+            ),
+            movimientos: <MovementsList project={project} />,
+          }}
+        />
+      )}
+      <ConfirmDialog
+        isOpen={confirmDelete}
+        onOpenChange={setConfirmDelete}
+        title={`¿Eliminar el proyecto «${project?.name ?? ''}»?`}
+        description="Se eliminarán también todos sus gastos, cuotas, pagos y recibos."
+        onConfirm={async () => {
+          if (!id) return;
+          await deleteProject(id);
+          navigate('/proyectos', { replace: true });
+        }}
+      />
+
+      <Button
+        aria-label="Agregar gasto"
+        onPress={() => setFormOpen(true)}
+        className="fixed bottom-[96px] right-5 h-14 w-14 min-w-0 rounded-[19px] bg-leaf text-2xl text-white shadow-fab"
+      >
+        +
+      </Button>
+      {id && <ExpenseForm projectId={id} isOpen={formOpen} onOpenChange={setFormOpen} />}
+    </div>
+  );
+}

@@ -245,3 +245,84 @@ test('renders the four persistent tabs', () => {
 - [ ] **Step 3: Implement** profile, generate PWA icons from the SVG, add the reduced-motion rule.
 - [ ] **Step 4: Run tests + `npm run build` — expect PASS;** verify install/manifest and motion-off in the browser.
 - [ ] **Step 5: Commit** `feat(profile): profile screen, PWA packaging, reduced-motion`.
+
+---
+
+### Task 12: Movimientos (historial de entradas y salidas por proyecto)
+
+*Added 2026-11-16 at the user's request ("cada pago agregado debe registrar un movimiento — cada entrada y salida de cada proyecto"). User decision: Movimientos is the chronological history of the project — the initial budget load is the first **entrada**, every payment is a **salida**; no other kind of entrada.*
+
+**Files:**
+- Create: `src/lib/movements.ts`, `src/features/projects/MovementsList.tsx`
+- Modify: `src/features/projects/ProjectDetail.tsx` (HeroUI `Tabs`: "Gastos" | "Movimientos")
+- Test: `src/lib/movements.test.ts`, `src/features/projects/MovementsList.test.tsx`
+- Reference: `docs/design-system.md` (tokens, rows, chips)
+
+**Interfaces:**
+- Consumes: `Project, Expense, Installment, Payment` (`src/db/types.ts`); `useProject`, `useExpenses`, `useAllPayments`/`usePayments`, `useInstallments` (`src/db/hooks.ts`); `formatMoney` (`src/lib/money.ts`); `ReceiptThumb` (`src/features/payments`).
+- Produces: `projectMovements(project: Project, expenses: Expense[], installments: Installment[], payments: Payment[]): Movement[]` where
+  `Movement = { id: string; kind: 'entrada' | 'salida'; date: number; label: string; detail?: string; amount: number; balance: number; receiptId?: string; expenseId?: string }`.
+  - Derived, never stored (deleting a payment removes its movement automatically).
+  - First movement: `kind:'entrada'`, `id:'budget-'+project.id`, `date: project.createdAt`, `label:'Presupuesto inicial'`, `amount: project.totalBudget`, `balance: project.totalBudget`.
+  - One `salida` per payment of the project's expenses, chronological by `date` then `createdAt`: `label` = gasto name, `detail` = `"Cuota N"` (or the installment label) when `installmentId` is set, `amount` = payment amount, `balance` = running `totalBudget − cumulative paid` (may go negative).
+  - Return order: oldest → newest (UI renders newest first).
+
+- [ ] **Step 1: Write failing tests** `movements.test.ts`: budget entrada first with balance = total; salidas in date order with running balance; tie broken by `createdAt`; cuota detail "Cuota 3"; balance goes negative on over-spend; payments of other projects excluded; no payments → only the entrada. `MovementsList.test.tsx`: renders newest first, entrada shown as `+₡…` and salidas as `−₡…` in the project's currency, running saldo shown, receipt thumb for payments with `receiptId`; after `deletePayment` the movement disappears; ProjectDetail shows the "Movimientos" tab.
+- [ ] **Step 2: Run — expect FAIL.**
+- [ ] **Step 3: Implement** `movements.ts` (pure) and `MovementsList` (HeroUI Card rows, entrada in `leaf`/green, salida in ink, negative saldo in `danger`); add HeroUI `Tabs` "Gastos | Movimientos" to ProjectDetail (Gastos stays default). Rows link to the gasto detail.
+- [ ] **Step 4: Run tests — expect PASS;** `tsc --noEmit`, `npm run build`.
+- [ ] **Step 5: Commit** `feat(projects): movimientos history (entradas y salidas)`.
+
+Note for a future "editar proyecto" task: changing `totalBudget` after creation must surface as its own movement (e.g. "Ajuste de presupuesto"), which will require storing budget changes.
+
+---
+
+### Task 13: Rediseño — contorno y elevación (aplicar el lienzo aprobado)
+
+*Added 2026-11-16 — user approved applying the redesign from the Design canvas "Panda Wallet — contorno y elevación" (Inicio, Proyecto, Gasto, Calendario + "Sistema de elevación" board). Problem it solves: white cards and the bottom nav blended into the background.*
+
+**Files (expected):** `src/styles.css` (tokens), `src/app/TabBar.tsx`, the card/row components across `src/features/{home,projects,expenses,calendar,payments,profile}`, `src/features/expenses/InstallmentTimeline.tsx`, `docs/design-system.md` (update §2/§4/§5/§7 with the new rules). Tests: adjust/add where structure changes (TabBar active state, timeline).
+
+**Exact values (from the "Sistema de elevación" board):**
+- Ground: `linear-gradient(180deg, #dcefd8 0%, #eaf5e7 34%, #f1f6ef 100%)` — never ends in white.
+- Card (level 1): bg `#ffffff`; border `1px solid rgba(36,33,43,0.07)`; shadow `0 1px 2px rgba(36,33,43,0.05), 0 14px 30px -16px rgba(46,90,34,0.34)`; radius 22 (hero/summary), 18 (rows, shadow `0 1px 2px rgba(36,33,43,0.05), 0 8px 20px -14px rgba(46,90,34,0.30)`), 16 (cuota/calendar rows).
+- Floating (level 2): bottom nav = island `left/right 12px, bottom 14px, height 66px, radius 24, bg #fff, border 1px rgba(36,33,43,0.08), shadow 0 1px 2px rgba(36,33,43,0.06), 0 16px 34px -14px rgba(36,64,30,0.38)`; page content gets bottom padding so nothing hides under it. FAB: add ring `0 0 0 4px rgba(255,255,255,0.92)` + `0 14px 26px -8px rgba(46,110,30,0.6)`, positioned above the island (bottom ≈ 96px).
+- Inside cards: rails `#eef1ec` + `inset 0 0 0 1px rgba(36,33,43,0.04)`; separators `1px #eef1ec`; secondary controls `#f4f8f2`. Never a shadow inside a card.
+- Active tab (nav): pill `#dcefd8`, icon `#2f6f22`, label ink `#24212b` 800; inactive `#5d5866` (no opacity). **The active pill glides between tabs** (Motion shared `layoutId`), respecting reduced motion.
+- App-bar icon buttons (back, ⋯): 40px, radius 13, white, hairline border + `0 1px 2px rgba(36,33,43,0.06), 0 6px 14px -8px rgba(46,90,34,0.35)`.
+- Over-spend rows: border `1px solid rgba(203,71,36,0.22)`, shadow tinted `rgba(203,71,36,0.30)`, text `#b23f1d`.
+- **Bamboo timeline** (gasto detail cuotas): the vertical line is a bamboo cane — pale rail `#e1ead9` full height, and the grown cane (8px wide, radius 4, `linear-gradient(90deg,#6db546,#7cc04b 30%,#b9e28f 50%,#7cc04b 70%,#5fa83c)`, knots `3px #4c8a2c` between cuotas) that grows on mount (~1.8s ease-out) from the top down to the próxima cuota (or the full length when all paid); two leaves (`#4f9e34`, `#6db546`) at the growing tip, rendered above the status dots, sitting just before the próxima dot, gently swaying (rotate ±7°, 3.2s loop). Reduced motion: static, fully grown.
+
+**Steps:** TDD where behaviour changes (nav active state, timeline grown length = paid progress); then restyle; `tsc`, full `vitest run`, `npm run build`; commit `feat(ui): contorno y elevación redesign`.
+
+---
+
+### Task 14: Bienvenida — pedir el nombre en el primer arranque
+
+*Added 2026-11-16 (user request).* On first launch (no stored name) show a full-screen **WelcomeScreen** (panda icon, "¡Bienvenido a Panda Wallet!", a HeroUI Input "¿Cómo te llamás?" ≤ 40 chars, trimmed, required, and a primary "Empezar" button). The name is stored locally (Dexie `settings` table — add `version(2)` with a `settings: 'key'` store and an upgrade that keeps all data; or the existing local settings module if it already wraps storage — pick one, state it) and the app then opens normally. The Inicio greeting shows "¡Hola! 👋" over the user's **name** (falls back to "Bienvenido" only if unset). Perfil gets an editable "Tu nombre" field. The tab bar is not shown on the welcome screen. Tests: first launch shows welcome; saving routes into the app and the greeting shows the name; empty name blocks; Perfil edit updates the greeting; a Dexie upgrade from v1 keeps existing projects.
+
+### Task 15: App Android con Capacitor (IndexedDB se mantiene)
+
+*Added 2026-11-16. User decision: keep IndexedDB/Dexie as the on-device database (no SQLite rewrite).* Add Capacitor (`@capacitor/core`, `@capacitor/cli`, `@capacitor/android`), `capacitor.config.ts` (appName "Panda Wallet", appId `com.pandawallet.app`, webDir `dist`), and commit the generated `android/` project. App icon + splash from `docs/assets/panda-app-icon.svg` / `#c4e8c8` (e.g. `@capacitor/assets`). Inside the native shell, skip service-worker registration (assets are local) and keep `navigator.storage.persist()`. Android back button navigates back (`@capacitor/app`), exiting only from Inicio. Camera/gallery receipt input keeps working (file input in WebView). npm scripts: `cap:sync` (`npm run build && npx cap sync android`). Verify locally only as far as `npx cap sync` and `tsc`/tests/build allow (no emulator).
+
+### Task 16: CI de GitHub — APK release firmado
+
+*Added 2026-11-16. Repo: github.com/PENDRAGON2121/Panda-Budget. User decision: signed release APK.* `.github/workflows/android.yml`: on push to `main`, on tags `v*` and `workflow_dispatch`; jobs: checkout → setup Node (LTS, npm cache) → `npm ci` → `npx vitest run` → `npm run build` → `npx cap sync android` → setup Java 21 + Gradle cache → decode keystore from secret → `./gradlew assembleRelease` with signing from env → upload `app-release.apk` as an artifact; on `v*` tags also attach it to a GitHub Release. Signing reads ONLY repo secrets `ANDROID_KEYSTORE_BASE64`, `ANDROID_KEYSTORE_PASSWORD`, `ANDROID_KEY_ALIAS`, `ANDROID_KEY_PASSWORD` (Gradle `signingConfigs.release` from env vars; no credential ever committed; keystore/`*.jks` in `.gitignore`). If secrets are missing, the workflow fails with a clear message (or falls back to a debug APK — state which). Add `docs/android-release.md`: how to generate the keystore with `keytool`, base64 it, and add the four secrets. versionCode from `github.run_number`, versionName from the tag or `package.json`.
+
+---
+
+### Versioning policy (added 2026-11-16, user request)
+
+- Semantic versioning; this implementation ships as **0.0.1**. Single source of truth: `package.json` `version`.
+- Exposed to the app at build time (Vite `define: { __APP_VERSION__ }`), shown in Perfil (replace the hard-coded "versión 0.1").
+- Android: `versionName` = package version; `versionCode` = `major*10000 + minor*100 + patch` (monotonic with semver).
+- `CHANGELOG.md` (Keep a Changelog format); release = bump `package.json` + changelog section + tag `vX.Y.Z` → CI builds and publishes the signed APK to a GitHub Release whose notes are that changelog section. Folded into **Task 16** (first release v0.0.1).
+
+### Task 17: Actualizaciones dentro de la app
+
+*Added 2026-11-16 (user request).* Ruling: the update check is the app's only network call and touches no user data — an explicit exception to "no network for data".
+- `src/lib/updates.ts`: `compareSemver(a,b)`, `checkForUpdate(current): Promise<{version, notes, apkUrl, htmlUrl} | null>` → GET `https://api.github.com/repos/PENDRAGON2121/Panda-Budget/releases/latest` (unauthenticated; timeout ~5s; any error/offline → `null`, never throws to UI); picks the `.apk` asset.
+- Android (Capacitor): on startup (at most once per 24h, timestamp in local settings) and from Perfil "Buscar actualizaciones": if newer, a HeroUI Modal "Nueva versión vX.Y.Z" with the release notes and "Descargar e instalar" (opens the APK URL via `@capacitor/browser`; Android handles install), plus "Más tarde".
+- Web/PWA: vite-plugin-pwa `registerType: 'prompt'` → a HeroUI toast/banner "Hay una versión nueva — Recargar" using `useRegisterSW`.
+- Perfil: "Versión 0.0.1" + "Buscar actualizaciones" with states (buscando / al día / nueva versión / sin conexión).
+- Tests: `compareSemver` table; `checkForUpdate` with mocked fetch (newer, same, older, no apk asset, network error → null); Perfil states.

@@ -40,12 +40,15 @@
 | `green-deep` | `#3c8a2e` | **Verde interactivo accesible** — texto/porcentajes sobre claro, fills de botón |
 | `node` | `#4c8a2c` | Verde oscuro — detalles |
 | `danger` | `#e0592f` | **Rojo de alerta** — sobre-giro / sobre-asignación |
+| `bamboo-ink` | `#8a5a24` | **Texto** ámbar de estados pendientes/advertencia ("Pendiente", sin conexión, almacenamiento no protegido). Nunca como relleno. Contraste 5.9:1 sobre blanco y 4.9:1 sobre el punto más oscuro del fondo (`#dcefd8`) |
+| `danger-ink` | `#b23f1d` | **Texto** de sobre-giro/negativos (5.8:1 sobre blanco). `danger` solo para rellenos/barras |
 
 **Reglas de color (accesibilidad):**
 - `ink` sobre `fur`/`icon-bg` tiene contraste alto → es el color de texto por defecto.
 - Los **verdes claros (`bamboo`, `highlight`, `leaf-light`) e `cheek` son ILUSTRATIVOS**: no se usan para texto ni para información (contraste < 3:1). Para texto/porcentaje en verde usar **`green-deep`**; para rellenos de botón con texto blanco usar **`leaf`/`green-deep`** (nunca `bamboo`).
 - **Semántico:** `primary = green-deep/leaf` · `surface = fur/#fff` · `muted-surface = icon-bg` · `danger = #e0592f` · neutros de barra/disponible `#eef1ec`/`#dfe4dc`.
-- Fondo de pantalla: degradado menta→blanco `linear-gradient(176deg,#e4f4e2,#f3faee,#fffdf7)`.
+- **Fondo de pantalla (ground):** `linear-gradient(180deg,#dcefd8 0%,#eaf5e7 34%,#f1f6ef 100%)` — **nunca termina en blanco**, para que cards y nav blancos siempre contrasten.
+- **Tokens de contorno/elevación:** `hairline` `rgba(36,33,43,.07)` · `hairline-strong` `.08` · `hairline-over` `rgba(203,71,36,.22)` · `rail` `#eef1ec` · `control` `#f4f8f2` (controles secundarios dentro de card) · `nav-pill` `#dcefd8` · `cane-rail` `#e1ead9`. Texto de sobre-giro `#b23f1d`.
 
 ---
 
@@ -74,26 +77,30 @@ Dos familias, roles fijos:
 
 ## 4. Forma: espaciado, radio, sombra
 
-- **Radios:** card grande `24px` · card chica / fila `15–18px` · botón `17px` · FAB `19px` (squircle) · tile de icono `13–15px` · chip/pill `999px`.
+- **Radios:** card hero/resumen `22px` (`rounded-card`) · fila `18px` (`rounded-row`) · fila de cuota/calendario `16px` (`rounded-cuota`) · botón `17px` · FAB `19px` (squircle) · tile de icono `13–15px` · chip/pill `999px`.
 - **Padding card:** 18px (grande) · 11–13px (fila).
 - **Gutter de pantalla:** 18px laterales.
-- **Sombra de card (verde suave):** `0 14px 32px -18px rgba(76,138,44,.34)`; fila: `0 6px 16px -11px rgba(76,138,44,.3)`; FAB: `0 14px 26px -6px rgba(60,138,46,.6)`.
+- **Elevación (contorno + sombra; los tokens están en `src/styles.css`):**
+  - Nivel 1 — card (`shadow-card`): borde `1px hairline` + `0 1px 2px rgba(36,33,43,.05), 0 14px 30px -16px rgba(46,90,34,.34)`. Fila (`shadow-row`): `0 1px 2px rgba(36,33,43,.05), 0 8px 20px -14px rgba(46,90,34,.30)`. Sobre-giro (`shadow-over`): igual con tinte `rgba(203,71,36,.30)` y borde `hairline-over`.
+  - Nivel 2 — flotante (`shadow-float`): `0 1px 2px rgba(36,33,43,.06), 0 16px 34px -14px rgba(36,64,30,.38)`. Botones de app bar (`shadow-appbar`): `0 1px 2px rgba(36,33,43,.06), 0 6px 14px -8px rgba(46,90,34,.35)`. FAB (`shadow-fab`): anillo `0 0 0 4px rgba(255,255,255,.92)` + `0 14px 26px -8px rgba(46,110,30,.6)`.
+  - **Dentro de una card nunca hay sombra**: rieles `#eef1ec` + `inset 0 0 0 1px rgba(36,33,43,.04)` (clase `.rail`), separadores `1px #eef1ec`, controles secundarios `#f4f8f2`.
 - **Separación entre filas:** 9px.
 
 ---
 
 ## 5. Componentes fijos (reutilizar idénticos)
 
-- **App bar (detalle):** botón volver (tile blanco 38px, radio 12px) · título Nunito 900 + subtítulo Inter muted · menú ⋯ (mismo tile). Fondo transparente sobre el degradado.
-- **Barra de navegación inferior (PERSISTENTE):** 4 tabs — **Inicio · Proyectos · Calendario · Perfil**. Fondo blanco translúcido con blur. Tab activo en `leaf`, inactivos opacidad 0.45. **Siempre visible** en pantallas principales y de detalle; nunca se reemplaza por un botón.
-- **FAB (acción primaria):** verde (`leaf`), abajo-derecha, squircle 56px radio 19px, con `+`. Es la **acción primaria contextual** de cada pantalla (Inicio→nuevo proyecto, Proyecto→nuevo gasto, Gasto→registrar pago). Puede ser **extendido con texto** cuando la acción lo amerite (ej. "Registrar pago"). *(definir circular vs extendido de forma uniforme — pendiente de decisión del usuario).*
-- **Cards:** fondo `#fff`, radio 24 (resumen) / 15–18 (lista), sombra verde suave. Entran con animación `rise`.
+- **App bar (detalle) — `components/AppBar`:** botón volver (40px, radio 13, blanco, hairline + `shadow-appbar`) · **card blanca de título** (flex 1, radio 15, padding 7×14, borde `hairline-strong`, `shadow-appbar`) con título Nunito 900 + subtítulo Inter muted · menú ⋯ (mismo tile 40px).
+- **Barra de navegación inferior (PERSISTENTE):** 4 tabs — **Inicio · Proyectos · Calendario · Perfil**. **Isla flotante** (nivel 2): `left/right 12px`, `bottom 14px`, alto 66px, radio 24, blanco, borde `hairline-strong`, `shadow-float`; el contenido tiene `padding-bottom` para que nada quede bajo ella. Tab activo: píldora `#dcefd8` (que **se desliza** entre tabs), icono `#2f6f22`, etiqueta `ink` 800; inactivos `#5d5866` sin opacidad. **Siempre visible** en pantallas principales y de detalle; nunca se reemplaza por un botón.
+- **FAB (acción primaria):** verde (`leaf`), abajo-derecha, squircle 56px radio 19px, con `+`, con **anillo blanco** (`shadow-fab`) y ubicado sobre la isla (`bottom 96px`). Es la **acción primaria contextual** de cada pantalla (Inicio→nuevo proyecto, Proyecto→nuevo gasto, Gasto→registrar pago). Puede ser **extendido con texto** cuando la acción lo amerite (ej. "Registrar pago"). *(definir circular vs extendido de forma uniforme — pendiente de decisión del usuario).*
+- **Cards:** fondo `#fff`, radio 22 (resumen) / 18 (fila) / 16 (cuota, calendario), borde hairline + sombra de nivel 1; las de sobre-giro usan borde y sombra rojizos. Entran con animación `rise`.
+- **Tabs de proyecto (Gastos | Movimientos):** pista `rgba(255,255,255,.7)` + hairline + `inset 0 1px 2px rgba(36,33,43,.05)`; píldora blanca con hairline y sombra suave que se desliza (`layoutId`).
 - **Botones (HeroUI Button):** primario = fill `leaf`/`green-deep` + texto blanco (Nunito 800); nunca fill `bamboo` con texto.
 - **Chips/Tags (HeroUI Chip):** `Cuotas` = fondo `icon-bg` texto `green-deep`; `Único` = fondo `#efeae1` texto gris; `% ejecutado` = chip menta.
 - **Barra de progreso (HeroUI Progress):** riel `#eef1ec`; relleno gradiente `bamboo→leaf-light`; **si sobre-giro → gradiente rojo** (`#f2a07e→danger`) al 100%.
 - **Fila de gasto:** tile emoji (icon-bg) · nombre (Nunito 800) · chip tipo · "pagado de planeado" (Inter muted) · barra · estado (✓ pagado / chevron / rojo sobre-giro) · borde izquierdo de color que liga con su segmento de distribución.
 - **Empty state:** card con borde punteado menta, panda en tile, título Nunito 900, texto guía y **botón circular de agregar** con anillos de pulso.
-- **Timeline de cuotas:** línea vertical; nodo por cuota (verde ✓ si pagada, hueco si pendiente, resaltado la próxima); card con monto, fecha, estado y **miniatura de recibo** si existe.
+- **Timeline de cuotas (bambú):** la línea es una **caña de bambú**: riel pálido `#e1ead9` a todo el largo y caña crecida (8px, radio 4, degradado `#6db546→#7cc04b→#b9e28f→#7cc04b→#5fa83c`) con **nudos** de 3px `#4c8a2c` entre cuotas, hasta el nodo de la próxima cuota (todas pagadas → largo completo; ninguna → un tocón). Dos **hojas** (`#4f9e34`, `#6db546`) en la punta, sobre los nodos, se mecen. Nodo por cuota (verde ✓ si pagada, hueco si pendiente, resaltado la próxima); card con monto, fecha, estado y **miniatura de recibo** si existe.
 - **Modales / bottom sheets (HeroUI Modal/Drawer):** crear/editar/registrar se abren como **overlay** (no reemplazan la nav).
 
 ---
@@ -116,6 +123,9 @@ Dos familias, roles fijos:
 - **Barras:** se llenan animadas al aparecer.
 - **Carrusel:** infinito con loop sin topes; tarjeta activa centrada.
 - **Gastos al cambiar de proyecto:** el bloque actual hace **banish hacia el lado del desliz** y el nuevo **entra siguiendo el mismo movimiento**, filas en cascada ("reflejo").
+- **Píldora de la nav:** se **desliza** entre tabs (Motion `layoutId` `nav-pill`, 0.4s ease-out).
+- **Tabs de proyecto:** píldora deslizante + el panel sale/entra horizontalmente según la dirección (calculada en el handler, no en render).
+- **Bambú (timeline de cuotas):** crece al montar ~1.8s ease-out hasta la próxima cuota; hojas se mecen ±7° en 3.2s (loop). Con *reduced motion*: estático y completamente crecido.
 - **FAB:** aparece con `pop`. **Botón de empty state:** anillos de pulso.
 - **Tarjeta → detalle (container transform):** la **misma card crece con sombra** hacia el detalle y, al llegar, **aparecen el texto y los demás componentes**; al volver, se **contrae** a la card de origen. Cada transición se siente **conectada y fluida** (shared-element). En el build real: `layoutId` de Motion / animate-ui.
 - **Nota técnica:** no depender de eventos `finish`/`finished` de animación para lógica crítica en entornos que los throttlean; en el build real Motion lo maneja.

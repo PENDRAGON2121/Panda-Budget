@@ -1,0 +1,62 @@
+import { Card } from '@heroui/react';
+import type { Expense, Payment, Project } from '../../db/types';
+import { projectSummary } from '../../lib/calc';
+import { formatMoney } from '../../lib/money';
+import { DistributionBar } from './DistributionBar';
+
+interface Props {
+  project: Project;
+  expenses: Expense[];
+  payments: Payment[];
+}
+
+export function ProjectSummaryCard({ project, expenses, payments }: Props) {
+  const s = projectSummary(project, expenses, payments);
+  return (
+    <Card
+      className={`rounded-card border ${s.pct > 100 ? 'border-hairline-over shadow-over' : 'border-hairline shadow-card'}`}
+    >
+      <Card.Content>
+        <div className="flex items-center justify-between">
+          <span className="text-[11.5px] font-semibold text-ink-muted">Presupuesto total</span>
+          <span
+            className={`rounded-full px-2.5 py-0.5 text-[10.5px] font-extrabold ${
+              s.pct > 100 ? 'bg-danger/10 text-danger-ink' : 'bg-icon-bg text-green-deep'
+            }`}
+          >
+            {Math.round(s.pct)}% ejecutado
+          </span>
+        </div>
+        <div className="my-1 font-sans text-3xl font-extrabold tabular-nums tracking-tight text-ink">
+          {formatMoney(project.totalBudget, project.currency)}
+        </div>
+        <div className="mt-2 flex gap-6">
+          <div>
+            <span className="text-[11.5px] font-semibold text-ink-muted">Pagado</span>
+            <b data-testid="pagado" className="block text-sm font-extrabold tabular-nums">{formatMoney(s.paid, project.currency)}</b>
+          </div>
+          <div>
+            <span className="text-[11.5px] font-semibold text-ink-muted">Disponible</span>
+            <b
+              data-testid="disponible"
+              className={`block text-sm font-extrabold tabular-nums ${s.available < 0 ? 'text-danger-ink' : ''}`}
+            >
+              {formatMoney(s.available, project.currency)}
+            </b>
+          </div>
+        </div>
+        {s.overAllocated && (
+          <div role="status" className="mt-3 rounded-sm bg-danger/10 px-3 py-2 text-xs font-bold text-danger-ink">
+            ⚠ Presupuesto sobreasignado: los gastos planeados superan el total.
+          </div>
+        )}
+        <DistributionBar
+          expenses={expenses}
+          distribution={s.distribution}
+          freePct={s.freePct}
+          overflowPct={s.overflowPct}
+        />
+      </Card.Content>
+    </Card>
+  );
+}
