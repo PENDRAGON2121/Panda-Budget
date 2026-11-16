@@ -3,6 +3,22 @@
 All notable changes to this project are documented in this file.
 The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and the project uses [Semantic Versioning](https://semver.org/).
 
+## [0.0.2] - 2026-11-16
+
+### Added
+- Inicio: tocar la tarjeta del proyecto abre su detalle.
+- Inicio: el botón + agrega un gasto al proyecto que está en pantalla.
+
+### Changed
+- Calendario rediseñado: flechas de mes con borde, días más grandes con punto de pagos y registros con el detalle "Proyecto · Cuota N".
+- Gasto: cuotas más compactas (una sola línea) y hojas de bambú más grandes en la punta de la caña.
+
+### Fixed
+- El formulario de nuevo gasto con muchas cuotas ahora se desplaza y el botón "Crear gasto" queda siempre visible (igual en nuevo proyecto y registrar pago).
+- Los selectores (moneda, cuota, fecha) ya no quedan flotando cuando se cierra el teclado.
+- Las últimas cuotas ya no quedan tapadas por el botón "Registrar pago".
+- El APK de Android vuelve a compilar (versionCode) y la firma se verifica antes de compilar.
+
 ## [0.0.1] - 2026-11-16
 
 ### Added
