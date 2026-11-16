@@ -1,10 +1,11 @@
 import { useState } from 'react';
 import { Button, Input, Label, Modal, TextField } from '@heroui/react';
 import { useProjectCurrency } from '../../db/hooks';
+import { FormError } from '../../components/FormError';
 import { createExpense } from '../../db/repos';
+import { MAX_NAME } from '../../lib/limits';
 import { currencySymbol, formatMoney, parseAmount } from '../../lib/money';
-
-export const MAX_NAME = 60;
+import { useGuardedAction } from '../../lib/useGuardedAction';
 const MAX_INSTALLMENTS = 60;
 
 interface Props {
@@ -32,12 +33,18 @@ export function ExpenseForm({ projectId, isOpen, onOpenChange }: Props) {
   const [total, setTotal] = useState('');
   const currency = useProjectCurrency(projectId);
   const [rows, setRows] = useState<Row[]>([]);
+  const { saving, error, run, clearError } = useGuardedAction();
 
   const trimmed = name.trim();
   const nameOk = trimmed.length > 0 && trimmed.length <= MAX_NAME;
   const rowAmounts = rows.map((r) => parseAmount(r.amount));
   const installmentsOk = rows.length > 0 && rowAmounts.every((a) => a > 0);
-  const canSave = nameOk && (type === 'single' ? parseAmount(amount) > 0 : installmentsOk);
+  const canSave = nameOk && (type === 'single' ? parseAmount(amount) > 0 : installmentsOk) && !saving;
+
+  const change = (open: boolean) => {
+    if (!open) clearError();
+    onOpenChange(open);
+  };
 
   function changeCount(v: string) {
     const n = Math.min(MAX_INSTALLMENTS, parseAmount(v));
@@ -72,26 +79,27 @@ export function ExpenseForm({ projectId, isOpen, onOpenChange }: Props) {
   async function submit(e: React.FormEvent) {
     e.preventDefault();
     if (!canSave) return;
-    if (type === 'single') {
-      await createExpense({ projectId, name: trimmed, type, plannedAmount: parseAmount(amount) });
-    } else {
-      await createExpense(
-        { projectId, name: trimmed, type, plannedAmount: rowAmounts.reduce((s, a) => s + a, 0) },
-        rows.map((r, i) => ({
-          index: i + 1,
-          plannedAmount: rowAmounts[i],
-          dueDate: dateToMs(r.date),
-        })),
-      );
-    }
+    const ok = await run(() =>
+      type === 'single'
+        ? createExpense({ projectId, name: trimmed, type, plannedAmount: parseAmount(amount) })
+        : createExpense(
+            { projectId, name: trimmed, type, plannedAmount: rowAmounts.reduce((s, a) => s + a, 0) },
+            rows.map((r, i) => ({
+              index: i + 1,
+              plannedAmount: rowAmounts[i],
+              dueDate: dateToMs(r.date),
+            })),
+          ),
+    );
+    if (!ok) return;
     reset();
-    onOpenChange(false);
+    change(false);
   }
 
   const plannedSum = rowAmounts.reduce((s, a) => s + a, 0);
 
   return (
-    <Modal.Backdrop isOpen={isOpen} onOpenChange={onOpenChange}>
+    <Modal.Backdrop isOpen={isOpen} onOpenChange={change}>
       <Modal.Container scroll="inside">
         <Modal.Dialog>
           <Modal.CloseTrigger />
@@ -130,7 +138,7 @@ export function ExpenseForm({ projectId, isOpen, onOpenChange }: Props) {
                   <Label>Monto planeado ({currencySymbol(currency)})</Label>
                   <Input
                     value={amount}
-                    inputMode="numeric"
+                    inputMode="decimal"
                     onChange={(e) => setAmount(e.target.value)}
                     placeholder="0"
                   />
@@ -153,7 +161,7 @@ export function ExpenseForm({ projectId, isOpen, onOpenChange }: Props) {
                           <Label>Monto total ({currencySymbol(currency)})</Label>
                           <Input
                             value={total}
-                            inputMode="numeric"
+                            inputMode="decimal"
                             onChange={(e) => setTotal(e.target.value)}
                             placeholder="Opcional"
                           />
@@ -169,7 +177,7 @@ export function ExpenseForm({ projectId, isOpen, onOpenChange }: Props) {
                               <Label>{`Monto cuota ${i + 1}`}</Label>
                               <Input
                                 value={r.amount}
-                                inputMode="numeric"
+                                inputMode="decimal"
                                 onChange={(e) => updateRow(i, { amount: e.target.value })}
                                 placeholder="0"
                               />
@@ -192,9 +200,10 @@ export function ExpenseForm({ projectId, isOpen, onOpenChange }: Props) {
                   )}
                 </>
               )}
+              <FormError message={error} />
             </Modal.Body>
             <Modal.Footer>
-              <Button type="button" variant="secondary" onPress={() => onOpenChange(false)}>
+              <Button type="button" variant="secondary" onPress={() => change(false)}>
                 Cancelar
               </Button>
               <Button type="submit" isDisabled={!canSave}>

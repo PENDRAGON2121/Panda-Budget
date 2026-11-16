@@ -1,10 +1,11 @@
 import { useState } from 'react';
-import { Button, Input, Label, ListBox, Modal, Select, TextField } from '@heroui/react';
+import { Button, Description, Input, Label, ListBox, Modal, Select, TextField } from '@heroui/react';
+import { FormError } from '../../components/FormError';
 import { createProject } from '../../db/repos';
+import { MAX_NAME } from '../../lib/limits';
 import { currencySymbol, parseAmount } from '../../lib/money';
 import { getDefaultCurrency } from '../../lib/settings';
-
-export const MAX_NAME = 60;
+import { useGuardedAction } from '../../lib/useGuardedAction';
 
 interface Props {
   isOpen: boolean;
@@ -15,21 +16,30 @@ export function ProjectForm({ isOpen, onOpenChange }: Props) {
   const [name, setName] = useState('');
   const [budget, setBudget] = useState('');
   const [currency, setCurrency] = useState<string>(getDefaultCurrency);
+  const { saving, error, run, clearError } = useGuardedAction();
   const trimmed = name.trim();
-  const canSave = trimmed.length > 0 && trimmed.length <= MAX_NAME;
+  const totalBudget = parseAmount(budget);
+  const budgetOk = totalBudget > 0;
+  const canSave = trimmed.length > 0 && trimmed.length <= MAX_NAME && budgetOk && !saving;
+
+  const change = (open: boolean) => {
+    if (!open) clearError();
+    onOpenChange(open);
+  };
 
   async function submit(e: React.FormEvent) {
     e.preventDefault();
     if (!canSave) return;
-    await createProject({ name: trimmed, currency, totalBudget: parseAmount(budget) });
+    const ok = await run(() => createProject({ name: trimmed, currency, totalBudget }));
+    if (!ok) return;
     setName('');
     setBudget('');
     setCurrency(getDefaultCurrency());
-    onOpenChange(false);
+    change(false);
   }
 
   return (
-    <Modal.Backdrop isOpen={isOpen} onOpenChange={onOpenChange}>
+    <Modal.Backdrop isOpen={isOpen} onOpenChange={change}>
       <Modal.Container>
         <Modal.Dialog>
           <Modal.CloseTrigger />
@@ -68,14 +78,18 @@ export function ProjectForm({ isOpen, onOpenChange }: Props) {
                 <Label>Presupuesto total ({currencySymbol(currency)})</Label>
                 <Input
                   value={budget}
-                  inputMode="numeric"
+                  inputMode="decimal"
                   onChange={(e) => setBudget(e.target.value)}
                   placeholder="0"
                 />
+                {!budgetOk && (
+                  <Description className="text-xs text-ink-muted">Ingresá un presupuesto mayor a 0</Description>
+                )}
               </TextField>
+              <FormError message={error} />
             </Modal.Body>
             <Modal.Footer>
-              <Button type="button" variant="secondary" onPress={() => onOpenChange(false)}>
+              <Button type="button" variant="secondary" onPress={() => change(false)}>
                 Cancelar
               </Button>
               <Button type="submit" isDisabled={!canSave}>

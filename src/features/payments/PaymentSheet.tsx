@@ -1,8 +1,11 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Button, Calendar, DateField, DatePicker, Drawer, Input, Label, ListBox, Select, TextField } from '@heroui/react';
 import { CalendarDate, getLocalTimeZone, today } from '@internationalized/date';
-import { useExpenseCurrency, useInstallments } from '../../db/hooks';
+import { FormError } from '../../components/FormError';
+import { useExpenseCurrency, useInstallments, usePayments } from '../../db/hooks';
 import { addPayment } from '../../db/repos';
+import { installmentStatus } from '../../lib/calc';
+import { useGuardedAction } from '../../lib/useGuardedAction';
 import { currencySymbol, formatMoney, parseAmount } from '../../lib/money';
 import { compressImage } from './image';
 import { ReceiptPicker } from './ReceiptPicker';
@@ -19,17 +22,20 @@ const todayDate = () => today(getLocalTimeZone());
 
 export function PaymentSheet({ expenseId, installmentId, isOpen, onOpenChange }: Props) {
   const installments = useInstallments(expenseId);
+  const payments = usePayments(expenseId);
   const currency = useExpenseCurrency(expenseId);
   const [amount, setAmount] = useState('');
   const [date, setDate] = useState<CalendarDate | null>(todayDate);
   const [target, setTarget] = useState<string>(installmentId ?? NONE);
   const [file, setFile] = useState<File | null>(null);
   const [note, setNote] = useState('');
-  const [saving, setSaving] = useState(false);
+  const { saving, error, run, clearError } = useGuardedAction();
+  const targetChosen = useRef(false);
 
   // Re-target (and reset) each time the sheet opens.
   useEffect(() => {
     if (isOpen) {
+      targetChosen.current = false;
       setTarget(installmentId ?? NONE);
       setAmount('');
       setDate(todayDate());
@@ -38,14 +44,32 @@ export function PaymentSheet({ expenseId, installmentId, isOpen, onOpenChange }:
     }
   }, [isOpen, installmentId]);
 
+  // Default target: the given cuota, else the next unpaid ('proxima') cuota once data has loaded.
+  // Decided once per opening so it never overrides the user's own choice (incl. "Sin cuota específica").
+  useEffect(() => {
+    if (!isOpen || targetChosen.current) return;
+    if (installmentId) {
+      targetChosen.current = true;
+      return;
+    }
+    if (!installments || !payments) return;
+    targetChosen.current = true;
+    const next = installments.find((i) => installmentStatus(i, payments, installments) === 'proxima');
+    if (next) setTarget(next.id);
+  }, [isOpen, installmentId, installments, payments]);
+
+  const change = (open: boolean) => {
+    if (!open) clearError();
+    onOpenChange(open);
+  };
+
   const value = parseAmount(amount);
   const canSave = value > 0 && date !== null && !saving;
 
   async function save(e: React.FormEvent) {
     e.preventDefault();
     if (!canSave || !date) return;
-    setSaving(true);
-    try {
+    const ok = await run(async () => {
       const receipt = file ? await compressImage(file) : undefined;
       await addPayment(
         {
@@ -57,14 +81,12 @@ export function PaymentSheet({ expenseId, installmentId, isOpen, onOpenChange }:
         },
         receipt,
       );
-      onOpenChange(false);
-    } finally {
-      setSaving(false);
-    }
+    });
+    if (ok) change(false);
   }
 
   return (
-    <Drawer.Backdrop isOpen={isOpen} onOpenChange={onOpenChange}>
+    <Drawer.Backdrop isOpen={isOpen} onOpenChange={change}>
       <Drawer.Content placement="bottom">
         <Drawer.Dialog>
           <Drawer.Handle />
@@ -78,7 +100,7 @@ export function PaymentSheet({ expenseId, installmentId, isOpen, onOpenChange }:
                 <Label>Monto ({currencySymbol(currency)})</Label>
                 <Input
                   value={amount}
-                  inputMode="numeric"
+                  inputMode="decimal"
                   placeholder="0"
                   onChange={(e) => setAmount(e.target.value)}
                 />
@@ -150,6 +172,7 @@ export function PaymentSheet({ expenseId, installmentId, isOpen, onOpenChange }:
                 <Label>Nota</Label>
                 <Input value={note} placeholder="Opcional" onChange={(e) => setNote(e.target.value)} />
               </TextField>
+              <FormError message={error} />
             </Drawer.Body>
             <Drawer.Footer>
               <Button type="submit" fullWidth isDisabled={!canSave} className="bg-leaf font-display font-extrabold text-white">

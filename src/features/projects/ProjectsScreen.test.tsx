@@ -1,7 +1,7 @@
-import { render, screen, waitFor } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { MemoryRouter } from 'react-router-dom';
-import { beforeEach } from 'vitest';
+import { afterEach, beforeEach, vi } from 'vitest';
 import { db } from '../../db/db';
 import { createProject } from '../../db/repos';
 import { formatCRC } from '../../lib/money';
@@ -11,6 +11,7 @@ import { ProjectForm } from './ProjectForm';
 beforeEach(async () => {
   await Promise.all(db.tables.map((t) => t.clear()));
 });
+afterEach(() => vi.restoreAllMocks());
 
 test('shows a seeded project name and formatted total', async () => {
   await createProject({ name: 'Casa nueva', currency: 'CRC', totalBudget: 38000000 });
@@ -29,6 +30,7 @@ test('form blocks names over 60 chars and accepts exactly 60', async () => {
   const user = userEvent.setup();
   render(<ProjectForm isOpen onOpenChange={() => {}} />);
   const input = screen.getByLabelText(/nombre/i) as HTMLInputElement;
+  await user.type(screen.getByLabelText(/presupuesto/i), '1000');
   await user.type(input, 'a'.repeat(75));
   expect(input.value).toHaveLength(60);
   expect(input.value).toBe('a'.repeat(60));
@@ -71,6 +73,7 @@ test('new project is created in the profile default currency (USD)', async () =>
     const user = userEvent.setup();
     render(<ProjectForm isOpen onOpenChange={() => {}} />);
     await user.type(screen.getByLabelText(/nombre/i), 'Viaje USD');
+    await user.type(screen.getByLabelText(/presupuesto/i), '1500');
     await user.click(screen.getByRole('button', { name: /crear proyecto/i }));
     await waitFor(async () => {
       const all = await db.projects.toArray();
@@ -80,4 +83,45 @@ test('new project is created in the profile default currency (USD)', async () =>
   } finally {
     localStorage.clear();
   }
+});
+
+test('total budget must be > 0: submit disabled with a hint until a positive budget is entered', async () => {
+  const user = userEvent.setup();
+  render(<ProjectForm isOpen onOpenChange={() => {}} />);
+  await user.type(screen.getByLabelText(/nombre/i), 'Viaje');
+  expect(screen.getByRole('button', { name: /crear proyecto/i })).toBeDisabled();
+  expect(screen.getByText('Ingresá un presupuesto mayor a 0')).toBeInTheDocument();
+  await user.type(screen.getByLabelText(/presupuesto/i), '0');
+  expect(screen.getByRole('button', { name: /crear proyecto/i })).toBeDisabled();
+  await user.clear(screen.getByLabelText(/presupuesto/i));
+  await user.type(screen.getByLabelText(/presupuesto/i), '500000');
+  expect(screen.getByRole('button', { name: /crear proyecto/i })).toBeEnabled();
+  expect(screen.queryByText('Ingresá un presupuesto mayor a 0')).not.toBeInTheDocument();
+});
+
+test('a rejected write shows an inline error and keeps the dialog open', async () => {
+  vi.spyOn(db.projects, 'add').mockRejectedValueOnce(new Error('QuotaExceededError'));
+  const onOpenChange = vi.fn();
+  const user = userEvent.setup();
+  render(<ProjectForm isOpen onOpenChange={onOpenChange} />);
+  await user.type(screen.getByLabelText(/nombre/i), 'Viaje');
+  await user.type(screen.getByLabelText(/presupuesto/i), '500000');
+  await user.click(screen.getByRole('button', { name: /crear proyecto/i }));
+  expect(await screen.findByRole('alert')).toHaveTextContent(/no se pudo guardar/i);
+  expect(onOpenChange).not.toHaveBeenCalledWith(false);
+  expect(screen.getByRole('dialog')).toBeInTheDocument();
+  expect(screen.getByRole('button', { name: /crear proyecto/i })).toBeEnabled();
+});
+
+test('double submit creates exactly one project', async () => {
+  const user = userEvent.setup();
+  render(<ProjectForm isOpen onOpenChange={() => {}} />);
+  await user.type(screen.getByLabelText(/nombre/i), 'Viaje');
+  await user.type(screen.getByLabelText(/presupuesto/i), '500000');
+  const form = screen.getByRole('button', { name: /crear proyecto/i }).closest('form')!;
+  fireEvent.submit(form);
+  fireEvent.submit(form);
+  await waitFor(async () => expect(await db.projects.count()).toBe(1));
+  await new Promise((r) => setTimeout(r, 50));
+  expect(await db.projects.count()).toBe(1);
 });

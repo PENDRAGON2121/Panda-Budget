@@ -22,6 +22,18 @@ describe('parseAmount', () => {
   it('strips spaces and commas', () => expect(parseAmount(' 1,200 ')).toBe(1200));
   it('never negative', () => expect(parseAmount('-500')).toBe(500));
   it('round-trips', () => expect(parseAmount(formatCRC(38000000))).toBe(38000000));
+  it.each([
+    ['12.50', 13],
+    ['12,4', 12],
+    ['12,49', 12],
+    ['1.250', 1250],
+    ['1.250.000', 1250000],
+    ['₡1.200.000', 1200000],
+    ['1.250.000,75', 1250001],
+    ['$1,250.5', 1251],
+    ['abc', 0],
+    ['-500', 500],
+  ])('decimals vs thousands: %s -> %d', (input, expected) => expect(parseAmount(input)).toBe(expected));
 });
 
 describe('formatMoney', () => {

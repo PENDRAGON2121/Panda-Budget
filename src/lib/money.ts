@@ -14,10 +14,18 @@ export function formatMoney(n: number, currency: string): string {
 /** Colón amount: 38000000 -> "₡38.000.000". */
 export const formatCRC = (n: number): string => formatMoney(n, 'CRC');
 
-/** Parse user input to a non-negative integer by keeping digits only. Non-numeric -> 0. */
+/**
+ * Parse user input to a non-negative whole amount. A trailing `.` or `,` followed by exactly 1–2 digits is a
+ * decimal part (rounded to the nearest unit); any other separator groups thousands. Signs, symbols and spaces
+ * are ignored. Non-numeric -> 0.
+ *   '12.50' -> 13 · '12,4' -> 12 · '1.250' -> 1250 · '₡1.200.000' -> 1200000 · '-500' -> 500
+ */
 export function parseAmount(input: string): number {
-  const digits = (input ?? '').replace(/\D/g, '');
-  if (!digits) return 0;
-  const n = parseInt(digits, 10);
+  const clean = (input ?? '').replace(/[^\d.,]/g, '');
+  const m = /^(.*)[.,](\d{1,2})$/.exec(clean);
+  const intDigits = (m ? m[1] : clean).replace(/\D/g, '');
+  const fraction = m ? Number(`0.${m[2]}`) : 0;
+  if (!intDigits && !m) return 0;
+  const n = Math.round((intDigits ? parseInt(intDigits, 10) : 0) + fraction);
   return Number.isFinite(n) ? n : 0;
 }

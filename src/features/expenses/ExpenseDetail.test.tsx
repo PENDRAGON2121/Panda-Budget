@@ -84,7 +84,8 @@ test('FAB and per-cuota Pagar open the payment sheet, the latter pre-selecting i
 
   await user.click(await screen.findByRole('button', { name: 'Registrar pago' }));
   expect(await screen.findByRole('heading', { name: /registrar pago/i })).toBeInTheDocument();
-  expect(screen.getByRole('button', { name: /aplicar a/i })).toHaveTextContent(/sin cuota/i);
+  // no cuota given: defaults to the next (proxima) cuota
+  await waitFor(() => expect(screen.getByRole('button', { name: /aplicar a/i })).toHaveTextContent(/cuota 1/i));
   await user.keyboard('{Escape}');
   await waitFor(() => expect(screen.queryByRole('heading', { name: /registrar pago/i })).not.toBeInTheDocument());
 

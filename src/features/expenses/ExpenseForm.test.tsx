@@ -1,12 +1,13 @@
-import { render, screen, waitFor } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { beforeEach } from 'vitest';
+import { afterEach, beforeEach, vi } from 'vitest';
 import { db } from '../../db/db';
 import { ExpenseForm } from './ExpenseForm';
 
 beforeEach(async () => {
   await Promise.all(db.tables.map((t) => t.clear()));
 });
+afterEach(() => vi.restoreAllMocks());
 
 test('creates a single expense', async () => {
   const user = userEvent.setup();
@@ -56,4 +57,41 @@ test('submit is disabled for empty name or zero amount', async () => {
   expect(screen.getByRole('button', { name: /crear gasto/i })).toBeDisabled();
   await user.type(screen.getByLabelText(/nombre/i), 'X');
   expect(screen.getByRole('button', { name: /crear gasto/i })).toBeDisabled();
+});
+
+test('a rejected write shows an inline error and keeps the dialog open', async () => {
+  vi.spyOn(db.expenses, 'add').mockRejectedValueOnce(new Error('QuotaExceededError'));
+  const onOpenChange = vi.fn();
+  const user = userEvent.setup();
+  render(<ExpenseForm projectId="p1" isOpen onOpenChange={onOpenChange} />);
+  await user.type(screen.getByLabelText(/nombre/i), 'Nevera');
+  await user.type(screen.getByLabelText(/monto planeado/i), '450000');
+  await user.click(screen.getByRole('button', { name: /crear gasto/i }));
+  expect(await screen.findByRole('alert')).toHaveTextContent(/no se pudo guardar/i);
+  expect(onOpenChange).not.toHaveBeenCalledWith(false);
+  expect(screen.getByRole('dialog')).toBeInTheDocument();
+  expect(await db.expenses.count()).toBe(0);
+});
+
+test('double submit creates exactly one gasto', async () => {
+  const user = userEvent.setup();
+  render(<ExpenseForm projectId="p1" isOpen onOpenChange={() => {}} />);
+  await user.type(screen.getByLabelText(/nombre/i), 'Nevera');
+  await user.type(screen.getByLabelText(/monto planeado/i), '450000');
+  const form = screen.getByRole('button', { name: /crear gasto/i }).closest('form')!;
+  fireEvent.submit(form);
+  fireEvent.submit(form);
+  await waitFor(async () => expect(await db.expenses.count()).toBe(1));
+  await new Promise((r) => setTimeout(r, 50));
+  expect(await db.expenses.count()).toBe(1);
+});
+
+test('decimal amounts are rounded to whole units', async () => {
+  const user = userEvent.setup();
+  render(<ExpenseForm projectId="p1" isOpen onOpenChange={() => {}} />);
+  await user.type(screen.getByLabelText(/nombre/i), 'Nevera');
+  await user.type(screen.getByLabelText(/monto planeado/i), '12.50');
+  await user.click(screen.getByRole('button', { name: /crear gasto/i }));
+  await waitFor(async () => expect(await db.expenses.count()).toBe(1));
+  expect((await db.expenses.toArray())[0].plannedAmount).toBe(13);
 });
