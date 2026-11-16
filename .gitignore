@@ -6,3 +6,8 @@ dist/
 coverage/
 
 tsconfig.tsbuildinfo
+
+# Android signing secrets
+*.jks
+*.keystore
+keystore.properties

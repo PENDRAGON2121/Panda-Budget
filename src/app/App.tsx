@@ -1,5 +1,5 @@
 import { MotionConfig } from 'motion/react';
-import { BrowserRouter, Outlet, Route, Routes } from 'react-router-dom';
+import { BrowserRouter, Outlet, Route, Routes, useLocation } from 'react-router-dom';
 import { StorageGate } from './StorageGate';
 import { TabBar } from './TabBar';
 import { ProjectsScreen } from '../features/projects/ProjectsScreen';
@@ -10,6 +10,11 @@ import { CalendarScreen } from '../features/calendar/CalendarScreen';
 import { ProfileScreen } from '../features/profile/ProfileScreen';
 import { WelcomeScreen } from '../features/welcome/WelcomeScreen';
 import { useUserName } from '../lib/useUserName';
+import { NativeShell } from '../native/NativeShell';
+
+function RoutedShell() {
+  return <NativeShell path={useLocation().pathname} />;
+}
 
 function Layout() {
   return (
@@ -24,9 +29,17 @@ function Layout() {
 
 function Routed() {
   const name = useUserName();
-  if (!name) return <WelcomeScreen />;
+  if (!name) {
+    return (
+      <>
+        <NativeShell path="/" />
+        <WelcomeScreen />
+      </>
+    );
+  }
   return (
     <BrowserRouter>
+      <RoutedShell />
       <Routes>
         <Route element={<Layout />}>
           <Route index element={<HomeScreen />} />

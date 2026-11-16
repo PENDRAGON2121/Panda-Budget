@@ -9,6 +9,7 @@ export default defineConfig({
     tailwindcss(),
     VitePWA({
       registerType: 'autoUpdate',
+      injectRegister: false, // registered manually in main.tsx so the native shell can skip it
       manifest: {
         name: 'Panda Wallet',
         short_name: 'Panda Wallet',
