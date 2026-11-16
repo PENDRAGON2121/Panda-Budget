@@ -26,7 +26,7 @@ jobs:
 
       - uses: actions/setup-node@v4.2.0
         with:
-          node-version: lts/*
+          node-version: '22'
           cache: npm
 
       - run: npm ci
@@ -46,37 +46,53 @@ jobs:
         run: |
           NAME=$(node -p "require('./package.json').version")
           CODE=$(node scripts/version-code.mjs "$NAME")
-          if [[ "$GITHUB_REF" == refs/tags/v* && "$GITHUB_REF_NAME" != "v$NAME" ]]; then
-            echo "::error::Tag $GITHUB_REF_NAME does not match package.json version v$NAME"
-            exit 1
+          if [[ "$GITHUB_REF" == refs/tags/v* ]]; then
+            if [[ "$GITHUB_REF_NAME" != "v$NAME" ]]; then
+              echo "::error::Tag $GITHUB_REF_NAME does not match package.json version v$NAME"
+              exit 1
+            fi
+            node scripts/changelog-section.mjs "$NAME" > /dev/null
           fi
           echo "APP_VERSION_NAME=$NAME" >> "$GITHUB_ENV"
           echo "APP_VERSION_CODE=$CODE" >> "$GITHUB_ENV"
           echo "name=$NAME" >> "$GITHUB_OUTPUT"
 
-      - name: Prepare signing
+      - name: Check signing
         id: signing
         env:
-          KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
-          KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
-          KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
-          KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+          EVENT_NAME: ${{ github.event_name }}
+          HAS_KEYSTORE: ${{ secrets.ANDROID_KEYSTORE_BASE64 != '' }}
+          HAS_STORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD != '' }}
+          HAS_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS != '' }}
+          HAS_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD != '' }}
         run: |
-          if [[ -n "$KEYSTORE_BASE64" && -n "$KEYSTORE_PASSWORD" && -n "$KEY_ALIAS" && -n "$KEY_PASSWORD" ]]; then
-            echo "$KEYSTORE_BASE64" | base64 --decode > "$RUNNER_TEMP/release.jks"
-            echo "ANDROID_KEYSTORE_PATH=$RUNNER_TEMP/release.jks" >> "$GITHUB_ENV"
-            echo "ANDROID_KEYSTORE_PASSWORD=$KEYSTORE_PASSWORD" >> "$GITHUB_ENV"
-            echo "ANDROID_KEY_ALIAS=$KEY_ALIAS" >> "$GITHUB_ENV"
-            echo "ANDROID_KEY_PASSWORD=$KEY_PASSWORD" >> "$GITHUB_ENV"
+          if [[ "$EVENT_NAME" == "pull_request" ]]; then
+            echo "::notice::Pull request: building a debug APK (signing is never used for PRs)."
+            echo "signed=false" >> "$GITHUB_OUTPUT"
+          elif [[ "$HAS_KEYSTORE" == "true" && "$HAS_STORE_PASSWORD" == "true" && "$HAS_ALIAS" == "true" && "$HAS_KEY_PASSWORD" == "true" ]]; then
             echo "signed=true" >> "$GITHUB_OUTPUT"
+          elif [[ "$GITHUB_REF" == refs/tags/v* ]]; then
+            echo "::error::Release tag build requires all four ANDROID_KEYSTORE_BASE64, ANDROID_KEYSTORE_PASSWORD, ANDROID_KEY_ALIAS and ANDROID_KEY_PASSWORD secrets. See docs/android-release.md."
+            exit 1
           else
-            echo "::warning::Signing secrets not available (fork PR or not configured): the release APK is NOT signed; building a debug APK instead. See docs/android-release.md."
+            echo "::warning::Signing secrets not configured: the release APK is NOT signed; building a debug APK instead. See docs/android-release.md."
             echo "signed=false" >> "$GITHUB_OUTPUT"
           fi
+
+      - name: Decode keystore
+        if: steps.signing.outputs.signed == 'true'
+        env:
+          KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+        run: echo "$KEYSTORE_BASE64" | base64 --decode > "$RUNNER_TEMP/release.jks"
 
       - name: Build signed release APK
         if: steps.signing.outputs.signed == 'true'
         working-directory: android
+        env:
+          ANDROID_KEYSTORE_PATH: ${{ runner.temp }}/release.jks
+          ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
         run: |
           chmod +x gradlew
           ./gradlew assembleRelease
@@ -89,6 +105,10 @@ jobs:
           chmod +x gradlew
           ./gradlew assembleDebug
           cp app/build/outputs/apk/debug/app-debug.apk "../panda-wallet-v${APP_VERSION_NAME}-debug.apk"
+
+      - name: Remove keystore
+        if: always()
+        run: rm -f "$RUNNER_TEMP/release.jks"
 
       - uses: actions/upload-artifact@v4.6.0
         with:
@@ -110,7 +130,9 @@ jobs:
           name: panda-wallet-apk
 
       - name: Extract release notes
-        run: node scripts/changelog-section.mjs "${{ needs.build.outputs.version }}" > release-notes.md
+        env:
+          APP_VERSION: ${{ needs.build.outputs.version }}
+        run: node scripts/changelog-section.mjs "$APP_VERSION" > release-notes.md
 
       - uses: softprops/action-gh-release@v2.2.1
         with:

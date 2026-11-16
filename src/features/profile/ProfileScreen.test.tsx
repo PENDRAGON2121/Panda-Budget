@@ -3,6 +3,7 @@ import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { MemoryRouter } from 'react-router-dom';
 import { ProfileScreen } from './ProfileScreen';
+import pkg from '../../../package.json';
 
 const ui = () => (
   <MemoryRouter>
@@ -55,6 +56,6 @@ describe('ProfileScreen', () => {
 describe('ProfileScreen version', () => {
   it('shows the app version injected at build time', () => {
     render(ui());
-    expect(screen.getByText(`Panda Wallet · versión ${__APP_VERSION__}`)).toBeInTheDocument();
+    expect(screen.getByText(`Panda Wallet · versión ${pkg.version}`)).toBeInTheDocument();
   });
 });

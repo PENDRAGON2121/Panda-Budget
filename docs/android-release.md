@@ -10,8 +10,10 @@
 Workflow: `.github/workflows/android.yml` (push to `main`, `v*` tags, PRs, manual dispatch). It runs tests, type-check, build, `cap sync`, then builds the APK.
 
 - **With signing secrets:** builds a signed `assembleRelease` and uploads `panda-wallet-v<version>.apk` as an artifact. On a `v*` tag it also publishes a GitHub Release with that APK and the matching `CHANGELOG.md` section as notes.
-- **Without secrets** (fork PRs, or before you add them): builds `assembleDebug`, uploads `panda-wallet-v<version>-debug.apk` and emits a `::warning::`. The run does not fail.
-- On a `v*` tag, the run fails if the tag differs from `v<package.json version>`.
+- **Pull requests** never sign: they always build a debug APK (notice only).
+- **Tag builds** (`v*`) fail with an error if any of the four secrets is missing.
+- **Without secrets** (non-tag, non-PR runs, or before you add them): builds `assembleDebug`, uploads `panda-wallet-v<version>-debug.apk` and emits a `::warning::`. The run does not fail.
+- On a `v*` tag, the run fails if the tag differs from `v<package.json version>` or if `CHANGELOG.md` has no non-empty section for that version.
 
 ### 1. Generate the keystore (once, keep it safe and backed up)
 
@@ -45,7 +47,7 @@ Settings -> Secrets and variables -> Actions -> New repository secret:
 
 ### Release procedure
 
-1. Bump `version` in `package.json` (semantic versioning; `versionCode` = `major*10000 + minor*100 + patch`, minor/patch <= 99).
+1. Bump `version` in `package.json` (semantic versioning; `versionCode` = `major*10000 + minor*100 + patch`, minor/patch <= 99). Pre-release suffixes (`1.0.0-beta.1`) are accepted but share the `versionCode` of their final release, so never ship a pre-release and its final release as separate updates expecting different codes.
 2. Add a `## [X.Y.Z] - YYYY-MM-DD` section to `CHANGELOG.md`.
 3. Commit and push to `main`.
 4. `git tag v0.0.2 && git push --tags` (tag must equal `v` + package version).
