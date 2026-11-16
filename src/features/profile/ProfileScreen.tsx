@@ -1,11 +1,14 @@
 import { useEffect, useState } from 'react';
-import { Card, Radio, RadioGroup } from '@heroui/react';
+import { Card, Input, Label, Radio, RadioGroup, TextField } from '@heroui/react';
 import pandaIcon from '../../assets/panda-app-icon.svg';
-import { getDefaultCurrency, setDefaultCurrency, type Currency } from '../../lib/settings';
+import { MAX_NAME_LENGTH, getDefaultCurrency, setDefaultCurrency, setUserName, type Currency } from '../../lib/settings';
+import { useUserName } from '../../lib/useUserName';
 import { isPersisted } from '../../lib/storage';
 
 export function ProfileScreen() {
   const [currency, setCurrency] = useState<Currency>(getDefaultCurrency);
+  const storedName = useUserName();
+  const [draft, setDraft] = useState<string | null>(null);
   const [persisted, setPersisted] = useState<boolean>();
 
   useEffect(() => {
@@ -22,6 +25,11 @@ export function ProfileScreen() {
     setCurrency(c);
   };
 
+  const saveName = () => {
+    if (draft !== null) setUserName(draft); // empty/whitespace is rejected: stored name stays
+    setDraft(null);
+  };
+
   return (
     <div className="flex flex-col gap-3.5">
       <header className="flex items-center gap-3 pb-1 pt-2">
@@ -33,6 +41,27 @@ export function ProfileScreen() {
           <h1 className="font-display text-lg font-black leading-tight text-ink">Perfil</h1>
         </div>
       </header>
+
+      <Card className="rounded-card border border-hairline shadow-card">
+        <Card.Content>
+          <TextField fullWidth>
+            <Label>Tu nombre</Label>
+            <Input
+              maxLength={MAX_NAME_LENGTH}
+              autoComplete="given-name"
+              value={draft ?? storedName}
+              onChange={(e) => setDraft(e.target.value)}
+              onBlur={saveName}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') {
+                  saveName();
+                  e.currentTarget.blur();
+                }
+              }}
+            />
+          </TextField>
+        </Card.Content>
+      </Card>
 
       <Card className="rounded-card border border-hairline shadow-card">
         <Card.Content className="flex flex-col gap-3">

@@ -8,6 +8,8 @@ import { ExpenseDetail } from '../features/expenses/ExpenseDetail';
 import { HomeScreen } from '../features/home/HomeScreen';
 import { CalendarScreen } from '../features/calendar/CalendarScreen';
 import { ProfileScreen } from '../features/profile/ProfileScreen';
+import { WelcomeScreen } from '../features/welcome/WelcomeScreen';
+import { useUserName } from '../lib/useUserName';
 
 function Layout() {
   return (
@@ -20,10 +22,10 @@ function Layout() {
   );
 }
 
-export function App() {
+function Routed() {
+  const name = useUserName();
+  if (!name) return <WelcomeScreen />;
   return (
-    <MotionConfig reducedMotion="user">
-    <StorageGate>
     <BrowserRouter>
       <Routes>
         <Route element={<Layout />}>
@@ -36,7 +38,15 @@ export function App() {
         </Route>
       </Routes>
     </BrowserRouter>
-    </StorageGate>
+  );
+}
+
+export function App() {
+  return (
+    <MotionConfig reducedMotion="user">
+      <StorageGate>
+        <Routed />
+      </StorageGate>
     </MotionConfig>
   );
 }

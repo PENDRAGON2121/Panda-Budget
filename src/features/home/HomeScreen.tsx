@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { Button } from '@heroui/react';
 import { useAllExpenses, useAllPayments, useProjects } from '../../db/hooks';
+import { useUserName } from '../../lib/useUserName';
 import pandaIcon from '../../assets/panda-app-icon.svg';
 import { ProjectForm } from '../projects/ProjectForm';
 import { EmptyHome } from './EmptyHome';
@@ -8,6 +9,7 @@ import { HomeGastos } from './HomeGastos';
 import { ProjectCarousel } from './ProjectCarousel';
 
 function Greeting() {
+  const name = useUserName();
   return (
     <header className="flex items-center gap-3 pb-3.5 pt-2">
       <div className="size-[46px] shrink-0 overflow-hidden rounded-[15px] shadow-row">
@@ -15,7 +17,7 @@ function Greeting() {
       </div>
       <div>
         <div className="font-sans text-xs font-semibold text-ink-muted">¡Hola! 👋</div>
-        <h1 className="font-display text-lg font-black leading-tight text-ink">Bienvenido</h1>
+        <h1 className="font-display text-lg font-black leading-tight text-ink">{name || 'Bienvenido'}</h1>
       </div>
     </header>
   );
