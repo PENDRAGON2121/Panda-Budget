@@ -10,8 +10,8 @@ export default defineConfig({
     react(),
     tailwindcss(),
     VitePWA({
-      registerType: 'autoUpdate',
-      injectRegister: false, // registered manually in main.tsx so the native shell can skip it
+      registerType: 'prompt', // a new build waits until the user taps "Recargar"
+      injectRegister: false, // registered by useRegisterSW in UpdateManager, which the native shell never mounts
       manifest: {
         name: 'Panda Wallet',
         short_name: 'Panda Wallet',

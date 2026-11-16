@@ -56,6 +56,7 @@ describe('ProfileScreen', () => {
 describe('ProfileScreen version', () => {
   it('shows the app version injected at build time', () => {
     render(ui());
-    expect(screen.getByText(`Panda Wallet · versión ${pkg.version}`)).toBeInTheDocument();
+    expect(screen.getByText(`Versión ${pkg.version}`)).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Buscar actualizaciones' })).toBeInTheDocument();
   });
 });

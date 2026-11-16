@@ -14,3 +14,4 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and 
 - Pantalla de bienvenida y perfil con moneda predeterminada y nombre de usuario.
 - Rediseño visual (HeroUI) y app instalable como PWA.
 - App Android (Capacitor) con APK firmado generado por GitHub Actions.
+- Actualizaciones dentro de la app: en Android revisa GitHub Releases (al iniciar, máximo una vez al día, y desde Perfil → "Buscar actualizaciones") y ofrece descargar el APK nuevo; en la PWA avisa "Hay una versión nueva — Recargar". Es la única llamada de red y no envía datos del usuario.

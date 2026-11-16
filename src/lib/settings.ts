@@ -22,7 +22,7 @@ export function setDefaultCurrency(c: Currency): void {
 /* ---- User name (first-launch welcome + Perfil) ---- */
 export const MAX_NAME_LENGTH = 40;
 const NAME_KEY = 'panda-wallet:user-name';
-let memoryName = ''; // only used if localStorage is unavailable
+let memoryName = ''; // set only when a localStorage write failed (session-only fallback)
 const listeners = new Set<() => void>();
 
 /** Trim and cap to MAX_NAME_LENGTH. */
@@ -32,7 +32,8 @@ export function normalizeName(raw: string): string {
 
 export function getUserName(): string {
   try {
-    return localStorage.getItem(NAME_KEY) ?? '';
+    // `||`, not `??`: a name set while setItem threw is not in storage (getItem → null) but must still show.
+    return localStorage.getItem(NAME_KEY) || memoryName;
   } catch {
     return memoryName;
   }
@@ -42,11 +43,11 @@ export function getUserName(): string {
 export function setUserName(raw: string): boolean {
   const name = normalizeName(raw);
   if (!name) return false;
-  memoryName = name;
   try {
     localStorage.setItem(NAME_KEY, name);
+    memoryName = '';
   } catch {
-    /* storage unavailable: name lasts for the session only */
+    memoryName = name; // storage unavailable: name lasts for the session only
   }
   listeners.forEach((l) => l());
   return true;
@@ -59,4 +60,35 @@ export function subscribeUserName(cb: () => void): () => void {
     listeners.delete(cb);
     window.removeEventListener('storage', cb);
   };
+}
+
+/* ---- Update check (native auto-check throttle) ---- */
+const UPDATE_CHECK_KEY = 'panda-wallet:last-update-check';
+const DAY_MS = 24 * 60 * 60 * 1000;
+let memoryUpdateCheck = 0; // set only when a localStorage write failed
+
+/** Epoch ms of the last completed update check (0 = never). */
+export function getLastUpdateCheck(): number {
+  try {
+    const raw = localStorage.getItem(UPDATE_CHECK_KEY);
+    const n = raw === null ? NaN : Number(raw);
+    return Number.isFinite(n) && n > 0 ? n : memoryUpdateCheck;
+  } catch {
+    return memoryUpdateCheck;
+  }
+}
+
+export function setLastUpdateCheck(ts: number): void {
+  try {
+    localStorage.setItem(UPDATE_CHECK_KEY, String(ts));
+    memoryUpdateCheck = 0;
+  } catch {
+    memoryUpdateCheck = ts; // storage unavailable: throttle lasts for the session only
+  }
+}
+
+/** True when no update check completed in the last 24h (or the clock went backwards). */
+export function shouldAutoCheckUpdates(now: number = Date.now()): boolean {
+  const last = getLastUpdateCheck();
+  return !last || now - last >= DAY_MS || now < last;
 }

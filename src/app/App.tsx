@@ -11,6 +11,7 @@ import { ProfileScreen } from '../features/profile/ProfileScreen';
 import { WelcomeScreen } from '../features/welcome/WelcomeScreen';
 import { useUserName } from '../lib/useUserName';
 import { NativeShell } from '../native/NativeShell';
+import { UpdateManager } from '../features/updates/UpdateManager';
 
 function RoutedShell() {
   return <NativeShell path={useLocation().pathname} />;
@@ -60,6 +61,7 @@ export function App() {
       <StorageGate>
         <Routed />
       </StorageGate>
+      <UpdateManager />
     </MotionConfig>
   );
 }

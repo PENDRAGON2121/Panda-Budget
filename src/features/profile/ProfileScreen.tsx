@@ -4,6 +4,7 @@ import pandaIcon from '../../assets/panda-app-icon.svg';
 import { MAX_NAME_LENGTH, getDefaultCurrency, setDefaultCurrency, setUserName, type Currency } from '../../lib/settings';
 import { useUserName } from '../../lib/useUserName';
 import { isPersisted } from '../../lib/storage';
+import { UpdateCheckCard } from '../updates/UpdateCheckCard';
 
 export function ProfileScreen() {
   const [currency, setCurrency] = useState<Currency>(getDefaultCurrency);
@@ -118,9 +119,7 @@ export function ProfileScreen() {
         </Card.Content>
       </Card>
 
-      <p className="pt-1 text-center text-xs font-semibold text-ink-muted">
-        Panda Wallet · versión {__APP_VERSION__}
-      </p>
+      <UpdateCheckCard />
     </div>
   );
 }
