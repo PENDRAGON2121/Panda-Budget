@@ -48,7 +48,7 @@ export function ProjectForm({ isOpen, onOpenChange }: Props) {
           <Modal.Header>
             <Modal.Heading>Nuevo proyecto</Modal.Heading>
           </Modal.Header>
-          <form onSubmit={submit}>
+          <form onSubmit={submit} className="flex min-h-0 flex-1 flex-col">
             <Modal.Body className="flex flex-col gap-4">
               <TextField fullWidth>
                 <Label>Nombre</Label>

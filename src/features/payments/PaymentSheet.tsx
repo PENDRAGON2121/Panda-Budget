@@ -97,7 +97,7 @@ export function PaymentSheet({ expenseId, installmentId, isOpen, onOpenChange }:
           <Drawer.Header>
             <Drawer.Heading>Registrar pago</Drawer.Heading>
           </Drawer.Header>
-          <form onSubmit={save}>
+          <form onSubmit={save} className="flex min-h-0 flex-1 flex-col">
             <Drawer.Body className="flex flex-col gap-4">
               <TextField fullWidth>
                 <Label>Monto{currency ? ` (${currencySymbol(currency)})` : ''}</Label>
