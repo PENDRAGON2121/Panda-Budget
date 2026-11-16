@@ -7,7 +7,7 @@ import { addPayment } from '../../db/repos';
 import { installmentStatus } from '../../lib/calc';
 import { useGuardedAction } from '../../lib/useGuardedAction';
 import { useKeyboardSafeOpen } from '../../lib/useKeyboardSafeOpen';
-import { currencySymbol, formatMoney, parseAmount } from '../../lib/money';
+import { currencySymbol, formatMoney, parseAmount, formatAmountInput } from '../../lib/money';
 import { compressImage } from './image';
 import { ReceiptPicker } from './ReceiptPicker';
 
@@ -103,9 +103,9 @@ export function PaymentSheet({ expenseId, installmentId, isOpen, onOpenChange }:
                 <Label>Monto{currency ? ` (${currencySymbol(currency)})` : ''}</Label>
                 <Input
                   value={amount}
-                  inputMode="decimal"
+                  inputMode="numeric"
                   placeholder="0"
-                  onChange={(e) => setAmount(e.target.value)}
+                  onChange={(e) => setAmount(formatAmountInput(e.target.value))}
                 />
               </TextField>
 

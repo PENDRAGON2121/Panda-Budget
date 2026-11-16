@@ -86,12 +86,14 @@ test('double submit creates exactly one gasto', async () => {
   expect(await db.expenses.count()).toBe(1);
 });
 
-test('decimal amounts are rounded to whole units', async () => {
+test('amount fields group thousands while typing and save whole units', async () => {
   const user = userEvent.setup();
   render(<ExpenseForm projectId="p1" isOpen onOpenChange={() => {}} />);
   await user.type(screen.getByLabelText(/nombre/i), 'Nevera');
-  await user.type(screen.getByLabelText(/monto planeado/i), '12.50');
+  const amount = screen.getByLabelText(/monto planeado/i);
+  await user.type(amount, '1250000');
+  expect(amount).toHaveValue('1.250.000');
   await user.click(screen.getByRole('button', { name: /crear gasto/i }));
   await waitFor(async () => expect(await db.expenses.count()).toBe(1));
-  expect((await db.expenses.toArray())[0].plannedAmount).toBe(13);
+  expect((await db.expenses.toArray())[0].plannedAmount).toBe(1250000);
 });

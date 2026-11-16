@@ -4,7 +4,7 @@ import { useProjectCurrency } from '../../db/hooks';
 import { FormError } from '../../components/FormError';
 import { createExpense } from '../../db/repos';
 import { MAX_NAME } from '../../lib/limits';
-import { currencySymbol, formatMoney, parseAmount } from '../../lib/money';
+import { currencySymbol, formatMoney, parseAmount, formatAmountInput } from '../../lib/money';
 import { useGuardedAction } from '../../lib/useGuardedAction';
 const MAX_INSTALLMENTS = 60;
 
@@ -63,7 +63,7 @@ export function ExpenseForm({ projectId, isOpen, onOpenChange }: Props) {
     if (t <= 0 || n === 0) return;
     const base = Math.floor(t / n);
     setRows((prev) =>
-      prev.map((r, i) => ({ ...r, amount: String(i === n - 1 ? t - base * (n - 1) : base) })),
+      prev.map((r, i) => ({ ...r, amount: formatAmountInput(i === n - 1 ? t - base * (n - 1) : base) })),
     );
   }
 
@@ -140,8 +140,8 @@ export function ExpenseForm({ projectId, isOpen, onOpenChange }: Props) {
                   <Label>Monto planeado{sym}</Label>
                   <Input
                     value={amount}
-                    inputMode="decimal"
-                    onChange={(e) => setAmount(e.target.value)}
+                    inputMode="numeric"
+                    onChange={(e) => setAmount(formatAmountInput(e.target.value))}
                     placeholder="0"
                   />
                 </TextField>
@@ -163,8 +163,8 @@ export function ExpenseForm({ projectId, isOpen, onOpenChange }: Props) {
                           <Label>Monto total{sym}</Label>
                           <Input
                             value={total}
-                            inputMode="decimal"
-                            onChange={(e) => setTotal(e.target.value)}
+                            inputMode="numeric"
+                            onChange={(e) => setTotal(formatAmountInput(e.target.value))}
                             placeholder="Opcional"
                           />
                         </TextField>
@@ -179,8 +179,8 @@ export function ExpenseForm({ projectId, isOpen, onOpenChange }: Props) {
                               <Label>{`Monto cuota ${i + 1}`}</Label>
                               <Input
                                 value={r.amount}
-                                inputMode="decimal"
-                                onChange={(e) => updateRow(i, { amount: e.target.value })}
+                                inputMode="numeric"
+                                onChange={(e) => updateRow(i, { amount: formatAmountInput(e.target.value) })}
                                 placeholder="0"
                               />
                             </TextField>

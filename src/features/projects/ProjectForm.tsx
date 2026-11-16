@@ -3,7 +3,7 @@ import { Button, Description, Input, Label, ListBox, Modal, Select, TextField } 
 import { FormError } from '../../components/FormError';
 import { createProject } from '../../db/repos';
 import { MAX_NAME } from '../../lib/limits';
-import { currencySymbol, parseAmount } from '../../lib/money';
+import { currencySymbol, parseAmount, formatAmountInput } from '../../lib/money';
 import { getDefaultCurrency } from '../../lib/settings';
 import { useGuardedAction } from '../../lib/useGuardedAction';
 import { useKeyboardSafeOpen } from '../../lib/useKeyboardSafeOpen';
@@ -82,8 +82,8 @@ export function ProjectForm({ isOpen, onOpenChange }: Props) {
                 <Label>Presupuesto total ({currencySymbol(currency)})</Label>
                 <Input
                   value={budget}
-                  inputMode="decimal"
-                  onChange={(e) => setBudget(e.target.value)}
+                  inputMode="numeric"
+                  onChange={(e) => setBudget(formatAmountInput(e.target.value))}
                   placeholder="0"
                 />
                 {!budgetOk && (

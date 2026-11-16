@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { formatCRC, parseAmount, formatMoney } from './money';
+import { formatAmountInput, formatCRC, parseAmount, formatMoney } from './money';
 
 describe('formatCRC', () => {
   it('formats zero', () => expect(formatCRC(0)).toBe('₡0'));
@@ -42,4 +42,26 @@ describe('formatMoney', () => {
   it('unknown codes fall back to ₡', () => expect(formatMoney(2500, 'EUR')).toBe('₡2.500'));
   it('negative keeps sign before symbol', () => expect(formatMoney(-1500, 'USD')).toBe('-$1.500'));
   it('formatCRC delegates to CRC', () => expect(formatCRC(1500)).toBe(formatMoney(1500, 'CRC')));
+});
+
+describe('formatAmountInput', () => {
+  it.each([
+    ['', ''],
+    ['5', '5'],
+    ['1234', '1.234'],
+    ['1250000', '1.250.000'],
+    ['1.250.0001', '12.500.001'],
+    ['₡ 2 000', '2.000'],
+    ['00012', '12'],
+    ['0', '0'],
+    [1500000, '1.500.000'],
+  ])('%s → %s', (raw, out) => {
+    expect(formatAmountInput(raw)).toBe(out);
+  });
+
+  it('round-trips through parseAmount', () => {
+    for (const n of [0, 7, 999, 1000, 25000, 1250000, 38000000]) {
+      expect(parseAmount(formatAmountInput(n))).toBe(n);
+    }
+  });
 });

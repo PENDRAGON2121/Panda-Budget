@@ -3,6 +3,11 @@
 All notable changes to this project are documented in this file.
 The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and the project uses [Semantic Versioning](https://semver.org/).
 
+## [0.0.3] - 2026-11-16
+
+### Changed
+- Todos los campos de monto muestran separadores de miles mientras escribís (1.250.000) y abren el teclado numérico. Los montos son en unidades enteras.
+
 ## [0.0.2] - 2026-11-16
 
 ### Added

@@ -29,3 +29,12 @@ export function parseAmount(input: string): number {
   const n = Math.round((intDigits ? parseInt(intDigits, 10) : 0) + fraction);
   return Number.isFinite(n) ? n : 0;
 }
+
+/**
+ * Live formatting for amount inputs: keeps digits only and groups thousands with "." (1.250.000).
+ * Amounts are whole units, so any typed decimal part is dropped; parseAmount reads the result back.
+ */
+export function formatAmountInput(raw: string | number): string {
+  const digits = String(raw ?? '').replace(/\D/g, '').replace(/^0+(?=\d)/, '');
+  return digits.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+}
