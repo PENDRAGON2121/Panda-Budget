@@ -75,3 +75,12 @@ export function useExpenseCurrency(expenseId: string | undefined): string | unde
     return (e ? (await db.projects.get(e.projectId))?.currency : undefined) ?? 'CRC';
   }, [expenseId]);
 }
+
+/** All installments of every expense of a project. */
+export function useProjectInstallments(projectId: string | undefined) {
+  return useLiveQuery(async () => {
+    if (!projectId) return [];
+    const ids = (await db.expenses.where('projectId').equals(projectId).primaryKeys()) as string[];
+    return db.installments.where('expenseId').anyOf(ids).toArray();
+  }, [projectId]);
+}

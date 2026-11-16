@@ -10,7 +10,9 @@ import type { Expense, Payment } from '../../db/types';
 import { expenseProgress } from '../../lib/calc';
 import { formatMoney } from '../../lib/money';
 import { ExpenseForm } from '../expenses/ExpenseForm';
+import { MovementsList } from './MovementsList';
 import { ProjectSummaryCard } from './ProjectSummaryCard';
+import { ProjectTabs, type TabId } from './ProjectTabs';
 
 function ExpenseRow({ expense, payments, currency }: { expense: Expense; payments: Payment[]; currency: string }) {
   const p = expenseProgress(expense, payments);
@@ -47,6 +49,7 @@ export function ProjectDetail() {
   const payments = useAllPayments();
   const [formOpen, setFormOpen] = useState(false);
   const [confirmDelete, setConfirmDelete] = useState(false);
+  const [tab, setTab] = useState<TabId>('gastos');
   const navigate = useNavigate();
 
   if (project === null) {
@@ -84,22 +87,31 @@ export function ProjectDetail() {
       </motion.div>
 
       {ready && (
-      <section aria-label="Gastos" className="flex flex-col gap-2.5">
-        <h2 className="font-display text-[15px] font-black text-ink">
-          Gastos <small className="font-bold text-ink-muted">· {expenses.length}</small>
-        </h2>
-        {expenses.length === 0 ? (
-          <Card className="rounded-lg text-center shadow-card">
-            <Card.Content className="flex flex-col items-center gap-1 py-6">
-              <div aria-hidden className="text-4xl">🐼</div>
-              <p className="font-display text-[15px] font-black text-ink">Agregá tu primer gasto</p>
-              <p className="text-sm text-ink-muted">Dividí el presupuesto en gastos para ver en qué se va la plata.</p>
-            </Card.Content>
-          </Card>
-        ) : (
-          expenses.map((e) => <ExpenseRow key={e.id} expense={e} payments={payments} currency={project.currency} />)
-        )}
-      </section>
+        <ProjectTabs
+          value={tab}
+          onChange={setTab}
+          panels={{
+            gastos: (
+          <section aria-label="Gastos" className="flex flex-col gap-2.5">
+            <h2 className="font-display text-[15px] font-black text-ink">
+              Gastos <small className="font-bold text-ink-muted">· {expenses.length}</small>
+            </h2>
+            {expenses.length === 0 ? (
+              <Card className="rounded-lg text-center shadow-card">
+                <Card.Content className="flex flex-col items-center gap-1 py-6">
+                  <div aria-hidden className="text-4xl">🐼</div>
+                  <p className="font-display text-[15px] font-black text-ink">Agregá tu primer gasto</p>
+                  <p className="text-sm text-ink-muted">Dividí el presupuesto en gastos para ver en qué se va la plata.</p>
+                </Card.Content>
+              </Card>
+            ) : (
+              expenses.map((e) => <ExpenseRow key={e.id} expense={e} payments={payments} currency={project.currency} />)
+            )}
+          </section>
+            ),
+            movimientos: <MovementsList project={project} />,
+          }}
+        />
       )}
       <ConfirmDialog
         isOpen={confirmDelete}
