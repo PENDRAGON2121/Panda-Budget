@@ -5,6 +5,7 @@ import { ProjectsScreen } from '../features/projects/ProjectsScreen';
 import { ProjectDetail } from '../features/projects/ProjectDetail';
 import { ExpenseDetail } from '../features/expenses/ExpenseDetail';
 import { HomeScreen } from '../features/home/HomeScreen';
+import { CalendarScreen } from '../features/calendar/CalendarScreen';
 
 function Layout() {
   return (
@@ -31,7 +32,7 @@ export function App() {
           <Route path="proyectos" element={<ProjectsScreen />} />
           <Route path="proyectos/:id" element={<ProjectDetail />} />
           <Route path="gastos/:id" element={<ExpenseDetail />} />
-          <Route path="calendario" element={<Placeholder title="Calendario" />} />
+          <Route path="calendario" element={<CalendarScreen />} />
           <Route path="perfil" element={<Placeholder title="Perfil" />} />
         </Route>
       </Routes>
