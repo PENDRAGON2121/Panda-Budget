@@ -4,7 +4,7 @@ import { CalendarDate, getLocalTimeZone, today } from '@internationalized/date';
 import { FormError } from '../../components/FormError';
 import { useExpenseCurrency, useInstallments, usePayments } from '../../db/hooks';
 import { addPayment } from '../../db/repos';
-import { installmentStatus } from '../../lib/calc';
+import { installmentRemaining, installmentStatus } from '../../lib/calc';
 import { useGuardedAction } from '../../lib/useGuardedAction';
 import { useKeyboardSafeOpen } from '../../lib/useKeyboardSafeOpen';
 import { currencySymbol, formatMoney, parseAmount, formatAmountInput } from '../../lib/money';
@@ -164,7 +164,14 @@ export function PaymentSheet({ expenseId, installmentId, isOpen, onOpenChange }:
                         <ListBox.ItemIndicator />
                       </ListBox.Item>
                       {installments.map((i) => {
-                        const text = `Cuota ${i.index} · ${formatMoney(i.plannedAmount, currency)}`;
+                        const left = installmentRemaining(i, payments ?? []);
+                        const text = `Cuota ${i.index} · ${
+                          left > 0 && left < i.plannedAmount
+                            ? `faltan ${formatMoney(left, currency)} de ${formatMoney(i.plannedAmount, currency)}`
+                            : left === 0
+                              ? `${formatMoney(i.plannedAmount, currency)} · pagada`
+                              : formatMoney(i.plannedAmount, currency)
+                        }`;
                         return (
                           <ListBox.Item key={i.id} id={i.id} textValue={text}>
                             {text}

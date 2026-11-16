@@ -35,6 +35,11 @@ export function installmentStatus(
   return next && next.id === inst.id ? 'proxima' : 'pendiente';
 }
 
+/** What is still owed on one cuota: planned minus what was paid toward it (never below 0). */
+export function installmentRemaining(inst: Installment, payments: Payment[]): number {
+  return Math.max(0, inst.plannedAmount - sum(payments.filter((p) => p.installmentId === inst.id)));
+}
+
 export interface DistributionSegment {
   expenseId: string;
   /** Amount PAID for this gasto. */

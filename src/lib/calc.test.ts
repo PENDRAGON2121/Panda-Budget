@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { expenseProgress, installmentStatus, projectSummary } from './calc';
+import { expenseProgress, installmentRemaining, installmentStatus, projectSummary } from './calc';
 import type { Project, Expense, Installment, Payment } from '../db/types';
 
 const exp = (id: string, planned: number): Expense => ({
@@ -151,4 +151,14 @@ describe('projectSummary', () => {
       paid: 0, available: 1000, pct: 0, overAllocated: false, distribution: [], freePct: 100, overflowPct: 0,
     });
   });
+});
+
+describe('installmentRemaining', () => {
+  const inst = { id: 'i1', expenseId: 'e', index: 1, plannedAmount: 1000, createdAt: 0 } as Installment;
+  const pay = (amount: number, installmentId?: string) =>
+    ({ id: String(amount), expenseId: 'e', amount, date: 0, createdAt: 0, installmentId }) as Payment;
+  it('is the full amount with no payments', () => expect(installmentRemaining(inst, [])).toBe(1000));
+  it('subtracts partial payments to that cuota only', () =>
+    expect(installmentRemaining(inst, [pay(300, 'i1'), pay(200, 'i1'), pay(999, 'other'), pay(50)])).toBe(500));
+  it('never goes below zero', () => expect(installmentRemaining(inst, [pay(1500, 'i1')])).toBe(0));
 });

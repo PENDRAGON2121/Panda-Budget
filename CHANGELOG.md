@@ -3,6 +3,12 @@
 All notable changes to this project are documented in this file.
 The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and the project uses [Semantic Versioning](https://semver.org/).
 
+## [0.0.4] - 2026-11-16
+
+### Added
+- Gasto en cuotas: cada cuota pendiente muestra cuánto falta por pagar ("Faltan ₡X"), descontando los abonos parciales.
+- Registrar pago: en "Aplicar a", cada cuota indica cuánto falta o si ya está pagada.
+
 ## [0.0.3] - 2026-11-16
 
 ### Changed

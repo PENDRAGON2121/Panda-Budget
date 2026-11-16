@@ -2,7 +2,7 @@ import { Button, Card } from '@heroui/react';
 import { motion, useReducedMotion } from 'motion/react';
 import { useLayoutEffect, useRef, useState } from 'react';
 import type { Installment, Payment } from '../../db/types';
-import { installmentStatus } from '../../lib/calc';
+import { installmentStatus, installmentRemaining } from '../../lib/calc';
 import { formatMoney } from '../../lib/money';
 import { ReceiptThumb } from '../payments/ReceiptThumb';
 
@@ -148,12 +148,17 @@ export function InstallmentTimeline({
                     )}
                   </div>
                 </div>
-                <div
-                  className={`shrink-0 text-right text-[13px] font-extrabold tabular-nums ${
-                    status === 'pendiente' ? 'text-ink-muted' : 'text-ink'
-                  }`}
-                >
-                  {formatMoney(inst.plannedAmount, currency)}
+                <div className="shrink-0 text-right tabular-nums">
+                  <div
+                    className={`text-[13px] font-extrabold ${status === 'pendiente' ? 'text-ink-muted' : 'text-ink'}`}
+                  >
+                    {formatMoney(inst.plannedAmount, currency)}
+                  </div>
+                  {status !== 'pagada' && (
+                    <div data-testid="cuota-remaining" className="text-[10.5px] font-bold text-bamboo-ink">
+                      Faltan {formatMoney(installmentRemaining(inst, payments), currency)}
+                    </div>
+                  )}
                 </div>
                 {receiptId && <ReceiptThumb receiptId={receiptId} />}
                 {latest && onDeletePayment && (
