@@ -6,6 +6,7 @@ import { ProjectDetail } from '../features/projects/ProjectDetail';
 import { ExpenseDetail } from '../features/expenses/ExpenseDetail';
 import { HomeScreen } from '../features/home/HomeScreen';
 import { CalendarScreen } from '../features/calendar/CalendarScreen';
+import { ProfileScreen } from '../features/profile/ProfileScreen';
 
 function Layout() {
   return (
@@ -18,10 +19,6 @@ function Layout() {
   );
 }
 
-const Placeholder = ({ title }: { title: string }) => (
-  <h1 className="font-display text-[17px] font-black">{title}</h1>
-);
-
 export function App() {
   return (
     <MotionConfig reducedMotion="user">
@@ -33,7 +30,7 @@ export function App() {
           <Route path="proyectos/:id" element={<ProjectDetail />} />
           <Route path="gastos/:id" element={<ExpenseDetail />} />
           <Route path="calendario" element={<CalendarScreen />} />
-          <Route path="perfil" element={<Placeholder title="Perfil" />} />
+          <Route path="perfil" element={<ProfileScreen />} />
         </Route>
       </Routes>
     </BrowserRouter>

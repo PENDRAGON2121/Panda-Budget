@@ -1,0 +1,78 @@
+import { useState } from 'react';
+import { Card, Radio, RadioGroup } from '@heroui/react';
+import pandaIcon from '../../assets/panda-app-icon.svg';
+import { getDefaultCurrency, setDefaultCurrency, type Currency } from '../../lib/settings';
+
+export function ProfileScreen() {
+  const [currency, setCurrency] = useState<Currency>(getDefaultCurrency);
+
+  const onChange = (value: string) => {
+    const c: Currency = value === 'USD' ? 'USD' : 'CRC';
+    setDefaultCurrency(c);
+    setCurrency(c);
+  };
+
+  return (
+    <div className="flex flex-col gap-3.5">
+      <header className="flex items-center gap-3 pb-1 pt-2">
+        <div className="size-[46px] shrink-0 overflow-hidden rounded-[15px] shadow-card">
+          <img src={pandaIcon} alt="Panda Wallet" className="block size-full object-cover" />
+        </div>
+        <div>
+          <div className="font-sans text-xs font-semibold text-ink-muted">Tu cuenta</div>
+          <h1 className="font-display text-lg font-black leading-tight text-ink">Perfil</h1>
+        </div>
+      </header>
+
+      <Card className="shadow-card">
+        <Card.Content className="flex flex-col gap-3">
+          <RadioGroup
+            aria-label="Moneda predeterminada"
+            value={currency}
+            onChange={onChange}
+            name="currency"
+          >
+            <span className="font-display text-[15px] font-extrabold text-ink">
+              Moneda predeterminada
+            </span>
+            <Radio value="CRC">
+              <Radio.Control>
+                <Radio.Indicator />
+              </Radio.Control>
+              <Radio.Content>Colones (₡ CRC)</Radio.Content>
+            </Radio>
+            <Radio value="USD">
+              <Radio.Control>
+                <Radio.Indicator />
+              </Radio.Control>
+              <Radio.Content>Dólares ($ USD)</Radio.Content>
+            </Radio>
+          </RadioGroup>
+        </Card.Content>
+      </Card>
+
+      <Card className="shadow-card">
+        <Card.Content className="flex flex-col gap-1.5">
+          <h2 className="font-display text-[15px] font-extrabold text-ink">Datos locales</h2>
+          <p className="text-[13px] leading-snug text-ink-muted">
+            Tus proyectos, gastos y pagos se guardan solo en este dispositivo. Nada se envía a
+            ningún servidor, y funciona sin conexión.
+          </p>
+        </Card.Content>
+      </Card>
+
+      <Card className="shadow-card opacity-60" aria-disabled="true">
+        <Card.Content className="flex flex-col gap-1">
+          <h2 className="font-display text-[15px] font-extrabold text-ink">
+            Respaldo / exportar (próximamente)
+          </h2>
+          <p className="text-[13px] text-ink-muted">Disponible en una próxima fase.</p>
+        </Card.Content>
+      </Card>
+
+      <p className="pt-1 text-center text-xs font-semibold text-ink-muted">
+        Panda Wallet · versión 0.1
+      </p>
+    </div>
+  );
+}
