@@ -82,16 +82,24 @@ export function InstallmentTimeline({
             <span key={i} className="absolute inset-x-0 h-[3px] bg-node" style={{ top: y }} />
           ))}
         </div>
+        {/* Leaf pair at the growing tip (design: 34×30, above the dots, stops just short of the próxima dot).
+            Hidden until the cane is tall enough to hold it, so it never pokes into the heading above. */}
         <span
-          data-testid="bamboo-leaf"
-          className="absolute z-20 h-[9px] w-[18px] animate-leaf-sway origin-right rounded-[100%_0_100%_0] bg-leaf"
-          style={{ right: 6, bottom: 12 }}
-        />
-        <span
-          data-testid="bamboo-leaf"
-          className="absolute z-20 h-[9px] w-[16px] animate-leaf-sway-alt origin-left rounded-[0_100%_0_100%] bg-leaf-light"
-          style={{ left: 6, bottom: 17 }}
-        />
+          hidden={geo.grown < 44}
+          className="absolute z-20 block h-[30px] w-[34px] drop-shadow-[0_2px_3px_rgba(46,90,34,0.25)]"
+          style={{ left: -13, bottom: 10 }}
+        >
+          <svg
+            width="34"
+            height="30"
+            viewBox="0 0 34 30"
+            className="block animate-leaf-sway overflow-visible"
+            style={{ transformOrigin: '17px 26px' }}
+          >
+            <path data-testid="bamboo-leaf" d="M17 26 C19 15 25 8 34 4 C31 14 25 22 17 26 Z" className="fill-leaf" />
+            <path data-testid="bamboo-leaf" d="M17 26 C14 17 7 12 -4 11 C0 20 8 25 17 26 Z" className="fill-leaf-light" />
+          </svg>
+        </span>
       </motion.div>
       {installments.map((inst, idx) => {
         const status = statuses[idx];
