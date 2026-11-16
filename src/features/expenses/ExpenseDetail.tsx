@@ -90,7 +90,7 @@ export function ExpenseDetail() {
                   <div className="text-[11.5px] font-semibold text-ink-muted">Pagado</div>
                   <div
                     data-testid="pagado"
-                    className={`text-sm font-extrabold tabular-nums ${p.over ? 'text-danger' : 'text-ink'}`}
+                    className={`text-sm font-extrabold tabular-nums ${p.over ? 'text-danger-ink' : 'text-ink'}`}
                   >
                     {formatMoney(p.paid, currency)}
                   </div>
@@ -101,7 +101,7 @@ export function ExpenseDetail() {
                   </div>
                   <div
                     data-testid="restante"
-                    className={`text-sm font-extrabold tabular-nums ${p.over ? 'text-danger' : 'text-ink'}`}
+                    className={`text-sm font-extrabold tabular-nums ${p.over ? 'text-danger-ink' : 'text-ink'}`}
                   >
                     {formatMoney(Math.abs(p.remaining), currency)}
                   </div>

@@ -29,7 +29,7 @@ function ExpenseRow({ expense, payments, currency }: { expense: Expense; payment
               {expense.type === 'installments' ? 'Cuotas' : 'Único'}
             </span>
           </div>
-          <div className={`text-[11px] tabular-nums ${p.over ? 'font-bold text-danger' : 'text-ink-muted'}`}>
+          <div className={`text-[11px] tabular-nums ${p.over ? 'font-bold text-danger-ink' : 'text-ink-muted'}`}>
             {formatMoney(p.paid, currency)} de {formatMoney(expense.plannedAmount, currency)}
           </div>
           <ProgressBar aria-label={`Progreso de ${expense.name}`} value={shown} className="w-full">

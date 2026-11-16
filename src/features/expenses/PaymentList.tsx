@@ -46,7 +46,7 @@ export function PaymentList({
                     variant="ghost"
                     aria-label={`Eliminar pago de ${formatMoney(p.amount, currency)}`}
                     onPress={() => onDelete(p)}
-                    className="text-danger"
+                    className="text-danger-ink"
                   >
                     🗑
                   </Button>

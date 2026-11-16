@@ -39,7 +39,7 @@ test('shows planeado, pagado and restante', async () => {
   expect(await screen.findByTestId('planeado')).toHaveTextContent(formatCRC(3000000));
   expect(await screen.findByTestId('pagado')).toHaveTextContent(formatCRC(1000000));
   expect(screen.getByTestId('restante')).toHaveTextContent(formatCRC(2000000));
-  expect(screen.getByTestId('pagado')).not.toHaveClass('text-danger');
+  expect(screen.getByTestId('pagado')).not.toHaveClass('text-danger-ink');
 });
 
 test('marks the earliest unpaid cuota as proxima and the paid one as pagada', async () => {
@@ -60,8 +60,8 @@ test('flags over-spend in red when paid exceeds planned', async () => {
   const pagado = await screen.findByTestId('pagado');
   await screen.findByTestId('restante');
   expect(pagado).toHaveTextContent(formatCRC(3500000));
-  expect(pagado).toHaveClass('text-danger');
-  expect(screen.getByTestId('restante')).toHaveClass('text-danger');
+  expect(pagado).toHaveClass('text-danger-ink');
+  expect(screen.getByTestId('restante')).toHaveClass('text-danger-ink');
 });
 
 test('single expense has no timeline', async () => {

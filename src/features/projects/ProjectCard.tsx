@@ -29,7 +29,7 @@ export function ProjectCard({ project, pct, expenseCount }: Props) {
             </ProgressBar.Track>
           </ProgressBar>
           <div className="text-xs text-ink-muted">
-            <span data-testid="project-pct" className={over ? 'font-bold text-danger' : undefined}>
+            <span data-testid="project-pct" className={over ? 'font-bold text-danger-ink' : undefined}>
               {Math.round(pct)}%
             </span>{' '}
             · {expenseCount} {expenseCount === 1 ? 'gasto' : 'gastos'}

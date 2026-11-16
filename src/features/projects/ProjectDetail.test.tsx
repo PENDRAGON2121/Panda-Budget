@@ -175,12 +175,12 @@ test('over-budget: the "% ejecutado" chip uses danger when pct > 100', async () 
   await addPayment({ expenseId: exps[0].id, amount: 150000, date: Date.now() });
   renderAt(p.id);
   const chip = await screen.findByText('150% ejecutado');
-  expect(chip).toHaveClass('text-danger');
+  expect(chip).toHaveClass('text-danger-ink');
 });
 
 test('within budget: the "% ejecutado" chip is not danger', async () => {
   const { p, exps } = await seed([400000], 1000000);
   await addPayment({ expenseId: exps[0].id, amount: 250000, date: Date.now() });
   renderAt(p.id);
-  expect(await screen.findByText('25% ejecutado')).not.toHaveClass('text-danger');
+  expect(await screen.findByText('25% ejecutado')).not.toHaveClass('text-danger-ink');
 });

@@ -33,7 +33,7 @@ function GastosList({ projectId }: { projectId: string }) {
                 <span aria-hidden className="text-lg">{e.icon ?? '🧾'}</span>
                 <span className="break-words font-display text-[13.5px] font-extrabold text-ink">{e.name}</span>
               </div>
-              <div className={`mt-1 text-[11px] tabular-nums ${p.over ? 'font-bold text-danger' : 'text-ink-muted'}`}>
+              <div className={`mt-1 text-[11px] tabular-nums ${p.over ? 'font-bold text-danger-ink' : 'text-ink-muted'}`}>
                 {formatMoney(p.paid, currency)} de {formatMoney(e.plannedAmount, currency)}
               </div>
               <ProgressBar aria-label={`Progreso de ${e.name}`} value={shown} className="mt-1.5 w-full">

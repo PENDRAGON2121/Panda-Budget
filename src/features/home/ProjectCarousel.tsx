@@ -109,7 +109,7 @@ export function ProjectCarousel({ projects, expenses, payments, activeIndex, onS
                       <h2 className="break-words font-display text-[15px] font-black text-ink">{p.name}</h2>
                       <span
                         className={`shrink-0 rounded-full px-2.5 py-0.5 text-[10.5px] font-extrabold ${
-                          s.pct > 100 ? 'bg-danger/10 text-danger' : 'bg-icon-bg text-green-deep'
+                          s.pct > 100 ? 'bg-danger/10 text-danger-ink' : 'bg-icon-bg text-green-deep'
                         }`}
                       >
                         {Math.round(s.pct)}% ejecutado
@@ -125,7 +125,7 @@ export function ProjectCarousel({ projects, expenses, payments, activeIndex, onS
                       </div>
                       <div>
                         Disponible
-                        <b className={`block text-sm font-extrabold tabular-nums ${s.available < 0 ? 'text-danger' : 'text-ink'}`}>
+                        <b className={`block text-sm font-extrabold tabular-nums ${s.available < 0 ? 'text-danger-ink' : 'text-ink'}`}>
                           {formatMoney(s.available, p.currency)}
                         </b>
                       </div>

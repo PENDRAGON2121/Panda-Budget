@@ -155,7 +155,7 @@ export function InstallmentTimeline({
                     variant="ghost"
                     aria-label={`Eliminar pago de cuota ${inst.index}`}
                     onPress={() => onDeletePayment(latest)}
-                    className="text-danger"
+                    className="text-danger-ink"
                   >
                     🗑
                   </Button>

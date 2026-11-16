@@ -133,7 +133,7 @@ test('over-budget project card: progress fill and percentage use danger', async 
   render(<MemoryRouter><ProjectsScreen /></MemoryRouter>);
   await screen.findByText('Casa');
   expect(await screen.findByTestId('project-progress-fill')).toHaveClass('bg-danger');
-  expect(screen.getByTestId('project-pct')).toHaveClass('text-danger');
+  expect(screen.getByTestId('project-pct')).toHaveClass('text-danger-ink');
   expect(screen.getByTestId('project-pct')).toHaveTextContent('150%');
 });
 
@@ -144,5 +144,5 @@ test('within-budget project card keeps the leaf fill', async () => {
   render(<MemoryRouter><ProjectsScreen /></MemoryRouter>);
   await screen.findByText('Casa');
   expect(await screen.findByTestId('project-progress-fill')).toHaveClass('bg-leaf');
-  expect(screen.getByTestId('project-pct')).not.toHaveClass('text-danger');
+  expect(screen.getByTestId('project-pct')).not.toHaveClass('text-danger-ink');
 });

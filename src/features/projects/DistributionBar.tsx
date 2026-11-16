@@ -55,7 +55,7 @@ export function DistributionBar({ expenses, distribution, freePct, overflowPct }
           return (
             <li
               key={e.id}
-              className={`flex items-center gap-1.5 text-[10.5px] font-semibold ${over ? 'text-danger' : 'text-ink-muted'}`}
+              className={`flex items-center gap-1.5 text-[10.5px] font-semibold ${over ? 'text-danger-ink' : 'text-ink-muted'}`}
             >
               <i className="block h-2 w-2 rounded-[3px]" style={{ background: over ? '#e0592f' : DOT[i % DOT.length] }} />
               {e.name}
@@ -67,7 +67,7 @@ export function DistributionBar({ expenses, distribution, freePct, overflowPct }
           Disponible
         </li>
         {overflowPct > 0 && (
-          <li className="flex items-center gap-1.5 text-[10.5px] font-semibold text-danger">
+          <li className="flex items-center gap-1.5 text-[10.5px] font-semibold text-danger-ink">
             <i className="block h-2 w-2 rounded-[3px] bg-danger" />
             Sobregiro
           </li>

@@ -55,7 +55,7 @@ export function DayRecords({ iso, records }: { iso: string; records: DayRecord[]
                       variant="ghost"
                       aria-label={`Eliminar pago de ${r.expenseName}`}
                       onPress={() => setToDelete(r)}
-                      className="text-danger"
+                      className="text-danger-ink"
                     >
                       🗑
                     </Button>
