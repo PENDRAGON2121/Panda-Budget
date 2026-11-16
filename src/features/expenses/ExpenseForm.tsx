@@ -97,6 +97,8 @@ export function ExpenseForm({ projectId, isOpen, onOpenChange }: Props) {
   }
 
   const plannedSum = rowAmounts.reduce((s, a) => s + a, 0);
+  // currency is undefined while the project loads: omit the symbol rather than flash a wrong one
+  const sym = currency ? ` (${currencySymbol(currency)})` : '';
 
   return (
     <Modal.Backdrop isOpen={isOpen} onOpenChange={change}>
@@ -135,7 +137,7 @@ export function ExpenseForm({ projectId, isOpen, onOpenChange }: Props) {
 
               {type === 'single' ? (
                 <TextField fullWidth>
-                  <Label>Monto planeado ({currencySymbol(currency)})</Label>
+                  <Label>Monto planeado{sym}</Label>
                   <Input
                     value={amount}
                     inputMode="decimal"
@@ -158,7 +160,7 @@ export function ExpenseForm({ projectId, isOpen, onOpenChange }: Props) {
                     <>
                       <div className="flex items-end gap-2">
                         <TextField fullWidth>
-                          <Label>Monto total ({currencySymbol(currency)})</Label>
+                          <Label>Monto total{sym}</Label>
                           <Input
                             value={total}
                             inputMode="decimal"
@@ -193,9 +195,11 @@ export function ExpenseForm({ projectId, isOpen, onOpenChange }: Props) {
                           </li>
                         ))}
                       </ol>
-                      <p className="text-sm font-bold tabular-nums text-ink">
-                        Total planeado: {formatMoney(plannedSum, currency)}
-                      </p>
+                      {currency && (
+                        <p className="text-sm font-bold tabular-nums text-ink">
+                          Total planeado: {formatMoney(plannedSum, currency)}
+                        </p>
+                      )}
                     </>
                   )}
                 </>

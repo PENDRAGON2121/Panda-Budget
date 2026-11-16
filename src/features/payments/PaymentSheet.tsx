@@ -97,7 +97,7 @@ export function PaymentSheet({ expenseId, installmentId, isOpen, onOpenChange }:
           <form onSubmit={save}>
             <Drawer.Body className="flex flex-col gap-4">
               <TextField fullWidth>
-                <Label>Monto ({currencySymbol(currency)})</Label>
+                <Label>Monto{currency ? ` (${currencySymbol(currency)})` : ''}</Label>
                 <Input
                   value={amount}
                   inputMode="decimal"
@@ -134,7 +134,7 @@ export function PaymentSheet({ expenseId, installmentId, isOpen, onOpenChange }:
                 </DatePicker.Popover>
               </DatePicker>
 
-              {installments && installments.length > 0 && (
+              {installments && installments.length > 0 && currency && (
                 <Select
                   fullWidth
                   aria-label="Aplicar a"

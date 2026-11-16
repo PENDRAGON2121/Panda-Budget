@@ -105,7 +105,11 @@ export function ProjectCarousel({ projects, expenses, payments, activeIndex, onS
                   <Card.Content className="gap-0 p-1">
                     <div className="flex items-center justify-between gap-2">
                       <h2 className="break-words font-display text-[15px] font-black text-ink">{p.name}</h2>
-                      <span className="shrink-0 rounded-full bg-icon-bg px-2.5 py-0.5 text-[10.5px] font-extrabold text-green-deep">
+                      <span
+                        className={`shrink-0 rounded-full px-2.5 py-0.5 text-[10.5px] font-extrabold ${
+                          s.pct > 100 ? 'bg-danger/10 text-danger' : 'bg-icon-bg text-green-deep'
+                        }`}
+                      >
                         {Math.round(s.pct)}% ejecutado
                       </span>
                     </div>

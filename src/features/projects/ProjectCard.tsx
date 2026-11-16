@@ -12,6 +12,7 @@ interface Props {
 
 export function ProjectCard({ project, pct, expenseCount }: Props) {
   const shown = Math.min(100, Math.max(0, pct));
+  const over = pct > 100;
   return (
     <Link to={`/proyectos/${project.id}`} className="block no-underline">
       <motion.div layoutId={`project-card-${project.id}`} className="h-full rounded-lg">
@@ -24,11 +25,14 @@ export function ProjectCard({ project, pct, expenseCount }: Props) {
           </div>
           <ProgressBar aria-label={`Progreso de ${project.name}`} value={shown} className="w-full">
             <ProgressBar.Track className="h-1.5">
-              <ProgressBar.Fill className="bg-leaf" />
+              <ProgressBar.Fill data-testid="project-progress-fill" className={over ? 'bg-danger' : 'bg-leaf'} />
             </ProgressBar.Track>
           </ProgressBar>
           <div className="text-xs text-ink-muted">
-            {Math.round(pct)}% · {expenseCount} {expenseCount === 1 ? 'gasto' : 'gastos'}
+            <span data-testid="project-pct" className={over ? 'font-bold text-danger' : undefined}>
+              {Math.round(pct)}%
+            </span>{' '}
+            · {expenseCount} {expenseCount === 1 ? 'gasto' : 'gastos'}
           </div>
         </Card.Content>
       </Card>

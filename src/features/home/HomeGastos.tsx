@@ -15,7 +15,7 @@ function GastosList({ projectId }: { projectId: string }) {
   const expenses = useExpenses(projectId);
   const payments = useAllPayments();
   const currency = useProjectCurrency(projectId);
-  if (!expenses || !payments) return null;
+  if (!expenses || !payments || !currency) return null;
   if (expenses.length === 0) {
     return <p className="py-4 text-center text-sm text-ink-muted">Este proyecto aún no tiene gastos.</p>;
   }

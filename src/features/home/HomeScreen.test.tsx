@@ -3,7 +3,7 @@ import userEvent from '@testing-library/user-event';
 import { MemoryRouter } from 'react-router-dom';
 import { beforeEach } from 'vitest';
 import { db } from '../../db/db';
-import { createExpense, createProject, deleteProject } from '../../db/repos';
+import { addPayment, createExpense, createProject, deleteProject } from '../../db/repos';
 import type { Project } from '../../db/types';
 import { HomeScreen } from './HomeScreen';
 import { buildLoopSlides, SLIDE_BASIS_PCT } from './ProjectCarousel';
@@ -82,6 +82,40 @@ test('deleting the active last project clamps the carousel to a valid project', 
   );
   expect(screen.getByRole('tab', { name: 'Ir a Proyecto B' })).toHaveAttribute('aria-selected', 'true');
   expect(await screen.findByText('Gasto de B')).toBeInTheDocument();
+});
+
+test('empty Inicio also shows the greeting header (logo, ¡Hola! 👋, Bienvenido)', async () => {
+  renderHome();
+  expect(await screen.findByText('Agregá un proyecto')).toBeInTheDocument();
+  expect(screen.getByRole('heading', { level: 1, name: 'Bienvenido' })).toBeInTheDocument();
+  expect(screen.getByText('¡Hola! 👋')).toBeInTheDocument();
+  expect(screen.getByAltText('Panda Wallet')).toBeInTheDocument();
+});
+
+test('with projects, the circular + FAB "Nuevo proyecto" opens the project form', async () => {
+  await seed();
+  const user = userEvent.setup();
+  renderHome();
+  await screen.findByLabelText('Proyecto Proyecto A');
+  const fab = screen.getByRole('button', { name: 'Nuevo proyecto' });
+  expect(fab).toHaveClass('rounded-full');
+  await user.click(fab);
+  expect(await screen.findByRole('heading', { name: 'Nuevo proyecto' })).toBeInTheDocument();
+});
+
+test('a USD project never flashes ₡ in the Inicio gastos while currency loads', async () => {
+  const p = await createProject({ name: 'Viaje', currency: 'USD', totalBudget: 5000 });
+  const e = await createExpense({ projectId: p.id, name: 'Vuelos', type: 'single', plannedAmount: 900 });
+  await addPayment({ expenseId: e.id, amount: 300, date: Date.now() });
+  let sawColon = false;
+  const mo = new MutationObserver(() => {
+    if (document.body.textContent?.includes('₡')) sawColon = true;
+  });
+  mo.observe(document.body, { childList: true, subtree: true, characterData: true });
+  renderHome();
+  expect(await screen.findByText('$300 de $900')).toBeInTheDocument();
+  mo.disconnect();
+  expect(sawColon).toBe(false);
 });
 
 describe('loop slides', () => {

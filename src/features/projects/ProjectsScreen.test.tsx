@@ -3,7 +3,7 @@ import userEvent from '@testing-library/user-event';
 import { MemoryRouter } from 'react-router-dom';
 import { afterEach, beforeEach, vi } from 'vitest';
 import { db } from '../../db/db';
-import { createProject } from '../../db/repos';
+import { addPayment, createExpense, createProject } from '../../db/repos';
 import { formatCRC } from '../../lib/money';
 import { ProjectsScreen } from './ProjectsScreen';
 import { ProjectForm } from './ProjectForm';
@@ -124,4 +124,25 @@ test('double submit creates exactly one project', async () => {
   await waitFor(async () => expect(await db.projects.count()).toBe(1));
   await new Promise((r) => setTimeout(r, 50));
   expect(await db.projects.count()).toBe(1);
+});
+
+test('over-budget project card: progress fill and percentage use danger', async () => {
+  const p = await createProject({ name: 'Casa', currency: 'CRC', totalBudget: 1000 });
+  const e = await createExpense({ projectId: p.id, name: 'X', type: 'single', plannedAmount: 1000 });
+  await addPayment({ expenseId: e.id, amount: 1500, date: Date.now() });
+  render(<MemoryRouter><ProjectsScreen /></MemoryRouter>);
+  await screen.findByText('Casa');
+  expect(await screen.findByTestId('project-progress-fill')).toHaveClass('bg-danger');
+  expect(screen.getByTestId('project-pct')).toHaveClass('text-danger');
+  expect(screen.getByTestId('project-pct')).toHaveTextContent('150%');
+});
+
+test('within-budget project card keeps the leaf fill', async () => {
+  const p = await createProject({ name: 'Casa', currency: 'CRC', totalBudget: 1000 });
+  const e = await createExpense({ projectId: p.id, name: 'X', type: 'single', plannedAmount: 1000 });
+  await addPayment({ expenseId: e.id, amount: 500, date: Date.now() });
+  render(<MemoryRouter><ProjectsScreen /></MemoryRouter>);
+  await screen.findByText('Casa');
+  expect(await screen.findByTestId('project-progress-fill')).toHaveClass('bg-leaf');
+  expect(screen.getByTestId('project-pct')).not.toHaveClass('text-danger');
 });

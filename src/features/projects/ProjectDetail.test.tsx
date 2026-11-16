@@ -169,3 +169,18 @@ test('Eliminar proyecto confirms, cascades and navigates to /proyectos', async (
   expect(await db.expenses.count()).toBe(0);
   expect(await db.payments.count()).toBe(0);
 });
+
+test('over-budget: the "% ejecutado" chip uses danger when pct > 100', async () => {
+  const { p, exps } = await seed([400000], 100000);
+  await addPayment({ expenseId: exps[0].id, amount: 150000, date: Date.now() });
+  renderAt(p.id);
+  const chip = await screen.findByText('150% ejecutado');
+  expect(chip).toHaveClass('text-danger');
+});
+
+test('within budget: the "% ejecutado" chip is not danger', async () => {
+  const { p, exps } = await seed([400000], 1000000);
+  await addPayment({ expenseId: exps[0].id, amount: 250000, date: Date.now() });
+  renderAt(p.id);
+  expect(await screen.findByText('25% ejecutado')).not.toHaveClass('text-danger');
+});

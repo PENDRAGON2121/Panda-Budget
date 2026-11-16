@@ -169,3 +169,18 @@ describe('deletion', () => {
     await waitFor(() => expect(within(screen.getByRole('list', { name: 'Pagos' })).getAllByRole('listitem')).toHaveLength(1));
   });
 });
+
+test('a USD gasto never flashes ₡ while its currency loads', async () => {
+  const p = await createProject({ name: 'Viaje', currency: 'USD', totalBudget: 5000 });
+  const e = await createExpense({ projectId: p.id, name: 'Vuelos', type: 'single', plannedAmount: 900 });
+  await addPayment({ expenseId: e.id, amount: 300, date: Date.now() });
+  let sawColon = false;
+  const mo = new MutationObserver(() => {
+    if (document.body.textContent?.includes('₡')) sawColon = true;
+  });
+  mo.observe(document.body, { childList: true, subtree: true, characterData: true });
+  renderAt(e.id);
+  expect(await screen.findByTestId('planeado')).toHaveTextContent('$900');
+  mo.disconnect();
+  expect(sawColon).toBe(false);
+});

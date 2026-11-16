@@ -17,7 +17,11 @@ export function ProjectSummaryCard({ project, expenses, payments }: Props) {
       <Card.Content>
         <div className="flex items-center justify-between">
           <span className="text-[11.5px] font-semibold text-ink-muted">Presupuesto total</span>
-          <span className="rounded-full bg-icon-bg px-2.5 py-0.5 text-[10.5px] font-extrabold text-green-deep">
+          <span
+            className={`rounded-full px-2.5 py-0.5 text-[10.5px] font-extrabold ${
+              s.pct > 100 ? 'bg-danger/10 text-danger' : 'bg-icon-bg text-green-deep'
+            }`}
+          >
             {Math.round(s.pct)}% ejecutado
           </span>
         </div>

@@ -33,7 +33,8 @@ export function ExpenseDetail() {
     );
   }
 
-  const ready = expense !== undefined && installments !== undefined && payments !== undefined;
+  const ready =
+    expense !== undefined && installments !== undefined && payments !== undefined && currency !== undefined;
   const p = ready ? expenseProgress(expense, payments) : undefined;
   const paidCount =
     ready && expense.type === 'installments'
@@ -160,7 +161,7 @@ export function ExpenseDetail() {
         onOpenChange={(open) => !open && setPaymentToDelete(null)}
         title="¿Eliminar este pago?"
         description={
-          paymentToDelete
+          paymentToDelete && currency
             ? `${formatMoney(paymentToDelete.amount, currency)} · ${new Date(paymentToDelete.date).toLocaleDateString('es-CR')}`
             : undefined
         }
