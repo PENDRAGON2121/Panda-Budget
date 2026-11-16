@@ -1,5 +1,6 @@
 import { MotionConfig } from 'motion/react';
 import { BrowserRouter, Outlet, Route, Routes } from 'react-router-dom';
+import { StorageGate } from './StorageGate';
 import { TabBar } from './TabBar';
 import { ProjectsScreen } from '../features/projects/ProjectsScreen';
 import { ProjectDetail } from '../features/projects/ProjectDetail';
@@ -22,6 +23,7 @@ function Layout() {
 export function App() {
   return (
     <MotionConfig reducedMotion="user">
+    <StorageGate>
     <BrowserRouter>
       <Routes>
         <Route element={<Layout />}>
@@ -34,6 +36,7 @@ export function App() {
         </Route>
       </Routes>
     </BrowserRouter>
+    </StorageGate>
     </MotionConfig>
   );
 }

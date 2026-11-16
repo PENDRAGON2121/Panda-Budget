@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { MemoryRouter } from 'react-router-dom';
@@ -12,6 +12,20 @@ const ui = () => (
 
 describe('ProfileScreen', () => {
   beforeEach(() => localStorage.clear());
+  afterEach(() => vi.unstubAllGlobals());
+
+  it('shows "Almacenamiento protegido" when storage is persisted', async () => {
+    vi.stubGlobal('navigator', { ...navigator, storage: { persisted: () => Promise.resolve(true) } });
+    render(ui());
+    expect(await screen.findByText('Almacenamiento protegido')).toBeInTheDocument();
+  });
+
+  it('warns the browser could clear data when storage is not persisted', async () => {
+    vi.stubGlobal('navigator', { ...navigator, storage: { persisted: () => Promise.resolve(false) } });
+    render(ui());
+    expect(await screen.findByText('El navegador podría borrar los datos')).toBeInTheDocument();
+  });
+
 
   it('renders the default-currency control (CRC selected by default)', () => {
     render(ui());

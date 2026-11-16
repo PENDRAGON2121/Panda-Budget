@@ -1,10 +1,20 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Card, Radio, RadioGroup } from '@heroui/react';
 import pandaIcon from '../../assets/panda-app-icon.svg';
 import { getDefaultCurrency, setDefaultCurrency, type Currency } from '../../lib/settings';
+import { isPersisted } from '../../lib/storage';
 
 export function ProfileScreen() {
   const [currency, setCurrency] = useState<Currency>(getDefaultCurrency);
+  const [persisted, setPersisted] = useState<boolean>();
+
+  useEffect(() => {
+    let alive = true;
+    void isPersisted().then((p) => alive && setPersisted(p));
+    return () => {
+      alive = false;
+    };
+  }, []);
 
   const onChange = (value: string) => {
     const c: Currency = value === 'USD' ? 'USD' : 'CRC';
@@ -58,6 +68,15 @@ export function ProfileScreen() {
             Tus proyectos, gastos y pagos se guardan solo en este dispositivo. Nada se envía a
             ningún servidor, y funciona sin conexión.
           </p>
+          {persisted !== undefined && (
+            <p
+              data-testid="storage-status"
+              className={`text-[12.5px] font-bold ${persisted ? 'text-green-deep' : 'text-[#b0783a]'}`}
+            >
+              <span aria-hidden>{persisted ? '🔒 ' : '⚠ '}</span>
+              <span>{persisted ? 'Almacenamiento protegido' : 'El navegador podría borrar los datos'}</span>
+            </p>
+          )}
         </Card.Content>
       </Card>
 
