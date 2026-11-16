@@ -11,6 +11,11 @@ beforeEach(async () => {
   await Promise.all(db.tables.map((t) => t.clear()));
 });
 
+const segmentOf = (name: string) =>
+  within(screen.getByRole('img', { name: /distribución/i }))
+    .getAllByTestId('segment-expense')
+    .find((el) => el.dataset.expense === name)!;
+
 function renderAt(id: string) {
   return render(
     <MemoryRouter initialEntries={[`/proyectos/${id}`]}>
@@ -62,11 +67,50 @@ test('distribution bar has one segment per expense plus disponible', async () =>
   expect(within(bar).getAllByTestId('segment-disponible')).toHaveLength(1);
 });
 
-test('over-spend portion uses danger segment', async () => {
+test('distribution segments are sized by PAID over the total; disponible matches the summary', async () => {
+  const { p, exps } = await seed([400000, 300000]);
+  await addPayment({ expenseId: exps[0].id, amount: 250000, date: Date.now() });
+  renderAt(p.id);
+  await screen.findByRole('link', { name: /Gasto 2/ });
+  const bar = screen.getByRole('img', { name: /distribución/i });
+  expect(segmentOf('Gasto 1')).toHaveStyle({ width: '25%' });
+  expect(segmentOf('Gasto 2')).toHaveStyle({ width: '0%' });
+  expect(within(bar).getByTestId('segment-disponible')).toHaveStyle({ width: '75%' });
+  expect(screen.getByTestId('disponible')).toHaveTextContent(formatCRC(750000));
+  expect(within(bar).queryByTestId('segment-over')).not.toBeInTheDocument();
+});
+
+test('a gasto paid over its plan is coloured danger in the distribution', async () => {
+  const { p, exps } = await seed([100000, 300000]);
+  await addPayment({ expenseId: exps[0].id, amount: 150000, date: Date.now() });
+  renderAt(p.id);
+  await screen.findByRole('link', { name: /Gasto 2/ });
+  expect(segmentOf('Gasto 1')).toHaveClass('bg-danger');
+  expect(segmentOf('Gasto 1')).toHaveStyle({ width: '15%' });
+  expect(segmentOf('Gasto 2')).not.toHaveClass('bg-danger');
+});
+
+test('when paid exceeds the total the bar scales by paid and shows the overflow', async () => {
+  const { p, exps } = await seed([1000000, 500000]);
+  await addPayment({ expenseId: exps[0].id, amount: 1000000, date: Date.now() });
+  await addPayment({ expenseId: exps[1].id, amount: 250000, date: Date.now() });
+  renderAt(p.id);
+  await screen.findByRole('link', { name: /Gasto 2/ });
+  const bar = screen.getByRole('img', { name: /distribución/i });
+  expect(segmentOf('Gasto 1')).toHaveStyle({ width: '80%' });
+  expect(segmentOf('Gasto 2')).toHaveStyle({ width: '20%' });
+  expect(within(bar).getByTestId('segment-disponible')).toHaveStyle({ width: '0%' });
+  expect(within(bar).getByTestId('segment-over')).toHaveStyle({ width: '20%' });
+  expect(screen.getByText('Sobregiro')).toBeInTheDocument();
+});
+
+test('over-allocation (planned > total) is the separate banner, not a bar segment', async () => {
   const { p } = await seed([700000, 500000]);
   renderAt(p.id);
   await screen.findByRole('link', { name: /Gasto 2/ });
-  expect(screen.getByTestId('segment-over')).toBeInTheDocument();
+  expect(screen.getByRole('status')).toHaveTextContent(/sobreasignado/i);
+  expect(screen.queryByTestId('segment-over')).not.toBeInTheDocument();
+  expect(screen.queryByText('Excedido')).not.toBeInTheDocument();
 });
 
 test('gastos rows link to /gastos/:id', async () => {

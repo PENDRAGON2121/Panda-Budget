@@ -95,10 +95,25 @@ describe('projectSummary', () => {
     expect(r.available).toBe(600);
     expect(r.pct).toBe(40);
     expect(r.overAllocated).toBe(false);
+    // distribution = where the money went: PAID per gasto over the total budget
     expect(r.distribution).toEqual([
-      { expenseId: 'a', amount: 600, pct: 60 },
-      { expenseId: 'b', amount: 400, pct: 40 },
+      { expenseId: 'a', amount: 300, pct: 30, over: false },
+      { expenseId: 'b', amount: 100, pct: 10, over: false },
     ]);
+    expect(r.freePct).toBe(60);
+    expect(r.overflowPct).toBe(0);
+  });
+  it('distribution flags a gasto paid over its plan as over', () => {
+    const r = projectSummary(proj(1000), [exp('a', 100), exp('b', 400)], [pay('a', 150)]);
+    expect(r.distribution[0]).toEqual({ expenseId: 'a', amount: 150, pct: 15, over: true });
+    expect(r.distribution[1].over).toBe(false);
+    expect(r.freePct).toBe(85);
+  });
+  it('distribution scales by paid when paid exceeds the total and reports the overflow', () => {
+    const r = projectSummary(proj(1000), [exp('a', 1000), exp('b', 500)], [pay('a', 1000), pay('b', 250)]);
+    expect(r.distribution.map((d) => d.pct)).toEqual([80, 20]);
+    expect(r.freePct).toBe(0);
+    expect(r.overflowPct).toBe(20);
   });
   it('sum planned == total is not over-allocated', () => {
     expect(projectSummary(proj(1000), [exp('a', 1000)], []).overAllocated).toBe(false);
@@ -110,8 +125,10 @@ describe('projectSummary', () => {
     expect(r.paid).toBe(1500);
     expect(r.available).toBe(-500);
     expect(r.pct).toBe(150);
-    expect(r.distribution[0].pct).toBe(80);
-    expect(r.distribution[1].pct).toBe(70);
+    // paid 1500 > total 1000: segments scaled by paid
+    expect(r.distribution[0].pct).toBeCloseTo(53.333, 2);
+    expect(r.distribution[1].pct).toBeCloseTo(46.667, 2);
+    expect(r.overflowPct).toBeCloseTo(33.333, 2);
   });
   it('over-allocated but not yet paid: available positive', () => {
     const r = projectSummary(proj(1000), [exp('a', 1500)], [pay('a', 100)]);
@@ -131,7 +148,7 @@ describe('projectSummary', () => {
   });
   it('empty project', () => {
     expect(projectSummary(proj(1000), [], [])).toEqual({
-      paid: 0, available: 1000, pct: 0, overAllocated: false, distribution: [],
+      paid: 0, available: 1000, pct: 0, overAllocated: false, distribution: [], freePct: 100, overflowPct: 0,
     });
   });
 });

@@ -35,6 +35,22 @@ export function installmentStatus(
   return next && next.id === inst.id ? 'proxima' : 'pendiente';
 }
 
+export interface DistributionSegment {
+  expenseId: string;
+  /** Amount PAID for this gasto. */
+  amount: number;
+  /** Share of the bar (paid over max(totalBudget, total paid)). */
+  pct: number;
+  /** Paid more than planned for this gasto. */
+  over: boolean;
+}
+
+/**
+ * Project totals. `distribution` answers "en qué se fue la plata": each gasto's PAID amount over the total
+ * budget, plus the free share (`freePct`, = max(0, total − paid), i.e. the Disponible number when not
+ * overspent). If paid exceeds the total the bar is scaled by paid and `overflowPct` is the overspent share.
+ * Over-allocation (planned > total) is a separate flag (`overAllocated`), not part of the bar.
+ */
 export function projectSummary(
   project: Project,
   expenses: Expense[],
@@ -44,20 +60,25 @@ export function projectSummary(
   available: number;
   pct: number;
   overAllocated: boolean;
-  distribution: { expenseId: string; amount: number; pct: number }[];
+  distribution: DistributionSegment[];
+  freePct: number;
+  overflowPct: number;
 } {
   const ids = new Set(expenses.map((e) => e.id));
-  const paid = sum(payments.filter((p) => ids.has(p.expenseId)));
+  const mine = payments.filter((p) => ids.has(p.expenseId));
+  const paid = sum(mine);
   const planned = expenses.reduce((s, e) => s + e.plannedAmount, 0);
+  const denom = Math.max(project.totalBudget, paid);
   return {
     paid,
     available: project.totalBudget - paid,
     pct: pctOf(paid, project.totalBudget),
     overAllocated: planned > project.totalBudget,
-    distribution: expenses.map((e) => ({
-      expenseId: e.id,
-      amount: e.plannedAmount,
-      pct: pctOf(e.plannedAmount, project.totalBudget),
-    })),
+    distribution: expenses.map((e) => {
+      const amount = sum(mine.filter((p) => p.expenseId === e.id));
+      return { expenseId: e.id, amount, pct: pctOf(amount, denom), over: amount > e.plannedAmount };
+    }),
+    freePct: pctOf(Math.max(0, project.totalBudget - paid), denom),
+    overflowPct: pctOf(Math.max(0, paid - project.totalBudget), denom),
   };
 }

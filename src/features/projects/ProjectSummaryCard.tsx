@@ -44,7 +44,12 @@ export function ProjectSummaryCard({ project, expenses, payments }: Props) {
             ⚠ Presupuesto sobreasignado: los gastos planeados superan el total.
           </div>
         )}
-        <DistributionBar expenses={expenses} totalBudget={project.totalBudget} />
+        <DistributionBar
+          expenses={expenses}
+          distribution={s.distribution}
+          freePct={s.freePct}
+          overflowPct={s.overflowPct}
+        />
       </Card.Content>
     </Card>
   );
