@@ -11,7 +11,7 @@ import { ProfileScreen } from '../features/profile/ProfileScreen';
 
 function Layout() {
   return (
-    <div className="mx-auto min-h-screen max-w-md px-[18px] pb-24 pt-6">
+    <div className="mx-auto min-h-screen max-w-md px-[18px] pb-32 pt-6">
       <main>
         <Outlet />
       </main>

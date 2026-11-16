@@ -10,7 +10,7 @@ import { ProjectCarousel } from './ProjectCarousel';
 function Greeting() {
   return (
     <header className="flex items-center gap-3 pb-3.5 pt-2">
-      <div className="size-[46px] shrink-0 overflow-hidden rounded-[15px] shadow-card">
+      <div className="size-[46px] shrink-0 overflow-hidden rounded-[15px] shadow-row">
         <img src={pandaIcon} alt="Panda Wallet" className="block size-full object-cover" />
       </div>
       <div>
@@ -79,7 +79,7 @@ export function HomeScreen() {
         isIconOnly
         aria-label="Nuevo proyecto"
         onPress={() => setFormOpen(true)}
-        className="fixed bottom-24 right-5 size-14 min-w-0 rounded-full bg-leaf text-2xl text-white shadow-fab"
+        className="fixed bottom-[96px] right-5 size-14 min-w-0 rounded-full bg-leaf text-2xl text-white shadow-fab"
       >
         +
       </Button>

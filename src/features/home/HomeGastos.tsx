@@ -26,7 +26,9 @@ function GastosList({ projectId }: { projectId: string }) {
         const shown = Math.min(100, Math.max(0, p.pct));
         return (
           <li key={e.id}>
-            <Link to={`/gastos/${e.id}`} className="block rounded-md bg-white p-3 no-underline shadow-row">
+            <Link to={`/gastos/${e.id}`} className={`block rounded-row border bg-white p-3 no-underline ${
+                p.over ? 'border-hairline-over shadow-over' : 'border-hairline shadow-row'
+              }`}>
               <div className="flex items-center gap-2">
                 <span aria-hidden className="text-lg">{e.icon ?? '🧾'}</span>
                 <span className="break-words font-display text-[13.5px] font-extrabold text-ink">{e.name}</span>
@@ -35,7 +37,7 @@ function GastosList({ projectId }: { projectId: string }) {
                 {formatMoney(p.paid, currency)} de {formatMoney(e.plannedAmount, currency)}
               </div>
               <ProgressBar aria-label={`Progreso de ${e.name}`} value={shown} className="mt-1.5 w-full">
-                <ProgressBar.Track className="h-1.5">
+                <ProgressBar.Track className="rail h-1.5">
                   <ProgressBar.Fill className={p.over ? 'bg-danger' : 'bg-leaf'} />
                 </ProgressBar.Track>
               </ProgressBar>

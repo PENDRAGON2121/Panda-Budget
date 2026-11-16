@@ -54,7 +54,7 @@ export function CalendarScreen({ initialDate }: { initialDate?: Date }) {
   return (
     <div>
       <h1 className="mb-3 font-display text-[22px] font-black">Calendario</h1>
-      <Card>
+      <Card className="rounded-card border border-hairline shadow-card">
         <Card.Content className="p-3.5">
           <div className="mb-3 flex items-center justify-between">
             <Button isIconOnly variant="ghost" aria-label="Mes anterior" onPress={() => go(-1)}>‹</Button>

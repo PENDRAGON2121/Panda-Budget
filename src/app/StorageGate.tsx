@@ -22,7 +22,7 @@ export function StorageGate({ children }: { children: ReactNode }) {
   if (!failed) return <>{children}</>;
   return (
     <div className="mx-auto flex min-h-screen max-w-md items-center px-[18px]">
-      <Card role="alert" className="w-full rounded-lg text-center shadow-card">
+      <Card role="alert" className="w-full rounded-card border border-hairline shadow-card text-center">
         <Card.Content className="flex flex-col items-center gap-2 py-8">
           <div aria-hidden className="text-5xl">🐼</div>
           <h1 className="font-display text-[19px] font-black text-ink">No se pudo abrir el almacenamiento local</h1>

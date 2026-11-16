@@ -11,9 +11,6 @@ import { ReceiptThumb } from '../payments/ReceiptThumb';
 const fmtDate = (ms: number) =>
   new Date(ms).toLocaleDateString('es-CR', { day: 'numeric', month: 'short', year: 'numeric' });
 
-const ROW_BORDER = '1px solid rgba(36,33,43,0.07)';
-const ROW_SHADOW = '0 1px 2px rgba(36,33,43,0.05), 0 8px 20px -14px rgba(46,90,34,0.30)';
-
 function Arrow({ up }: { up: boolean }) {
   return (
     <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
@@ -26,8 +23,7 @@ function MovementRow({ m, currency, index }: { m: Movement; currency: string; in
   const entrada = m.kind === 'entrada';
   const body = (
     <Card
-      className="rounded-2xl"
-      style={{ border: entrada ? '1px solid rgba(60,138,46,0.22)' : ROW_BORDER, boxShadow: ROW_SHADOW }}
+      className={`rounded-row border shadow-row ${entrada ? 'border-[rgba(60,138,46,0.22)]' : 'border-hairline'}`}
     >
       <Card.Content className="flex flex-row items-center gap-3 p-3">
         <span
@@ -74,7 +70,7 @@ function MovementRow({ m, currency, index }: { m: Movement; currency: string; in
       data-testid={`movement-${m.kind}`}
       initial={{ opacity: 0, y: 6 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.3, ease: 'easeOut', delay: 0.05 * index }}
+      transition={{ duration: 0.3, ease: 'easeOut', delay: 0.05 * Math.min(index, 8) }}
     >
       {content}
     </motion.li>

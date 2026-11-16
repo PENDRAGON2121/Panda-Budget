@@ -100,7 +100,9 @@ export function ProjectCarousel({ projects, expenses, payments, activeIndex, onS
                 <Card
                   role="article"
                   aria-label={isClone ? undefined : `Proyecto ${p.name}`}
-                  className="rounded-lg shadow-card"
+                  className={`rounded-card border ${
+                    s.pct > 100 ? 'border-hairline-over shadow-over' : 'border-hairline shadow-card'
+                  }`}
                 >
                   <Card.Content className="gap-0 p-1">
                     <div className="flex items-center justify-between gap-2">

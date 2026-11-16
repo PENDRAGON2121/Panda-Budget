@@ -1,6 +1,7 @@
 import { Button, Card, Chip, ProgressBar } from '@heroui/react';
 import { useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
+import { AppBar } from '../../components/AppBar';
 import { AppBarMenu } from '../../components/AppBarMenu';
 import { ConfirmDialog } from '../../components/ConfirmDialog';
 import { useExpense, useExpenseCurrency, useInstallments, usePayments } from '../../db/hooks';
@@ -43,28 +44,26 @@ export function ExpenseDetail() {
 
   return (
     <div className="flex flex-col gap-4">
-      <header className="flex items-center gap-3">
-        <Link
-          to={expense ? `/proyectos/${expense.projectId}` : '/proyectos'}
-          aria-label="Volver al proyecto"
-          className="text-ink no-underline"
-        >
-          ‹
-        </Link>
-        <h1 className="min-w-0 flex-1 break-words font-display text-[17px] font-black text-ink">
-          {expense ? expense.name : ''}
-        </h1>
-        {expense && (
-          <AppBarMenu
-            label="Más opciones del gasto"
-            actions={[{ id: 'delete', label: 'Eliminar gasto', danger: true, onAction: () => setConfirmDeleteExpense(true) }]}
-          />
-        )}
-      </header>
+      <AppBar
+        backTo={expense ? `/proyectos/${expense.projectId}` : '/proyectos'}
+        backLabel="Volver al proyecto"
+        title={expense ? expense.name : ''}
+        subtitle={expense ? (expense.type === 'installments' ? 'Gasto a plazos' : 'Pago único') : undefined}
+        menu={
+          expense && (
+            <AppBarMenu
+              label="Más opciones del gasto"
+              actions={[{ id: 'delete', label: 'Eliminar gasto', danger: true, onAction: () => setConfirmDeleteExpense(true) }]}
+            />
+          )
+        }
+      />
 
       {ready && p ? (
         <>
-          <Card className="rounded-lg shadow-card">
+          <Card
+            className={`rounded-card border ${p.over ? 'border-hairline-over shadow-over' : 'border-hairline shadow-card'}`}
+          >
             <Card.Content className="flex flex-col gap-2">
               <div className="flex items-center justify-between">
                 <span className="text-[11.5px] font-semibold text-ink-muted">Planeado</span>
@@ -82,7 +81,7 @@ export function ExpenseDetail() {
                 value={Math.min(100, Math.max(0, p.pct))}
                 className="w-full"
               >
-                <ProgressBar.Track className="h-2.5">
+                <ProgressBar.Track className="rail h-2.5">
                   <ProgressBar.Fill className={p.over ? 'bg-danger' : 'bg-leaf'} />
                 </ProgressBar.Track>
               </ProgressBar>
@@ -143,7 +142,7 @@ export function ExpenseDetail() {
           )}
         </>
       ) : (
-        <div aria-busy="true" className="h-40 rounded-lg bg-white shadow-card" />
+        <div aria-busy="true" className="h-40 rounded-card border border-hairline bg-white shadow-card" />
       )}
 
       <Button
@@ -152,7 +151,7 @@ export function ExpenseDetail() {
           setTargetInst(undefined);
           setSheetOpen(true);
         }}
-        className="fixed bottom-24 right-5 h-[52px] rounded-[17px] bg-leaf px-5 font-display text-sm font-extrabold text-white shadow-fab"
+        className="fixed bottom-[96px] right-5 h-[52px] rounded-[17px] bg-leaf px-5 font-display text-sm font-extrabold text-white shadow-fab"
       >
         + Registrar pago
       </Button>

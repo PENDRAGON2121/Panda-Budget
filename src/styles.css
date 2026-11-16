@@ -23,13 +23,40 @@
   --color-track: #eef1ec;
   --color-track-strong: #dfe4dc;
 
+  --color-hairline: rgba(36, 33, 43, 0.07);
+  --color-hairline-strong: rgba(36, 33, 43, 0.08);
+  --color-hairline-over: rgba(203, 71, 36, 0.22);
+  --color-rail: #eef1ec;
+  --color-control: #f4f8f2;
+  --color-nav-pill: #dcefd8;
+  --color-cane-rail: #e1ead9;
+
   --radius-sm: 12px;
   --radius-md: 17px;
   --radius-lg: 24px;
+  --radius-card: 22px;
+  --radius-row: 18px;
+  --radius-cuota: 16px;
 
-  --shadow-card: 0 14px 32px -18px rgba(76, 138, 44, 0.34);
-  --shadow-row: 0 6px 16px -11px rgba(76, 138, 44, 0.3);
-  --shadow-fab: 0 14px 26px -6px rgba(60, 138, 46, 0.6);
+  /* Elevation: level 1 (cards/rows) and level 2 (floating) — design-system.md §4 */
+  --shadow-card: 0 1px 2px rgba(36, 33, 43, 0.05), 0 14px 30px -16px rgba(46, 90, 34, 0.34);
+  --shadow-row: 0 1px 2px rgba(36, 33, 43, 0.05), 0 8px 20px -14px rgba(46, 90, 34, 0.3);
+  --shadow-over: 0 1px 2px rgba(36, 33, 43, 0.05), 0 8px 20px -14px rgba(203, 71, 36, 0.3);
+  --shadow-float: 0 1px 2px rgba(36, 33, 43, 0.06), 0 16px 34px -14px rgba(36, 64, 30, 0.38);
+  --shadow-appbar: 0 1px 2px rgba(36, 33, 43, 0.06), 0 6px 14px -8px rgba(46, 90, 34, 0.35);
+  --shadow-fab: 0 0 0 4px rgba(255, 255, 255, 0.92), 0 14px 26px -8px rgba(46, 110, 30, 0.6);
+
+  --animate-leaf-sway: leaf-sway 3.2s ease-in-out infinite;
+  --animate-leaf-sway-alt: leaf-sway 3.2s ease-in-out -1.6s infinite;
+  @keyframes leaf-sway {
+    0%,
+    100% {
+      transform: rotate(-7deg);
+    }
+    50% {
+      transform: rotate(7deg);
+    }
+  }
 }
 
 /* HeroUI semantic variables */
@@ -54,10 +81,21 @@ body {
   margin: 0;
   font-family: var(--font-sans);
   color: var(--color-ink);
-  background: linear-gradient(176deg, #e4f4e2, #f3faee, #fffdf7) fixed;
+  background: linear-gradient(180deg, #dcefd8 0%, #eaf5e7 34%, #f1f6ef 100%) fixed;
+}
+
+/* Inner rail (progress tracks, distribution bar): sunken, never a shadow outside */
+.rail {
+  background: var(--color-rail);
+  box-shadow: inset 0 0 0 1px rgba(36, 33, 43, 0.04);
 }
 
 @media (prefers-reduced-motion: reduce) {
+  .animate-leaf-sway,
+  .animate-leaf-sway-alt {
+    animation: none !important;
+  }
+
   *,
   *::before,
   *::after {

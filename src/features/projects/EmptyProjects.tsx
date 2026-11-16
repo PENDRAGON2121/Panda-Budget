@@ -2,7 +2,7 @@ import { Card } from '@heroui/react';
 
 export function EmptyProjects() {
   return (
-    <Card className="rounded-lg text-center shadow-card">
+    <Card className="rounded-card border border-hairline shadow-card text-center">
       <Card.Content className="flex flex-col items-center gap-2 py-8">
         <div aria-hidden className="text-5xl">🐼</div>
         <h2 className="font-display text-[17px] font-black text-ink">Agregá un proyecto</h2>

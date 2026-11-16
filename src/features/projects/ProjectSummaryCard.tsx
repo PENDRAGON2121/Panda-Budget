@@ -13,7 +13,9 @@ interface Props {
 export function ProjectSummaryCard({ project, expenses, payments }: Props) {
   const s = projectSummary(project, expenses, payments);
   return (
-    <Card className="rounded-lg shadow-card">
+    <Card
+      className={`rounded-card border ${s.pct > 100 ? 'border-hairline-over shadow-over' : 'border-hairline shadow-card'}`}
+    >
       <Card.Content>
         <div className="flex items-center justify-between">
           <span className="text-[11.5px] font-semibold text-ink-muted">Presupuesto total</span>

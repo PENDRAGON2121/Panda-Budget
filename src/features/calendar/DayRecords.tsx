@@ -27,7 +27,7 @@ export function DayRecords({ iso, records }: { iso: string; records: DayRecord[]
     <section aria-label="Registros del día" className="mt-4">
       <h2 className="font-display text-[15px] font-black text-ink">{title}</h2>
       {records.length === 0 ? (
-        <Card className="mt-3">
+        <Card className="mt-3 rounded-card border border-hairline shadow-card">
           <Card.Content className="py-5 text-center text-[12.5px] font-semibold text-ink-muted">
             Sin registros este día
           </Card.Content>
@@ -40,7 +40,7 @@ export function DayRecords({ iso, records }: { iso: string; records: DayRecord[]
           <ul className="m-0 flex list-none flex-col gap-2 p-0">
             {records.map((r) => (
               <li key={r.payment.id}>
-                <Card>
+                <Card className="rounded-cuota border border-hairline shadow-row">
                   <Card.Content className="flex flex-row items-center gap-3 p-3">
                     <span aria-hidden className="text-lg">{r.expenseIcon ?? '🧾'}</span>
                     <div className="min-w-0 flex-1">

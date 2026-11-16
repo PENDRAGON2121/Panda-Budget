@@ -1,4 +1,5 @@
 import type { ReactNode } from 'react';
+import { motion } from 'motion/react';
 import { NavLink } from 'react-router-dom';
 
 const icon = (children: ReactNode) => (
@@ -14,25 +15,35 @@ const tabs = [
   { to: '/perfil', label: 'Perfil', icon: icon(<><circle cx="12" cy="8" r="4" /><path d="M4 21c0-4 4-6 8-6s8 2 8 6" /></>) },
 ];
 
+/** Floating island (level 2). The active pill is one shared-layout element that glides between tabs. */
 export function TabBar() {
   return (
     <nav
       aria-label="Principal"
-      className="fixed inset-x-0 bottom-0 z-50 mx-auto flex max-w-md items-center justify-around bg-white/70 px-2.5 pb-[max(1rem,env(safe-area-inset-bottom))] pt-3 backdrop-blur-md"
+      className="fixed inset-x-3 bottom-[max(14px,env(safe-area-inset-bottom))] z-50 mx-auto flex h-[66px] max-w-[calc(28rem-24px)] items-center gap-1 rounded-[24px] border border-hairline-strong bg-white p-1.5 shadow-float"
     >
       {tabs.map((t) => (
         <NavLink
           key={t.to}
           to={t.to}
           end={t.end}
-          className={({ isActive }) =>
-            `flex flex-col items-center gap-1 font-sans text-[10px] font-bold transition-opacity ${
-              isActive ? 'text-leaf opacity-100' : 'text-ink opacity-45'
-            }`
-          }
+          className="relative flex h-full flex-1 flex-col items-center justify-center gap-0.5 rounded-[18px] font-sans text-[10px] no-underline outline-none focus-visible:ring-2 focus-visible:ring-leaf"
         >
-          {t.icon}
-          {t.label}
+          {({ isActive }) => (
+            <>
+              {isActive && (
+                <motion.span
+                  layoutId="nav-pill"
+                  data-testid="nav-pill"
+                  aria-hidden
+                  transition={{ duration: 0.4, ease: 'easeOut' }}
+                  className="absolute inset-0 rounded-[18px] bg-nav-pill"
+                />
+              )}
+              <span className={`relative ${isActive ? 'text-[#2f6f22]' : 'text-ink-muted'}`}>{t.icon}</span>
+              <span className={`relative ${isActive ? 'font-extrabold text-ink' : 'font-bold text-ink-muted'}`}>{t.label}</span>
+            </>
+          )}
         </NavLink>
       ))}
     </nav>

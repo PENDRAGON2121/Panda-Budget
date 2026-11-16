@@ -15,8 +15,8 @@ export function ProjectCard({ project, pct, expenseCount }: Props) {
   const over = pct > 100;
   return (
     <Link to={`/proyectos/${project.id}`} className="block no-underline">
-      <motion.div layoutId={`project-card-${project.id}`} className="h-full rounded-lg">
-      <Card className="h-full rounded-lg shadow-card">
+      <motion.div layoutId={`project-card-${project.id}`} className="h-full rounded-card">
+      <Card className={`h-full rounded-card border ${over ? 'border-hairline-over shadow-over' : 'border-hairline shadow-card'}`}>
         <Card.Content className="flex flex-col gap-2">
           <div aria-hidden className="text-2xl">{project.icon ?? '📁'}</div>
           <h3 className="break-words font-display text-[15px] font-black text-ink">{project.name}</h3>
@@ -24,7 +24,7 @@ export function ProjectCard({ project, pct, expenseCount }: Props) {
             {formatMoney(project.totalBudget, project.currency)}
           </div>
           <ProgressBar aria-label={`Progreso de ${project.name}`} value={shown} className="w-full">
-            <ProgressBar.Track className="h-1.5">
+            <ProgressBar.Track className="rail h-1.5">
               <ProgressBar.Fill data-testid="project-progress-fill" className={over ? 'bg-danger' : 'bg-leaf'} />
             </ProgressBar.Track>
           </ProgressBar>

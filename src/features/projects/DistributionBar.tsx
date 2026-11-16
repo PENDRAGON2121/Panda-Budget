@@ -26,7 +26,7 @@ export function DistributionBar({ expenses, distribution, freePct, overflowPct }
       <div
         role="img"
         aria-label="Distribución del presupuesto"
-        className="relative my-4 flex h-3.5 gap-0.5 overflow-hidden rounded-full bg-track"
+        className="relative my-4 flex h-3.5 gap-0.5 overflow-hidden rounded-full rail"
       >
         {expenses.map((e, i) => {
           const d = byId.get(e.id);

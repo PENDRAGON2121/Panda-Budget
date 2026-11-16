@@ -1,5 +1,5 @@
 import { AnimatePresence, motion } from 'motion/react';
-import { useRef, type KeyboardEvent, type ReactNode } from 'react';
+import { useRef, useState, type KeyboardEvent, type ReactNode } from 'react';
 
 export type TabId = 'gastos' | 'movimientos';
 const TABS: { id: TabId; label: string }[] = [
@@ -22,10 +22,13 @@ export function ProjectTabs({
   panels: Record<TabId, ReactNode>;
 }) {
   const refs = useRef<Record<string, HTMLButtonElement | null>>({});
-  const prev = useRef(value);
   const index = TABS.findIndex((t) => t.id === value);
-  const dir = index >= TABS.findIndex((t) => t.id === prev.current) ? 1 : -1;
-  prev.current = value;
+  // Slide direction is decided in the event handler (state), never by mutating a ref during render.
+  const [dir, setDir] = useState<1 | -1>(1);
+  const select = (id: TabId) => {
+    setDir(TABS.findIndex((t) => t.id === id) >= index ? 1 : -1);
+    onChange(id);
+  };
 
   const onKeyDown = (e: KeyboardEvent) => {
     let next = index;
@@ -35,7 +38,7 @@ export function ProjectTabs({
     else if (e.key === 'End') next = TABS.length - 1;
     else return;
     e.preventDefault();
-    onChange(TABS[next].id);
+    select(TABS[next].id);
     refs.current[TABS[next].id]?.focus();
   };
 
@@ -68,7 +71,7 @@ export function ProjectTabs({
               aria-selected={active}
               aria-controls={`panel-${t.id}`}
               tabIndex={active ? 0 : -1}
-              onClick={() => onChange(t.id)}
+              onClick={() => select(t.id)}
               className="relative h-9 cursor-pointer border-0 bg-transparent font-display text-[14px] font-extrabold outline-none focus-visible:ring-2 focus-visible:ring-leaf"
               style={{ color: active ? '#24212b' : '#5d5866', borderRadius: 11 }}
             >

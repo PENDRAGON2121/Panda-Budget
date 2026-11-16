@@ -25,7 +25,7 @@ export function ProfileScreen() {
   return (
     <div className="flex flex-col gap-3.5">
       <header className="flex items-center gap-3 pb-1 pt-2">
-        <div className="size-[46px] shrink-0 overflow-hidden rounded-[15px] shadow-card">
+        <div className="size-[46px] shrink-0 overflow-hidden rounded-[15px] shadow-row">
           <img src={pandaIcon} alt="Panda Wallet" className="block size-full object-cover" />
         </div>
         <div>
@@ -34,7 +34,7 @@ export function ProfileScreen() {
         </div>
       </header>
 
-      <Card className="shadow-card">
+      <Card className="rounded-card border border-hairline shadow-card">
         <Card.Content className="flex flex-col gap-3">
           <RadioGroup
             aria-label="Moneda predeterminada para nuevos proyectos"
@@ -61,7 +61,7 @@ export function ProfileScreen() {
         </Card.Content>
       </Card>
 
-      <Card className="shadow-card">
+      <Card className="rounded-card border border-hairline shadow-card">
         <Card.Content className="flex flex-col gap-1.5">
           <h2 className="font-display text-[15px] font-extrabold text-ink">Datos locales</h2>
           <p className="text-[13px] leading-snug text-ink-muted">
@@ -80,7 +80,7 @@ export function ProfileScreen() {
         </Card.Content>
       </Card>
 
-      <Card className="shadow-card opacity-60" aria-disabled="true">
+      <Card className="rounded-card border border-hairline shadow-card opacity-60" aria-disabled="true">
         <Card.Content className="flex flex-col gap-1">
           <h2 className="font-display text-[15px] font-extrabold text-ink">
             Respaldo / exportar (próximamente)

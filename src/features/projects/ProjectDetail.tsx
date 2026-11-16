@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Button, Card, ProgressBar } from '@heroui/react';
 import { motion } from 'motion/react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
+import { AppBar } from '../../components/AppBar';
 import { AppBarMenu } from '../../components/AppBarMenu';
 import { ConfirmDialog } from '../../components/ConfirmDialog';
 import { useAllPayments, useExpenses, useProject } from '../../db/hooks';
@@ -19,7 +20,7 @@ function ExpenseRow({ expense, payments, currency }: { expense: Expense; payment
   const shown = Math.min(100, Math.max(0, p.pct));
   return (
     <Link to={`/gastos/${expense.id}`} className="block no-underline">
-      <Card className="rounded-md shadow-row">
+      <Card className={`rounded-row border ${p.over ? 'border-hairline-over shadow-over' : 'border-hairline shadow-row'}`}>
         <Card.Content className="flex flex-col gap-1.5">
           <div className="flex items-center gap-2">
             <span aria-hidden className="text-lg">{expense.icon ?? '🧾'}</span>
@@ -32,7 +33,7 @@ function ExpenseRow({ expense, payments, currency }: { expense: Expense; payment
             {formatMoney(p.paid, currency)} de {formatMoney(expense.plannedAmount, currency)}
           </div>
           <ProgressBar aria-label={`Progreso de ${expense.name}`} value={shown} className="w-full">
-            <ProgressBar.Track className="h-1.5">
+            <ProgressBar.Track className="rail h-1.5">
               <ProgressBar.Fill className={p.over ? 'bg-danger' : 'bg-leaf'} />
             </ProgressBar.Track>
           </ProgressBar>
@@ -65,24 +66,28 @@ export function ProjectDetail() {
 
   return (
     <div className="flex flex-col gap-4">
-      <header className="flex items-center gap-3">
-        <Link to="/proyectos" aria-label="Volver a proyectos" className="text-ink no-underline">‹</Link>
-        <h1 className="min-w-0 flex-1 break-words font-display text-[17px] font-black text-ink">{project?.name ?? ''}</h1>
-        {project && (
-          <AppBarMenu
-            label="Más opciones del proyecto"
-            actions={[{ id: 'delete', label: 'Eliminar proyecto', danger: true, onAction: () => setConfirmDelete(true) }]}
-          />
-        )}
-      </header>
+      <AppBar
+        backTo="/proyectos"
+        backLabel="Volver a proyectos"
+        title={project?.name ?? ''}
+        subtitle={project ? `Proyecto · ${project.currency}` : undefined}
+        menu={
+          project && (
+            <AppBarMenu
+              label="Más opciones del proyecto"
+              actions={[{ id: 'delete', label: 'Eliminar proyecto', danger: true, onAction: () => setConfirmDelete(true) }]}
+            />
+          )
+        }
+      />
 
       {/* Container transform: the layoutId element mounts on first render (before data resolves) so Motion can
           match the exiting ProjectCard. App wraps in MotionConfig reducedMotion="user". */}
-      <motion.div layoutId={`project-card-${id}`} className="rounded-lg" data-testid="detail-container">
+      <motion.div layoutId={`project-card-${id}`} className="rounded-card" data-testid="detail-container">
         {ready ? (
           <ProjectSummaryCard project={project} expenses={expenses} payments={payments} />
         ) : (
-          <div aria-busy="true" className="h-40 rounded-lg bg-white shadow-card" />
+          <div aria-busy="true" className="h-40 rounded-card border border-hairline bg-white shadow-card" />
         )}
       </motion.div>
 
@@ -97,7 +102,7 @@ export function ProjectDetail() {
               Gastos <small className="font-bold text-ink-muted">· {expenses.length}</small>
             </h2>
             {expenses.length === 0 ? (
-              <Card className="rounded-lg text-center shadow-card">
+              <Card className="rounded-card border border-hairline shadow-card text-center">
                 <Card.Content className="flex flex-col items-center gap-1 py-6">
                   <div aria-hidden className="text-4xl">🐼</div>
                   <p className="font-display text-[15px] font-black text-ink">Agregá tu primer gasto</p>
@@ -128,7 +133,7 @@ export function ProjectDetail() {
       <Button
         aria-label="Agregar gasto"
         onPress={() => setFormOpen(true)}
-        className="fixed bottom-24 right-5 h-14 w-14 min-w-0 rounded-[19px] bg-leaf text-2xl text-white shadow-fab"
+        className="fixed bottom-[96px] right-5 h-14 w-14 min-w-0 rounded-[19px] bg-leaf text-2xl text-white shadow-fab"
       >
         +
       </Button>

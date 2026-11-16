@@ -29,7 +29,7 @@ export function PaymentList({
         <ul aria-label={label} className="m-0 flex list-none flex-col gap-2 p-0">
           {payments.map((p) => (
             <li key={p.id}>
-              <Card className="rounded-md shadow-row">
+              <Card className="rounded-row border border-hairline shadow-row">
                 <Card.Content className="flex flex-row items-center gap-3">
                   <div className="min-w-0 flex-1">
                     <div className="text-[13px] font-extrabold tabular-nums text-ink">{formatMoney(p.amount, currency)}</div>

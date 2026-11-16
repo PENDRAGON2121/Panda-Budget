@@ -13,7 +13,7 @@ export function AppBarMenu({ label, actions }: { label: string; actions: Action[
     <Dropdown>
       <Dropdown.Trigger
         aria-label={label}
-        className="flex size-[38px] shrink-0 items-center justify-center rounded-[12px] bg-white text-ink shadow-row"
+        className="flex size-10 shrink-0 items-center justify-center rounded-[13px] border border-hairline-strong bg-white text-ink shadow-appbar"
       >
         <svg aria-hidden viewBox="0 0 24 24" fill="currentColor" className="size-5">
           <circle cx="12" cy="5" r="1.6" />
