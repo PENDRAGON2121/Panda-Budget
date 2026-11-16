@@ -245,3 +245,32 @@ test('renders the four persistent tabs', () => {
 - [ ] **Step 3: Implement** profile, generate PWA icons from the SVG, add the reduced-motion rule.
 - [ ] **Step 4: Run tests + `npm run build` — expect PASS;** verify install/manifest and motion-off in the browser.
 - [ ] **Step 5: Commit** `feat(profile): profile screen, PWA packaging, reduced-motion`.
+
+---
+
+### Task 12: Movimientos (historial de entradas y salidas por proyecto)
+
+*Added 2026-11-16 at the user's request ("cada pago agregado debe registrar un movimiento — cada entrada y salida de cada proyecto"). User decision: Movimientos is the chronological history of the project — the initial budget load is the first **entrada**, every payment is a **salida**; no other kind of entrada.*
+
+**Files:**
+- Create: `src/lib/movements.ts`, `src/features/projects/MovementsList.tsx`
+- Modify: `src/features/projects/ProjectDetail.tsx` (HeroUI `Tabs`: "Gastos" | "Movimientos")
+- Test: `src/lib/movements.test.ts`, `src/features/projects/MovementsList.test.tsx`
+- Reference: `docs/design-system.md` (tokens, rows, chips)
+
+**Interfaces:**
+- Consumes: `Project, Expense, Installment, Payment` (`src/db/types.ts`); `useProject`, `useExpenses`, `useAllPayments`/`usePayments`, `useInstallments` (`src/db/hooks.ts`); `formatMoney` (`src/lib/money.ts`); `ReceiptThumb` (`src/features/payments`).
+- Produces: `projectMovements(project: Project, expenses: Expense[], installments: Installment[], payments: Payment[]): Movement[]` where
+  `Movement = { id: string; kind: 'entrada' | 'salida'; date: number; label: string; detail?: string; amount: number; balance: number; receiptId?: string; expenseId?: string }`.
+  - Derived, never stored (deleting a payment removes its movement automatically).
+  - First movement: `kind:'entrada'`, `id:'budget-'+project.id`, `date: project.createdAt`, `label:'Presupuesto inicial'`, `amount: project.totalBudget`, `balance: project.totalBudget`.
+  - One `salida` per payment of the project's expenses, chronological by `date` then `createdAt`: `label` = gasto name, `detail` = `"Cuota N"` (or the installment label) when `installmentId` is set, `amount` = payment amount, `balance` = running `totalBudget − cumulative paid` (may go negative).
+  - Return order: oldest → newest (UI renders newest first).
+
+- [ ] **Step 1: Write failing tests** `movements.test.ts`: budget entrada first with balance = total; salidas in date order with running balance; tie broken by `createdAt`; cuota detail "Cuota 3"; balance goes negative on over-spend; payments of other projects excluded; no payments → only the entrada. `MovementsList.test.tsx`: renders newest first, entrada shown as `+₡…` and salidas as `−₡…` in the project's currency, running saldo shown, receipt thumb for payments with `receiptId`; after `deletePayment` the movement disappears; ProjectDetail shows the "Movimientos" tab.
+- [ ] **Step 2: Run — expect FAIL.**
+- [ ] **Step 3: Implement** `movements.ts` (pure) and `MovementsList` (HeroUI Card rows, entrada in `leaf`/green, salida in ink, negative saldo in `danger`); add HeroUI `Tabs` "Gastos | Movimientos" to ProjectDetail (Gastos stays default). Rows link to the gasto detail.
+- [ ] **Step 4: Run tests — expect PASS;** `tsc --noEmit`, `npm run build`.
+- [ ] **Step 5: Commit** `feat(projects): movimientos history (entradas y salidas)`.
+
+Note for a future "editar proyecto" task: changing `totalBudget` after creation must surface as its own movement (e.g. "Ajuste de presupuesto"), which will require storing budget changes.
