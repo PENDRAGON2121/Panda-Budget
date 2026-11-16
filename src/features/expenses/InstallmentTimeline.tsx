@@ -129,8 +129,8 @@ export function InstallmentTimeline({
             >
               {status === 'pagada' ? '✓' : ''}
             </span>
-            <Card className={`rounded-cuota border shadow-row ${status === 'proxima' ? 'border-highlight' : 'border-hairline'}`}>
-              <Card.Content className="flex items-center gap-3">
+            <Card className={`rounded-cuota border p-0 shadow-row ${status === 'proxima' ? 'border-highlight' : 'border-hairline'}`}>
+              <Card.Content className="flex flex-row items-center gap-2.5 px-3 py-2.5">
                 <div className="min-w-0 flex-1">
                   <div className="font-display text-[13px] font-extrabold text-ink">{title}</div>
                   <div className="mt-0.5 text-[10.5px] font-semibold text-ink-muted">
@@ -171,8 +171,7 @@ export function InstallmentTimeline({
                 {status !== 'pagada' && onPay && (
                   <Button
                     size="sm"
-                    variant="secondary"
-                    className="bg-control"
+                    className="h-8 min-w-0 shrink-0 rounded-[10px] bg-leaf px-3 text-xs font-extrabold text-white"
                     aria-label={`Pagar cuota ${inst.index}`}
                     onPress={() => onPay(inst.id)}
                   >

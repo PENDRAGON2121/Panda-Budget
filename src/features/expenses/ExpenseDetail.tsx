@@ -43,7 +43,7 @@ export function ExpenseDetail() {
       : 0;
 
   return (
-    <div className="flex flex-col gap-4">
+    <div className="flex flex-col gap-4 pb-14">
       <AppBar
         backTo={expense ? `/proyectos/${expense.projectId}` : '/proyectos'}
         backLabel="Volver al proyecto"
