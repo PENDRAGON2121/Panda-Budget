@@ -85,6 +85,25 @@ jobs:
           KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
         run: echo "$KEYSTORE_BASE64" | base64 --decode > "$RUNNER_TEMP/release.jks"
 
+      # Fails early with a clear message; prints only the keystore fingerprint and pass/fail, never secret values.
+      - name: Verify keystore
+        if: steps.signing.outputs.signed == 'true'
+        env:
+          STORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+        run: |
+          echo "Keystore SHA-256: $(sha256sum "$RUNNER_TEMP/release.jks" | cut -d' ' -f1 | tr a-f A-F)"
+          echo "Keystore size: $(stat -c %s "$RUNNER_TEMP/release.jks") bytes"
+          if printf '%s' "$STORE_PASSWORD" | LC_ALL=C grep -q '[^ -~]'; then
+            echo "::warning::The keystore password secret contains non-ASCII characters."
+          fi
+          if keytool -list -keystore "$RUNNER_TEMP/release.jks" -storepass:env STORE_PASSWORD -alias "$KEY_ALIAS" > /dev/null 2>&1; then
+            echo "Keystore opens with the password secret and contains the alias."
+          else
+            echo "::error::The keystore could not be opened with ANDROID_KEYSTORE_PASSWORD (or the alias is missing). Compare the SHA-256 above with: Get-FileHash <your .jks> -Algorithm SHA256"
+            exit 1
+          fi
+
       - name: Build signed release APK
         if: steps.signing.outputs.signed == 'true'
         working-directory: android
