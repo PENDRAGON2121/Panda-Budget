@@ -1,6 +1,6 @@
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { MemoryRouter } from 'react-router-dom';
+import { MemoryRouter, Route, Routes, useParams } from 'react-router-dom';
 import { beforeEach } from 'vitest';
 import { db } from '../../db/db';
 import { addPayment, createExpense, createProject, deleteProject } from '../../db/repos';
@@ -144,3 +144,25 @@ describe('loop slides', () => {
     expect(screen.getAllByRole('tab')).toHaveLength(2);
   });
 });
+
+test('tapping the active project card opens that project detail', async () => {
+  await seed();
+  const user = userEvent.setup();
+  render(
+    <MemoryRouter initialEntries={['/']}>
+      <Routes>
+        <Route path="/" element={<HomeScreen />} />
+        <Route path="/proyectos/:id" element={<DetailProbe />} />
+      </Routes>
+    </MemoryRouter>,
+  );
+  const card = await screen.findByRole('link', { name: 'Abrir Proyecto B' });
+  await user.click(card);
+  const b = (await db.projects.toArray()).find((p) => p.name === 'Proyecto B')!;
+  expect(await screen.findByTestId('detail-probe')).toHaveTextContent(b.id);
+});
+
+function DetailProbe() {
+  const { id } = useParams();
+  return <div data-testid="detail-probe">{id}</div>;
+}

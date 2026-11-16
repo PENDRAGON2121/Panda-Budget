@@ -6,6 +6,7 @@ import { MAX_NAME } from '../../lib/limits';
 import { currencySymbol, parseAmount } from '../../lib/money';
 import { getDefaultCurrency } from '../../lib/settings';
 import { useGuardedAction } from '../../lib/useGuardedAction';
+import { useKeyboardSafeOpen } from '../../lib/useKeyboardSafeOpen';
 
 interface Props {
   isOpen: boolean;
@@ -17,6 +18,7 @@ export function ProjectForm({ isOpen, onOpenChange }: Props) {
   const [budget, setBudget] = useState('');
   const [currency, setCurrency] = useState<string>(getDefaultCurrency);
   const { saving, error, run, clearError } = useGuardedAction();
+  const currencyMenu = useKeyboardSafeOpen();
   const trimmed = name.trim();
   const totalBudget = parseAmount(budget);
   const budgetOk = totalBudget > 0;
@@ -61,6 +63,8 @@ export function ProjectForm({ isOpen, onOpenChange }: Props) {
                 fullWidth
                 selectedKey={currency}
                 onSelectionChange={(k) => k && setCurrency(String(k))}
+                isOpen={currencyMenu.isOpen}
+                onOpenChange={currencyMenu.onOpenChange}
               >
                 <Label>Moneda</Label>
                 <Select.Trigger>

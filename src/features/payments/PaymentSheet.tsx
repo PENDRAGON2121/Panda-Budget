@@ -6,6 +6,7 @@ import { useExpenseCurrency, useInstallments, usePayments } from '../../db/hooks
 import { addPayment } from '../../db/repos';
 import { installmentStatus } from '../../lib/calc';
 import { useGuardedAction } from '../../lib/useGuardedAction';
+import { useKeyboardSafeOpen } from '../../lib/useKeyboardSafeOpen';
 import { currencySymbol, formatMoney, parseAmount } from '../../lib/money';
 import { compressImage } from './image';
 import { ReceiptPicker } from './ReceiptPicker';
@@ -30,6 +31,8 @@ export function PaymentSheet({ expenseId, installmentId, isOpen, onOpenChange }:
   const [file, setFile] = useState<File | null>(null);
   const [note, setNote] = useState('');
   const { saving, error, run, clearError } = useGuardedAction();
+  const targetMenu = useKeyboardSafeOpen();
+  const datePopover = useKeyboardSafeOpen();
   const targetChosen = useRef(false);
 
   // Re-target (and reset) each time the sheet opens.
@@ -106,7 +109,13 @@ export function PaymentSheet({ expenseId, installmentId, isOpen, onOpenChange }:
                 />
               </TextField>
 
-              <DatePicker value={date} onChange={setDate} className="w-full">
+              <DatePicker
+                value={date}
+                onChange={setDate}
+                className="w-full"
+                isOpen={datePopover.isOpen}
+                onOpenChange={datePopover.onOpenChange}
+              >
                 <Label>Fecha</Label>
                 <DateField.Group fullWidth>
                   <DateField.Input>{(segment) => <DateField.Segment segment={segment} />}</DateField.Input>
@@ -140,6 +149,8 @@ export function PaymentSheet({ expenseId, installmentId, isOpen, onOpenChange }:
                   aria-label="Aplicar a"
                   selectedKey={target}
                   onSelectionChange={(k) => setTarget(String(k))}
+                  isOpen={targetMenu.isOpen}
+                  onOpenChange={targetMenu.onOpenChange}
                 >
                   <Label>Aplicar a</Label>
                   <Select.Trigger>

@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef } from 'react';
 import { Card } from '@heroui/react';
 import useEmblaCarousel from 'embla-carousel-react';
+import { Link } from 'react-router-dom';
 import type { Expense, Payment, Project } from '../../db/types';
 import { formatMoney } from '../../lib/money';
 import { projectSummary } from '../../lib/calc';
@@ -82,11 +83,24 @@ export function ProjectCarousel({ projects, expenses, payments, activeIndex, onS
     [embla, onSelect],
   );
 
+  // A tap opens the project (embla 8 already swallows the click that ends a swipe, in the capture phase).
+  // A tap on a peeking side card brings it to the centre first.
+  const onCardClick = useCallback(
+    (e: React.MouseEvent, slideIndex: number) => {
+      if (!embla) return;
+      if (embla.selectedScrollSnap() !== slideIndex) {
+        e.preventDefault();
+        embla.scrollTo(slideIndex);
+      }
+    },
+    [embla],
+  );
+
   return (
     <div>
       <div ref={viewportRef} className="overflow-hidden" data-testid="carousel">
         <div className="flex">
-          {slides.map(({ key, project: p, isClone }) => {
+          {slides.map(({ key, project: p, isClone }, slideIndex) => {
             const exps = expenses.filter((e) => e.projectId === p.id);
             const s = projectSummary(p, exps, payments);
             return (
@@ -97,6 +111,14 @@ export function ProjectCarousel({ projects, expenses, payments, activeIndex, onS
                 className="min-w-0 shrink-0 grow-0 px-1.5"
                 style={{ flexBasis: `${SLIDE_BASIS_PCT}%` }}
               >
+                <Link
+                  to={`/proyectos/${p.id}`}
+                  aria-label={isClone ? undefined : `Abrir ${p.name}`}
+                  tabIndex={isClone ? -1 : undefined}
+                  draggable={false}
+                  onClick={(e) => onCardClick(e, slideIndex)}
+                  className="block rounded-card no-underline outline-none focus-visible:ring-2 focus-visible:ring-leaf"
+                >
                 <Card
                   role="article"
                   aria-label={isClone ? undefined : `Proyecto ${p.name}`}
@@ -132,6 +154,7 @@ export function ProjectCarousel({ projects, expenses, payments, activeIndex, onS
                     </div>
                   </Card.Content>
                 </Card>
+                </Link>
               </div>
             );
           })}
