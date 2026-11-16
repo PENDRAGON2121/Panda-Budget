@@ -11,11 +11,14 @@ export function InstallmentTimeline({
   installments,
   payments,
   onPay,
+  onDeletePayment,
   currency = 'CRC',
 }: {
   installments: Installment[];
   payments: Payment[];
   onPay?: (installmentId: string) => void;
+  /** Asks to delete a payment; on a cuota row it targets the cuota's most recent payment. */
+  onDeletePayment?: (payment: Payment) => void;
   currency?: string;
 }) {
   return (
@@ -25,6 +28,7 @@ export function InstallmentTimeline({
         const mine = payments.filter((p) => p.installmentId === inst.id);
         const lastPaid = mine.length ? Math.max(...mine.map((p) => p.date)) : undefined;
         const receiptId = mine.find((p) => p.receiptId)?.receiptId;
+        const latest = [...mine].sort((a, b) => b.date - a.date || b.createdAt - a.createdAt)[0];
         const hasReceipt = !!receiptId;
         const title = `Cuota ${inst.index}${inst.label ? ` · ${inst.label}` : ''}`;
         return (
@@ -74,6 +78,18 @@ export function InstallmentTimeline({
                   {formatMoney(inst.plannedAmount, currency)}
                 </div>
                 {receiptId && <ReceiptThumb receiptId={receiptId} />}
+                {latest && onDeletePayment && (
+                  <Button
+                    isIconOnly
+                    size="sm"
+                    variant="ghost"
+                    aria-label={`Eliminar pago de cuota ${inst.index}`}
+                    onPress={() => onDeletePayment(latest)}
+                    className="text-danger"
+                  >
+                    🗑
+                  </Button>
+                )}
                 {status !== 'pagada' && onPay && (
                   <Button
                     size="sm"

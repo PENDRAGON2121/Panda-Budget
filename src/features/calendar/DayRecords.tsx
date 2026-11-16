@@ -1,4 +1,7 @@
-import { Card } from '@heroui/react';
+import { useState } from 'react';
+import { Button, Card } from '@heroui/react';
+import { ConfirmDialog } from '../../components/ConfirmDialog';
+import { deletePayment } from '../../db/repos';
 import { ReceiptThumb } from '../payments/ReceiptThumb';
 import { formatMoney } from '../../lib/money';
 import { msOfIso, WEEKDAYS_ES, MONTHS_ES } from '../../lib/calendar';
@@ -13,6 +16,7 @@ export interface DayRecord {
 }
 
 export function DayRecords({ iso, records }: { iso: string; records: DayRecord[] }) {
+  const [toDelete, setToDelete] = useState<DayRecord | null>(null);
   const d = new Date(msOfIso(iso));
   const title = `${WEEKDAYS_ES[(d.getDay() + 6) % 7]} ${d.getDate()} de ${MONTHS_ES[d.getMonth()].toLowerCase()}`;
   // One total per currency (stable alphabetical order) so currencies are never mixed.
@@ -45,6 +49,16 @@ export function DayRecords({ iso, records }: { iso: string; records: DayRecord[]
                     </div>
                     {r.payment.receiptId && <ReceiptThumb receiptId={r.payment.receiptId} />}
                     <span className="shrink-0 text-[13px] font-extrabold tabular-nums">{formatMoney(r.payment.amount, r.currency)}</span>
+                    <Button
+                      isIconOnly
+                      size="sm"
+                      variant="ghost"
+                      aria-label={`Eliminar pago de ${r.expenseName}`}
+                      onPress={() => setToDelete(r)}
+                      className="text-danger"
+                    >
+                      🗑
+                    </Button>
                   </Card.Content>
                 </Card>
               </li>
@@ -52,6 +66,13 @@ export function DayRecords({ iso, records }: { iso: string; records: DayRecord[]
           </ul>
         </>
       )}
+      <ConfirmDialog
+        isOpen={toDelete !== null}
+        onOpenChange={(open) => !open && setToDelete(null)}
+        title="¿Eliminar este pago?"
+        description={toDelete ? `${toDelete.expenseName} · ${formatMoney(toDelete.payment.amount, toDelete.currency)}` : undefined}
+        onConfirm={() => deletePayment(toDelete!.payment.id)}
+      />
     </section>
   );
 }

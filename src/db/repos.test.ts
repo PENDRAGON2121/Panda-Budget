@@ -7,6 +7,7 @@ import {
   createExpense,
   addPayment,
   deletePayment,
+  deleteExpense,
 } from './repos';
 
 const blob = () => new Blob(['x'], { type: 'image/png' });
@@ -111,5 +112,30 @@ describe('repos', () => {
     expect(await db.expenses.count()).toBe(1);
     expect(await db.payments.count()).toBe(1);
     expect(await db.receipts.count()).toBe(1);
+  });
+  it('deleteExpense cascades installments, payments and unshared receipts; keeps shared receipts and siblings', async () => {
+    const p = await seedProject();
+    const e = await createExpense(
+      { projectId: p.id, name: 'E', type: 'installments', plannedAmount: 200 },
+      [{ index: 1, plannedAmount: 100 }, { index: 2, plannedAmount: 100 }],
+    );
+    const other = await createExpense({ projectId: p.id, name: 'Other', type: 'single', plannedAmount: 50 });
+    const insts = await db.installments.where('expenseId').equals(e.id).toArray();
+    // own receipt (only used by e's payment)
+    const own = await addPayment({ expenseId: e.id, installmentId: insts[0].id, amount: 100, date: 1 }, { blob: blob(), mime: 'image/png' });
+    // shared receipt: referenced by e's payment and by a payment of the other expense
+    const shared = await addPayment({ expenseId: other.id, amount: 10, date: 2 }, { blob: blob(), mime: 'image/png' });
+    await db.payments.add({ id: 'dup', expenseId: e.id, amount: 5, date: 3, createdAt: 3, receiptId: shared.receiptId });
+
+    await deleteExpense(e.id);
+
+    expect(await db.expenses.get(e.id)).toBeUndefined();
+    expect(await db.installments.where('expenseId').equals(e.id).count()).toBe(0);
+    expect(await db.payments.where('expenseId').equals(e.id).count()).toBe(0);
+    expect(await db.receipts.get(own.receiptId!)).toBeUndefined();
+    expect(await db.receipts.get(shared.receiptId!)).toBeDefined();
+    expect(await db.expenses.get(other.id)).toBeDefined();
+    expect(await db.payments.get(shared.id)).toBeDefined();
+    expect(await db.projects.get(p.id)).toBeDefined();
   });
 });

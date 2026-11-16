@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo } from 'react';
+import { useCallback, useEffect, useMemo, useRef } from 'react';
 import { Card } from '@heroui/react';
 import useEmblaCarousel from 'embla-carousel-react';
 import type { Expense, Payment, Project } from '../../db/types';
@@ -53,6 +53,26 @@ export function ProjectCarousel({ projects, expenses, payments, activeIndex, onS
       embla.off('select', handler);
     };
   }, [embla, onSelect, slides]);
+
+  // App state owns the active project. Whenever embla re-initialises (slides added/removed, e.g. after a
+  // project delete), jump it back to the (already clamped) active index so it never points past the end.
+  const activeRef = useRef(activeIndex);
+  activeRef.current = activeIndex;
+  const slidesRef = useRef(slides);
+  slidesRef.current = slides;
+  const realCount = projects.length;
+  useEffect(() => {
+    if (!embla) return;
+    const resync = () => {
+      const target = Math.min(activeRef.current, realCount - 1);
+      if (target >= 0 && slidesRef.current[embla.selectedScrollSnap()]?.realIndex !== target) embla.scrollTo(target, true);
+    };
+    embla.on('reInit', resync);
+    embla.reInit();
+    return () => {
+      embla.off('reInit', resync);
+    };
+  }, [embla, realCount]);
 
   const goTo = useCallback(
     (i: number) => {

@@ -1,4 +1,4 @@
-import { useCallback, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { useAllExpenses, useAllPayments, useProjects } from '../../db/hooks';
 import pandaIcon from '../../assets/panda-app-icon.svg';
 import { EmptyHome } from './EmptyHome';
@@ -13,6 +13,14 @@ export function HomeScreen() {
   const [direction, setDirection] = useState<1 | -1>(1);
   const prev = useRef(0);
   const count = projects?.length ?? 0;
+  // When the list shrinks (e.g. a project was deleted) the stored index may point past the end: clamp and re-sync.
+  const safeIndex = count > 0 ? Math.min(index, count - 1) : 0;
+  useEffect(() => {
+    if (index !== safeIndex) {
+      prev.current = safeIndex;
+      setIndex(safeIndex);
+    }
+  }, [index, safeIndex]);
 
   const onSelect = useCallback(
     (next: number) => {
@@ -29,7 +37,7 @@ export function HomeScreen() {
   if (!projects || !expenses || !payments) return null;
   if (projects.length === 0) return <EmptyHome />;
 
-  const active = projects[Math.min(index, projects.length - 1)];
+  const active = projects[safeIndex];
   return (
     <div>
       <header className="flex items-center gap-3 pb-3.5 pt-2">
@@ -46,7 +54,7 @@ export function HomeScreen() {
           projects={projects}
           expenses={expenses}
           payments={payments}
-          activeIndex={index}
+          activeIndex={safeIndex}
           onSelect={onSelect}
         />
       </div>

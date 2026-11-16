@@ -101,3 +101,27 @@ test('Agregar gasto FAB opens the expense form', async () => {
   await userEvent.setup().click(screen.getByRole('button', { name: /agregar gasto/i }));
   expect(await screen.findByText('Nuevo gasto')).toBeInTheDocument();
 });
+
+test('Eliminar proyecto confirms, cascades and navigates to /proyectos', async () => {
+  const { p, exps } = await seed([400000]);
+  await addPayment({ expenseId: exps[0].id, amount: 1000, date: Date.now() });
+  const user = userEvent.setup();
+  render(
+    <MemoryRouter initialEntries={[`/proyectos/${p.id}`]}>
+      <Routes>
+        <Route path="/proyectos/:id" element={<ProjectDetail />} />
+        <Route path="/proyectos" element={<p>Lista de proyectos</p>} />
+      </Routes>
+    </MemoryRouter>,
+  );
+  await user.click(await screen.findByRole('button', { name: 'Más opciones del proyecto' }));
+    await user.click(await screen.findByRole('menuitem', { name: 'Eliminar proyecto' }));
+  const dialog = await screen.findByRole('dialog');
+  expect(dialog).toHaveTextContent(/¿Eliminar el proyecto «Casa nueva»\?/);
+  expect(dialog).toHaveTextContent(/Esta acción no se puede deshacer/);
+  await user.click(screen.getByRole('button', { name: 'Eliminar' }));
+  expect(await screen.findByText('Lista de proyectos')).toBeInTheDocument();
+  expect(await db.projects.count()).toBe(0);
+  expect(await db.expenses.count()).toBe(0);
+  expect(await db.payments.count()).toBe(0);
+});

@@ -88,3 +88,16 @@ export async function deletePayment(id: string): Promise<void> {
     await freeReceiptIfUnreferenced(payment.receiptId);
   });
 }
+
+export async function deleteExpense(id: string): Promise<void> {
+  await db.transaction('rw', [db.expenses, db.installments, db.payments, db.receipts], async () => {
+    const payments = await db.payments.where('expenseId').equals(id).toArray();
+    const receiptIds = [...new Set(payments.map((p) => p.receiptId).filter((r): r is string => !!r))];
+
+    await db.payments.where('expenseId').equals(id).delete();
+    await db.installments.where('expenseId').equals(id).delete();
+    await db.expenses.delete(id);
+
+    for (const rid of receiptIds) await freeReceiptIfUnreferenced(rid);
+  });
+}

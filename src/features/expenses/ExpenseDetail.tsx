@@ -1,11 +1,16 @@
 import { Button, Card, Chip, ProgressBar } from '@heroui/react';
 import { useState } from 'react';
-import { Link, useParams } from 'react-router-dom';
+import { Link, useNavigate, useParams } from 'react-router-dom';
+import { AppBarMenu } from '../../components/AppBarMenu';
+import { ConfirmDialog } from '../../components/ConfirmDialog';
 import { useExpense, useExpenseCurrency, useInstallments, usePayments } from '../../db/hooks';
+import { deleteExpense, deletePayment } from '../../db/repos';
+import type { Payment } from '../../db/types';
 import { expenseProgress, installmentStatus } from '../../lib/calc';
 import { formatMoney } from '../../lib/money';
 import { PaymentSheet } from '../payments/PaymentSheet';
 import { InstallmentTimeline } from './InstallmentTimeline';
+import { PaymentList } from './PaymentList';
 
 export function ExpenseDetail() {
   const { id } = useParams();
@@ -15,6 +20,9 @@ export function ExpenseDetail() {
   const currency = useExpenseCurrency(id);
   const [sheetOpen, setSheetOpen] = useState(false);
   const [targetInst, setTargetInst] = useState<string>();
+  const [paymentToDelete, setPaymentToDelete] = useState<Payment | null>(null);
+  const [confirmDeleteExpense, setConfirmDeleteExpense] = useState(false);
+  const navigate = useNavigate();
 
   if (expense === null) {
     return (
@@ -42,9 +50,15 @@ export function ExpenseDetail() {
         >
           ‹
         </Link>
-        <h1 className="break-words font-display text-[17px] font-black text-ink">
+        <h1 className="min-w-0 flex-1 break-words font-display text-[17px] font-black text-ink">
           {expense ? expense.name : ''}
         </h1>
+        {expense && (
+          <AppBarMenu
+            label="Más opciones del gasto"
+            actions={[{ id: 'delete', label: 'Eliminar gasto', danger: true, onAction: () => setConfirmDeleteExpense(true) }]}
+          />
+        )}
       </header>
 
       {ready && p ? (
@@ -109,8 +123,22 @@ export function ExpenseDetail() {
                   setTargetInst(instId);
                   setSheetOpen(true);
                 }}
+                onDeletePayment={setPaymentToDelete}
               />
             </section>
+          )}
+
+          {expense.type === 'single' ? (
+            <PaymentList payments={payments} currency={currency} onDelete={setPaymentToDelete} />
+          ) : (
+            payments.some((pay) => !pay.installmentId) && (
+              <PaymentList
+                label="Pagos sin cuota"
+                payments={payments.filter((pay) => !pay.installmentId)}
+                currency={currency}
+                onDelete={setPaymentToDelete}
+              />
+            )
           )}
         </>
       ) : (
@@ -127,6 +155,29 @@ export function ExpenseDetail() {
       >
         + Registrar pago
       </Button>
+      <ConfirmDialog
+        isOpen={paymentToDelete !== null}
+        onOpenChange={(open) => !open && setPaymentToDelete(null)}
+        title="¿Eliminar este pago?"
+        description={
+          paymentToDelete
+            ? `${formatMoney(paymentToDelete.amount, currency)} · ${new Date(paymentToDelete.date).toLocaleDateString('es-CR')}`
+            : undefined
+        }
+        onConfirm={() => deletePayment(paymentToDelete!.id)}
+      />
+      <ConfirmDialog
+        isOpen={confirmDeleteExpense}
+        onOpenChange={setConfirmDeleteExpense}
+        title={`¿Eliminar el gasto «${expense?.name ?? ''}»?`}
+        description="Se eliminarán también sus cuotas, pagos y recibos."
+        onConfirm={async () => {
+          if (!expense) return;
+          const projectId = expense.projectId;
+          await deleteExpense(expense.id);
+          navigate(`/proyectos/${projectId}`, { replace: true });
+        }}
+      />
       {id && <PaymentSheet expenseId={id} installmentId={targetInst} isOpen={sheetOpen} onOpenChange={setSheetOpen} />}
     </div>
   );

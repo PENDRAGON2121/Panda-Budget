@@ -1,8 +1,11 @@
 import { useState } from 'react';
 import { Button, Card, ProgressBar } from '@heroui/react';
 import { motion } from 'motion/react';
-import { Link, useParams } from 'react-router-dom';
+import { Link, useNavigate, useParams } from 'react-router-dom';
+import { AppBarMenu } from '../../components/AppBarMenu';
+import { ConfirmDialog } from '../../components/ConfirmDialog';
 import { useAllPayments, useExpenses, useProject } from '../../db/hooks';
+import { deleteProject } from '../../db/repos';
 import type { Expense, Payment } from '../../db/types';
 import { expenseProgress } from '../../lib/calc';
 import { formatMoney } from '../../lib/money';
@@ -43,6 +46,8 @@ export function ProjectDetail() {
   const expenses = useExpenses(id);
   const payments = useAllPayments();
   const [formOpen, setFormOpen] = useState(false);
+  const [confirmDelete, setConfirmDelete] = useState(false);
+  const navigate = useNavigate();
 
   if (project === null) {
     return (
@@ -59,7 +64,13 @@ export function ProjectDetail() {
     <div className="flex flex-col gap-4">
       <header className="flex items-center gap-3">
         <Link to="/proyectos" aria-label="Volver a proyectos" className="text-ink no-underline">‹</Link>
-        <h1 className="break-words font-display text-[17px] font-black text-ink">{project?.name ?? ''}</h1>
+        <h1 className="min-w-0 flex-1 break-words font-display text-[17px] font-black text-ink">{project?.name ?? ''}</h1>
+        {project && (
+          <AppBarMenu
+            label="Más opciones del proyecto"
+            actions={[{ id: 'delete', label: 'Eliminar proyecto', danger: true, onAction: () => setConfirmDelete(true) }]}
+          />
+        )}
       </header>
 
       {/* Container transform: the layoutId element mounts on first render (before data resolves) so Motion can
@@ -90,6 +101,17 @@ export function ProjectDetail() {
         )}
       </section>
       )}
+      <ConfirmDialog
+        isOpen={confirmDelete}
+        onOpenChange={setConfirmDelete}
+        title={`¿Eliminar el proyecto «${project?.name ?? ''}»?`}
+        description="Se eliminarán también todos sus gastos, cuotas, pagos y recibos."
+        onConfirm={async () => {
+          if (!id) return;
+          await deleteProject(id);
+          navigate('/proyectos', { replace: true });
+        }}
+      />
 
       <Button
         aria-label="Agregar gasto"

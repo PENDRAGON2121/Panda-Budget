@@ -1,4 +1,4 @@
-import { render, screen, within } from '@testing-library/react';
+import { render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { beforeEach } from 'vitest';
 import { db } from '../../db/db';
@@ -77,4 +77,17 @@ test('mixed-currency day shows one total per currency, never mixed', async () =>
   expect(await screen.findByText('₡1.800.000 + $500 · 2 pagos')).toBeInTheDocument();
   expect(screen.getByText('$500')).toBeInTheDocument();
   expect(screen.getByText('₡1.800.000')).toBeInTheDocument();
+});
+
+test('a day record can be deleted after confirmation', async () => {
+  await seed();
+  const user = userEvent.setup();
+  renderCal();
+  await screen.findByText('₡150.000 · 2 pagos');
+  const row = screen.getAllByRole('listitem').find((li) => li.textContent?.includes('₡100.000'))!;
+  await user.click(within(row).getByRole('button', { name: 'Eliminar pago de Cocina' }));
+  expect(await screen.findByRole('dialog')).toHaveTextContent(/Esta acción no se puede deshacer/);
+  await user.click(screen.getByRole('button', { name: 'Eliminar' }));
+  await waitFor(async () => expect(await db.payments.count()).toBe(2));
+  expect(await screen.findByText('₡50.000 · 1 pago')).toBeInTheDocument();
 });

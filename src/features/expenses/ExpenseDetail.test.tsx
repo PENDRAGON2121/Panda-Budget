@@ -1,4 +1,4 @@
-import { render, screen, waitFor } from '@testing-library/react';
+import { render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { MemoryRouter, Route, Routes } from 'react-router-dom';
 import { beforeEach } from 'vitest';
@@ -91,4 +91,80 @@ test('FAB and per-cuota Pagar open the payment sheet, the latter pre-selecting i
   await user.click(screen.getByRole('button', { name: /pagar cuota 2/i }));
   expect(await screen.findByRole('heading', { name: /registrar pago/i })).toBeInTheDocument();
   expect(screen.getByRole('button', { name: /aplicar a/i })).toHaveTextContent(/cuota 2/i);
+});
+
+function renderWithProjectRoute(id: string) {
+  return render(
+    <MemoryRouter initialEntries={[`/gastos/${id}`]}>
+      <Routes>
+        <Route path="/gastos/:id" element={<ExpenseDetail />} />
+        <Route path="/proyectos/:id" element={<p>Pantalla de proyecto</p>} />
+      </Routes>
+    </MemoryRouter>,
+  );
+}
+
+describe('deletion', () => {
+  test('Eliminar gasto asks for confirmation, cascades and navigates back to its project', async () => {
+    const { e, insts } = await seedInstallments();
+    await addPayment({ expenseId: e.id, installmentId: insts[0].id, amount: 1000000, date: Date.now() });
+    const user = userEvent.setup();
+    renderWithProjectRoute(e.id);
+    await screen.findByTestId('planeado');
+    expect(screen.queryByRole('button', { name: 'Eliminar gasto' })).not.toBeInTheDocument();
+    await user.click(await screen.findByRole('button', { name: 'Más opciones del gasto' }));
+    await user.click(await screen.findByRole('menuitem', { name: 'Eliminar gasto' }));
+    const dialog = await screen.findByRole('dialog');
+    expect(dialog).toHaveTextContent(/¿Eliminar el gasto «Constructora»\?/);
+    expect(dialog).toHaveTextContent(/Esta acción no se puede deshacer/);
+    await user.click(screen.getByRole('button', { name: 'Eliminar' }));
+    expect(await screen.findByText('Pantalla de proyecto')).toBeInTheDocument();
+    expect(await db.expenses.count()).toBe(0);
+    expect(await db.installments.count()).toBe(0);
+    expect(await db.payments.count()).toBe(0);
+  });
+
+  test('cancelling the confirmation keeps the gasto', async () => {
+    const { e } = await seedInstallments();
+    const user = userEvent.setup();
+    renderWithProjectRoute(e.id);
+    await user.click(await screen.findByRole('button', { name: 'Más opciones del gasto' }));
+    await user.click(await screen.findByRole('menuitem', { name: 'Eliminar gasto' }));
+    await screen.findByRole('dialog');
+    await user.click(screen.getByRole('button', { name: 'Cancelar' }));
+    await waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument());
+    expect(await db.expenses.count()).toBe(1);
+    expect(screen.getByText('Constructora')).toBeInTheDocument();
+  });
+
+  test('a paid cuota row can delete its payment after confirmation', async () => {
+    const { e, insts } = await seedInstallments();
+    await addPayment({ expenseId: e.id, installmentId: insts[0].id, amount: 1000000, date: Date.now() });
+    const user = userEvent.setup();
+    renderAt(e.id);
+    await user.click(await screen.findByRole('button', { name: 'Eliminar pago de cuota 1' }));
+    expect(await screen.findByRole('dialog')).toHaveTextContent(/¿Eliminar este pago\?/);
+    await user.click(screen.getByRole('button', { name: 'Eliminar' }));
+    await waitFor(async () => expect(await db.payments.count()).toBe(0));
+    await waitFor(() => expect(screen.getAllByTestId('cuota')[0]).toHaveAttribute('data-status', 'proxima'));
+  });
+
+  test('a single gasto lists its payments (date, amount) and can delete one', async () => {
+    const p = await createProject({ name: 'Casa', currency: 'CRC', totalBudget: 1000000 });
+    const e = await createExpense({ projectId: p.id, name: 'Nevera', type: 'single', plannedAmount: 500000 });
+    await addPayment({ expenseId: e.id, amount: 200000, date: new Date(2026, 4, 15).getTime() });
+    await addPayment({ expenseId: e.id, amount: 100000, date: new Date(2026, 4, 20).getTime() });
+    const user = userEvent.setup();
+    renderAt(e.id);
+    const list = await screen.findByRole('list', { name: 'Pagos' });
+    const rows = within(list).getAllByRole('listitem');
+    expect(rows).toHaveLength(2);
+    expect(rows[0]).toHaveTextContent(formatCRC(200000));
+    expect(rows[0]).toHaveTextContent(/15 may/i);
+    await user.click(within(rows[0]).getByRole('button', { name: /eliminar pago/i }));
+    await user.click(await screen.findByRole('button', { name: 'Eliminar' }));
+    await waitFor(async () => expect(await db.payments.count()).toBe(1));
+    expect((await db.payments.toArray())[0].amount).toBe(100000);
+    await waitFor(() => expect(within(screen.getByRole('list', { name: 'Pagos' })).getAllByRole('listitem')).toHaveLength(1));
+  });
 });

@@ -3,7 +3,7 @@ import userEvent from '@testing-library/user-event';
 import { MemoryRouter } from 'react-router-dom';
 import { beforeEach } from 'vitest';
 import { db } from '../../db/db';
-import { createExpense, createProject } from '../../db/repos';
+import { createExpense, createProject, deleteProject } from '../../db/repos';
 import type { Project } from '../../db/types';
 import { HomeScreen } from './HomeScreen';
 import { buildLoopSlides, SLIDE_BASIS_PCT } from './ProjectCarousel';
@@ -61,6 +61,27 @@ test('empty-state + button opens the new-project form', async () => {
   renderHome();
   await user.click(await screen.findByRole('button', { name: 'Nuevo proyecto' }));
   expect(await screen.findByRole('heading', { name: 'Nuevo proyecto' })).toBeInTheDocument();
+});
+
+test('deleting the active last project clamps the carousel to a valid project', async () => {
+  const a = await createProject({ name: 'Proyecto A', currency: 'CRC', totalBudget: 1000000 });
+  await new Promise((r) => setTimeout(r, 5));
+  const b = await createProject({ name: 'Proyecto B', currency: 'CRC', totalBudget: 1000000 });
+  await new Promise((r) => setTimeout(r, 5));
+  await createProject({ name: 'Proyecto C', currency: 'CRC', totalBudget: 1000000 });
+  await createExpense({ projectId: b.id, name: 'Gasto de B', type: 'single', plannedAmount: 1000 });
+  const user = userEvent.setup();
+  renderHome();
+  // newest-first: C(0), B(1), A(2); select A (last index) then delete it
+  await user.click(await screen.findByRole('tab', { name: 'Ir a Proyecto A' }));
+  await waitFor(() => expect(screen.getByRole('tab', { name: 'Ir a Proyecto A' })).toHaveAttribute('aria-selected', 'true'));
+  await deleteProject(a.id);
+  await waitFor(() => expect(screen.getAllByRole('tab')).toHaveLength(2));
+  await waitFor(() =>
+    expect(screen.getAllByRole('tab').filter((t) => t.getAttribute('aria-selected') === 'true')).toHaveLength(1),
+  );
+  expect(screen.getByRole('tab', { name: 'Ir a Proyecto B' })).toHaveAttribute('aria-selected', 'true');
+  expect(await screen.findByText('Gasto de B')).toBeInTheDocument();
 });
 
 describe('loop slides', () => {
