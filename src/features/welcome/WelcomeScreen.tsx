@@ -15,7 +15,7 @@ export function WelcomeScreen() {
   };
 
   return (
-    <div className="mx-auto flex min-h-screen max-w-md flex-col items-center justify-center gap-6 px-[18px] py-10">
+    <div className="mx-auto flex min-h-screen max-w-md flex-col items-center justify-center gap-6 px-[18px] pb-10 pt-[calc(2.5rem+env(safe-area-inset-top))]">
       <motion.div
         initial={{ opacity: 0, y: 16 }}
         animate={{ opacity: 1, y: 0 }}

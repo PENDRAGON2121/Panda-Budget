@@ -2,7 +2,7 @@ import { useEffect } from 'react';
 import { Capacitor } from '@capacitor/core';
 import { App as CapApp } from '@capacitor/app';
 import { StatusBar, Style } from '@capacitor/status-bar';
-import { decideBack } from './back';
+import { decideBack, OVERLAY_SELECTOR } from './back';
 
 /** Native-only behaviour (Android back button, status bar). Renders nothing; no-op on the web. */
 export function NativeShell({ path }: { path: string }) {
@@ -15,8 +15,8 @@ export function NativeShell({ path }: { path: string }) {
   useEffect(() => {
     if (!Capacitor.isNativePlatform()) return;
     const handle = CapApp.addListener('backButton', ({ canGoBack }) => {
-      // Open HeroUI overlays (Modal/Drawer) are modal dialogs: dismiss them first, like Escape would.
-      const dialog = document.querySelector<HTMLElement>('[role="dialog"], [role="alertdialog"]');
+      // Open HeroUI overlays (Modal/Drawer/Dropdown menu): dismiss them first, like Escape would.
+      const dialog = document.querySelector<HTMLElement>(OVERLAY_SELECTOR);
       if (dialog) {
         dialog.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', code: 'Escape', bubbles: true }));
         return;

@@ -114,3 +114,24 @@ test('deleting a payment removes its movement', async () => {
   await waitFor(() => expect(within(panel).queryAllByRole('link')).toHaveLength(0));
   expect(within(panel).getByText('Presupuesto inicial')).toBeInTheDocument();
 });
+
+test('tapping a receipt thumbnail opens the viewer without navigating to the expense', async () => {
+  const { p, e } = await seed();
+  await addPayment({ expenseId: e.id, amount: 100, date: 5 }, { blob: new Blob(['x'], { type: 'image/png' }), mime: 'image/png' });
+  URL.createObjectURL = () => 'blob:x';
+  URL.revokeObjectURL = () => {};
+  render(
+    <MemoryRouter initialEntries={[`/proyectos/${p.id}`]}>
+      <Routes>
+        <Route path="/proyectos/:id" element={<ProjectDetail />} />
+        <Route path="/gastos/:id" element={<div>PANTALLA GASTO</div>} />
+      </Routes>
+    </MemoryRouter>,
+  );
+  await openMovimientos();
+  const thumb = await screen.findByRole('button', { name: 'Ver recibo' });
+  expect(thumb.closest('a')).toBeNull();
+  await userEvent.click(thumb);
+  expect(screen.queryByText('PANTALLA GASTO')).not.toBeInTheDocument();
+  expect(await screen.findByRole('dialog')).toBeInTheDocument();
+});

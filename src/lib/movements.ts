@@ -25,6 +25,8 @@ export function projectMovements(
   const byExpense = new Map(expenses.filter((e) => e.projectId === project.id).map((e) => [e.id, e]));
   const byInstallment = new Map(installments.map((i) => [i.id, i]));
 
+  // NOTE: "Presupuesto inicial" is always pinned first, regardless of payments backdated before project.createdAt
+  // (payments are sorted among themselves only; the running balance starts from the budget).
   const movements: Movement[] = [
     {
       id: `budget-${project.id}`,

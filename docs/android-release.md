@@ -53,3 +53,9 @@ Settings -> Secrets and variables -> Actions -> New repository secret:
 4. `git tag v0.0.2 && git push --tags` (tag must equal `v` + package version).
 
 CI then publishes the signed APK to a GitHub Release using that changelog section as notes.
+
+### Notes
+
+- The repository must be **public**: the in-app update check reads the GitHub Releases API unauthenticated, and a 404 (private repo) is treated as "up to date".
+- A debug APK cannot be updated in place by the signed release APK (different signing key): uninstall the debug build first.
+- `ANDROID_KEYSTORE_PATH` is the local/Gradle variable (path to a keystore file on your machine). CI instead stores `ANDROID_KEYSTORE_BASE64` and decodes it to a temp file, then sets `ANDROID_KEYSTORE_PATH` to that path for the build.

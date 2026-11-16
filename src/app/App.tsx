@@ -19,7 +19,7 @@ function RoutedShell() {
 
 function Layout() {
   return (
-    <div className="mx-auto min-h-screen max-w-md px-[18px] pb-32 pt-6">
+    <div className="mx-auto min-h-screen max-w-md px-[18px] pb-32 pt-[calc(1.5rem+env(safe-area-inset-top))]">
       <main>
         <Outlet />
       </main>

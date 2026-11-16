@@ -21,7 +21,33 @@ function Arrow({ up }: { up: boolean }) {
 
 function MovementRow({ m, currency, index }: { m: Movement; currency: string; index: number }) {
   const entrada = m.kind === 'entrada';
-  const body = (
+  const text = (
+    <>
+      <div className="min-w-0 flex-1">
+        <div className="break-words font-display text-[13.5px] font-extrabold text-ink">
+          {m.label}
+          {m.detail ? ` · ${m.detail}` : ''}
+        </div>
+        <div className="text-[11px] tabular-nums text-ink-muted">
+          {fmtDate(m.date)} ·{' '}
+          <span style={m.balance < 0 ? { color: '#b23f1d', fontWeight: 700 } : undefined}>
+            saldo {formatMoney(m.balance, currency)}
+          </span>
+        </div>
+      </div>
+      <span
+        className="shrink-0 font-display text-[14px] font-black tabular-nums"
+        style={{ color: entrada ? '#2f6f22' : '#24212b' }}
+      >
+        {entrada ? '+' : '−'}
+        {formatMoney(m.amount, currency)}
+      </span>
+    </>
+  );
+  const textClass = 'flex min-w-0 flex-1 flex-row items-center gap-3 no-underline';
+
+  // The receipt thumbnail is a sibling of the Link (never nested inside it: interactive-in-anchor is invalid).
+  const content: ReactNode = (
     <Card
       className={`rounded-row border shadow-row ${entrada ? 'border-[rgba(60,138,46,0.22)]' : 'border-hairline'}`}
     >
@@ -33,36 +59,16 @@ function MovementRow({ m, currency, index }: { m: Movement; currency: string; in
         >
           <Arrow up={entrada} />
         </span>
-        <div className="min-w-0 flex-1">
-          <div className="break-words font-display text-[13.5px] font-extrabold text-ink">
-            {m.label}
-            {m.detail ? ` · ${m.detail}` : ''}
-          </div>
-          <div className="text-[11px] tabular-nums text-ink-muted">
-            {fmtDate(m.date)} ·{' '}
-            <span style={m.balance < 0 ? { color: '#b23f1d', fontWeight: 700 } : undefined}>
-              saldo {formatMoney(m.balance, currency)}
-            </span>
-          </div>
-        </div>
+        {m.expenseId ? (
+          <Link to={`/gastos/${m.expenseId}`} className={textClass}>
+            {text}
+          </Link>
+        ) : (
+          <div className={textClass}>{text}</div>
+        )}
         {m.receiptId && <ReceiptThumb receiptId={m.receiptId} />}
-        <span
-          className="shrink-0 font-display text-[14px] font-black tabular-nums"
-          style={{ color: entrada ? '#2f6f22' : '#24212b' }}
-        >
-          {entrada ? '+' : '−'}
-          {formatMoney(m.amount, currency)}
-        </span>
       </Card.Content>
     </Card>
-  );
-
-  const content: ReactNode = m.expenseId ? (
-    <Link to={`/gastos/${m.expenseId}`} className="block no-underline">
-      {body}
-    </Link>
-  ) : (
-    body
   );
 
   return (

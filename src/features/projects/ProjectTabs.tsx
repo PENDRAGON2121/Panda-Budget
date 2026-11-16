@@ -69,7 +69,7 @@ export function ProjectTabs({
               role="tab"
               id={`tab-${t.id}`}
               aria-selected={active}
-              aria-controls={`panel-${t.id}`}
+              aria-controls={active ? `panel-${t.id}` : undefined}
               tabIndex={active ? 0 : -1}
               onClick={() => select(t.id)}
               className="relative h-9 cursor-pointer border-0 bg-transparent font-display text-[14px] font-extrabold outline-none focus-visible:ring-2 focus-visible:ring-leaf"

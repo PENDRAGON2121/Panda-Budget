@@ -22,3 +22,9 @@ test('switches panels by click and arrow keys under StrictMode', async () => {
   expect(screen.getByRole('tab', { name: 'Gastos' })).toHaveAttribute('aria-selected', 'true');
   expect(await screen.findByText('lista gastos')).toBeInTheDocument();
 });
+
+test('only the active tab sets aria-controls', () => {
+  render(<Harness />);
+  expect(screen.getByRole('tab', { name: 'Gastos' })).toHaveAttribute('aria-controls', 'panel-gastos');
+  expect(screen.getByRole('tab', { name: 'Movimientos' })).not.toHaveAttribute('aria-controls');
+});

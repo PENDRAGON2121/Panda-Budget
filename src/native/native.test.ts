@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { decideBack } from './back';
+import { decideBack, OVERLAY_SELECTOR } from './back';
 
 describe('decideBack', () => {
   it('exits from Inicio even when history exists', () => {
@@ -11,5 +11,16 @@ describe('decideBack', () => {
   });
   it('exits when there is no history to go back to', () => {
     expect(decideBack('/perfil', false)).toBe('exit');
+  });
+});
+
+describe('OVERLAY_SELECTOR', () => {
+  it('matches dialogs, alert dialogs and open menus', () => {
+    for (const role of ['dialog', 'alertdialog', 'menu']) {
+      document.body.innerHTML = `<div role="${role}"></div>`;
+      expect(document.querySelector(OVERLAY_SELECTOR)).not.toBeNull();
+    }
+    document.body.innerHTML = '<div role="listbox"></div>';
+    expect(document.querySelector(OVERLAY_SELECTOR)).toBeNull();
   });
 });
