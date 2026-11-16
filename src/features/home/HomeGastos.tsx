@@ -1,9 +1,9 @@
 import { AnimatePresence, motion, useReducedMotion } from 'motion/react';
 import { Link } from 'react-router-dom';
 import { ProgressBar } from '@heroui/react';
-import { useAllPayments, useExpenses } from '../../db/hooks';
+import { useAllPayments, useExpenses, useProjectCurrency } from '../../db/hooks';
 import { expenseProgress } from '../../lib/calc';
-import { formatCRC } from '../../lib/money';
+import { formatMoney } from '../../lib/money';
 
 interface Props {
   projectId: string;
@@ -14,6 +14,7 @@ interface Props {
 function GastosList({ projectId }: { projectId: string }) {
   const expenses = useExpenses(projectId);
   const payments = useAllPayments();
+  const currency = useProjectCurrency(projectId);
   if (!expenses || !payments) return null;
   if (expenses.length === 0) {
     return <p className="py-4 text-center text-sm text-ink-muted">Este proyecto aún no tiene gastos.</p>;
@@ -31,7 +32,7 @@ function GastosList({ projectId }: { projectId: string }) {
                 <span className="break-words font-display text-[13.5px] font-extrabold text-ink">{e.name}</span>
               </div>
               <div className={`mt-1 text-[11px] tabular-nums ${p.over ? 'font-bold text-danger' : 'text-ink-muted'}`}>
-                {formatCRC(p.paid)} de {formatCRC(e.plannedAmount)}
+                {formatMoney(p.paid, currency)} de {formatMoney(e.plannedAmount, currency)}
               </div>
               <ProgressBar aria-label={`Progreso de ${e.name}`} value={shown} className="mt-1.5 w-full">
                 <ProgressBar.Track className="h-1.5">

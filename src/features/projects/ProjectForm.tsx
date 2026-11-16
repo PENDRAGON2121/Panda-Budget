@@ -1,7 +1,8 @@
 import { useState } from 'react';
-import { Button, Input, Label, Modal, TextField } from '@heroui/react';
+import { Button, Input, Label, ListBox, Modal, Select, TextField } from '@heroui/react';
 import { createProject } from '../../db/repos';
-import { parseAmount } from '../../lib/money';
+import { currencySymbol, parseAmount } from '../../lib/money';
+import { getDefaultCurrency } from '../../lib/settings';
 
 export const MAX_NAME = 60;
 
@@ -13,15 +14,17 @@ interface Props {
 export function ProjectForm({ isOpen, onOpenChange }: Props) {
   const [name, setName] = useState('');
   const [budget, setBudget] = useState('');
+  const [currency, setCurrency] = useState<string>(getDefaultCurrency);
   const trimmed = name.trim();
   const canSave = trimmed.length > 0 && trimmed.length <= MAX_NAME;
 
   async function submit(e: React.FormEvent) {
     e.preventDefault();
     if (!canSave) return;
-    await createProject({ name: trimmed, currency: 'CRC', totalBudget: parseAmount(budget) });
+    await createProject({ name: trimmed, currency, totalBudget: parseAmount(budget) });
     setName('');
     setBudget('');
+    setCurrency(getDefaultCurrency());
     onOpenChange(false);
   }
 
@@ -44,8 +47,25 @@ export function ProjectForm({ isOpen, onOpenChange }: Props) {
                   placeholder="Ej. Casa nueva"
                 />
               </TextField>
+              <Select
+                fullWidth
+                selectedKey={currency}
+                onSelectionChange={(k) => k && setCurrency(String(k))}
+              >
+                <Label>Moneda</Label>
+                <Select.Trigger>
+                  <Select.Value />
+                  <Select.Indicator />
+                </Select.Trigger>
+                <Select.Popover>
+                  <ListBox>
+                    <ListBox.Item id="CRC" textValue="Colones ₡">Colones ₡</ListBox.Item>
+                    <ListBox.Item id="USD" textValue="Dólares $">Dólares $</ListBox.Item>
+                  </ListBox>
+                </Select.Popover>
+              </Select>
               <TextField fullWidth>
-                <Label>Presupuesto total (₡)</Label>
+                <Label>Presupuesto total ({currencySymbol(currency)})</Label>
                 <Input
                   value={budget}
                   inputMode="numeric"

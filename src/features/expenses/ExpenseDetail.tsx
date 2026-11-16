@@ -1,9 +1,9 @@
 import { Button, Card, Chip, ProgressBar } from '@heroui/react';
 import { useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
-import { useExpense, useInstallments, usePayments } from '../../db/hooks';
+import { useExpense, useExpenseCurrency, useInstallments, usePayments } from '../../db/hooks';
 import { expenseProgress, installmentStatus } from '../../lib/calc';
-import { formatCRC } from '../../lib/money';
+import { formatMoney } from '../../lib/money';
 import { PaymentSheet } from '../payments/PaymentSheet';
 import { InstallmentTimeline } from './InstallmentTimeline';
 
@@ -12,6 +12,7 @@ export function ExpenseDetail() {
   const expense = useExpense(id);
   const installments = useInstallments(id);
   const payments = usePayments(id);
+  const currency = useExpenseCurrency(id);
   const [sheetOpen, setSheetOpen] = useState(false);
   const [targetInst, setTargetInst] = useState<string>();
 
@@ -59,7 +60,7 @@ export function ExpenseDetail() {
                 </Chip>
               </div>
               <div data-testid="planeado" className="text-[29px] font-extrabold tabular-nums text-ink">
-                {formatCRC(expense.plannedAmount)}
+                {formatMoney(expense.plannedAmount, currency)}
               </div>
               <ProgressBar
                 aria-label={`Progreso de ${expense.name}`}
@@ -77,7 +78,7 @@ export function ExpenseDetail() {
                     data-testid="pagado"
                     className={`text-sm font-extrabold tabular-nums ${p.over ? 'text-danger' : 'text-ink'}`}
                   >
-                    {formatCRC(p.paid)}
+                    {formatMoney(p.paid, currency)}
                   </div>
                 </div>
                 <div>
@@ -88,7 +89,7 @@ export function ExpenseDetail() {
                     data-testid="restante"
                     className={`text-sm font-extrabold tabular-nums ${p.over ? 'text-danger' : 'text-ink'}`}
                   >
-                    {formatCRC(Math.abs(p.remaining))}
+                    {formatMoney(Math.abs(p.remaining), currency)}
                   </div>
                 </div>
               </div>
@@ -103,6 +104,7 @@ export function ExpenseDetail() {
               <InstallmentTimeline
                 installments={installments}
                 payments={payments}
+                currency={currency}
                 onPay={(instId) => {
                   setTargetInst(instId);
                   setSheetOpen(true);

@@ -1,6 +1,6 @@
 import { Card } from '@heroui/react';
 import { ReceiptThumb } from '../payments/ReceiptThumb';
-import { formatCRC } from '../../lib/money';
+import { formatMoney } from '../../lib/money';
 import { msOfIso, WEEKDAYS_ES, MONTHS_ES } from '../../lib/calendar';
 import type { Payment } from '../../db/types';
 
@@ -9,12 +9,16 @@ export interface DayRecord {
   expenseName: string;
   expenseIcon?: string;
   projectName: string;
+  currency: string;
 }
 
 export function DayRecords({ iso, records }: { iso: string; records: DayRecord[] }) {
   const d = new Date(msOfIso(iso));
   const title = `${WEEKDAYS_ES[(d.getDay() + 6) % 7]} ${d.getDate()} de ${MONTHS_ES[d.getMonth()].toLowerCase()}`;
-  const total = records.reduce((s, r) => s + r.payment.amount, 0);
+  // One total per currency (stable alphabetical order) so currencies are never mixed.
+  const totals = new Map<string, number>();
+  for (const r of records) totals.set(r.currency, (totals.get(r.currency) ?? 0) + r.payment.amount);
+  const totalText = [...totals].sort(([a], [b]) => a.localeCompare(b)).map(([c, n]) => formatMoney(n, c)).join(' + ');
   return (
     <section aria-label="Registros del día" className="mt-4">
       <h2 className="font-display text-[15px] font-black text-ink">{title}</h2>
@@ -27,7 +31,7 @@ export function DayRecords({ iso, records }: { iso: string; records: DayRecord[]
       ) : (
         <>
           <p className="mb-3 mt-0.5 text-[11.5px] font-semibold tabular-nums text-ink-muted">
-            {formatCRC(total)} · {records.length} {records.length === 1 ? 'pago' : 'pagos'}
+            {totalText} · {records.length} {records.length === 1 ? 'pago' : 'pagos'}
           </p>
           <ul className="m-0 flex list-none flex-col gap-2 p-0">
             {records.map((r) => (
@@ -40,7 +44,7 @@ export function DayRecords({ iso, records }: { iso: string; records: DayRecord[]
                       <div className="text-[10.5px] text-ink-muted">{r.projectName}</div>
                     </div>
                     {r.payment.receiptId && <ReceiptThumb receiptId={r.payment.receiptId} />}
-                    <span className="shrink-0 text-[13px] font-extrabold tabular-nums">{formatCRC(r.payment.amount)}</span>
+                    <span className="shrink-0 text-[13px] font-extrabold tabular-nums">{formatMoney(r.payment.amount, r.currency)}</span>
                   </Card.Content>
                 </Card>
               </li>

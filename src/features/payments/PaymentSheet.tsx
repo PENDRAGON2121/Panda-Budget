@@ -1,9 +1,9 @@
 import { useEffect, useState } from 'react';
 import { Button, Calendar, DateField, DatePicker, Drawer, Input, Label, ListBox, Select, TextField } from '@heroui/react';
 import { CalendarDate, getLocalTimeZone, today } from '@internationalized/date';
-import { useInstallments } from '../../db/hooks';
+import { useExpenseCurrency, useInstallments } from '../../db/hooks';
 import { addPayment } from '../../db/repos';
-import { formatCRC, parseAmount } from '../../lib/money';
+import { currencySymbol, formatMoney, parseAmount } from '../../lib/money';
 import { compressImage } from './image';
 import { ReceiptPicker } from './ReceiptPicker';
 
@@ -19,6 +19,7 @@ const todayDate = () => today(getLocalTimeZone());
 
 export function PaymentSheet({ expenseId, installmentId, isOpen, onOpenChange }: Props) {
   const installments = useInstallments(expenseId);
+  const currency = useExpenseCurrency(expenseId);
   const [amount, setAmount] = useState('');
   const [date, setDate] = useState<CalendarDate | null>(todayDate);
   const [target, setTarget] = useState<string>(installmentId ?? NONE);
@@ -74,7 +75,7 @@ export function PaymentSheet({ expenseId, installmentId, isOpen, onOpenChange }:
           <form onSubmit={save}>
             <Drawer.Body className="flex flex-col gap-4">
               <TextField fullWidth>
-                <Label>Monto (₡)</Label>
+                <Label>Monto ({currencySymbol(currency)})</Label>
                 <Input
                   value={amount}
                   inputMode="numeric"
@@ -130,7 +131,7 @@ export function PaymentSheet({ expenseId, installmentId, isOpen, onOpenChange }:
                         <ListBox.ItemIndicator />
                       </ListBox.Item>
                       {installments.map((i) => {
-                        const text = `Cuota ${i.index} · ${formatCRC(i.plannedAmount)}`;
+                        const text = `Cuota ${i.index} · ${formatMoney(i.plannedAmount, currency)}`;
                         return (
                           <ListBox.Item key={i.id} id={i.id} textValue={text}>
                             {text}

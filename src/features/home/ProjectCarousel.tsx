@@ -2,7 +2,7 @@ import { useCallback, useEffect, useMemo } from 'react';
 import { Card } from '@heroui/react';
 import useEmblaCarousel from 'embla-carousel-react';
 import type { Expense, Payment, Project } from '../../db/types';
-import { formatCRC } from '../../lib/money';
+import { formatMoney } from '../../lib/money';
 import { projectSummary } from '../../lib/calc';
 
 interface Props {
@@ -90,17 +90,17 @@ export function ProjectCarousel({ projects, expenses, payments, activeIndex, onS
                       </span>
                     </div>
                     <div className="my-1 text-3xl font-extrabold tabular-nums tracking-tight text-ink">
-                      {formatCRC(p.totalBudget)}
+                      {formatMoney(p.totalBudget, p.currency)}
                     </div>
                     <div className="mt-2 flex gap-6 text-[11.5px] font-semibold text-ink-muted">
                       <div>
                         Pagado
-                        <b className="block text-sm font-extrabold tabular-nums text-ink">{formatCRC(s.paid)}</b>
+                        <b className="block text-sm font-extrabold tabular-nums text-ink">{formatMoney(s.paid, p.currency)}</b>
                       </div>
                       <div>
                         Disponible
                         <b className={`block text-sm font-extrabold tabular-nums ${s.available < 0 ? 'text-danger' : 'text-ink'}`}>
-                          {formatCRC(s.available)}
+                          {formatMoney(s.available, p.currency)}
                         </b>
                       </div>
                     </div>

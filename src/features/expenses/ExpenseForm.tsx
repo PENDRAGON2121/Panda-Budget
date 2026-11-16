@@ -1,7 +1,8 @@
 import { useState } from 'react';
 import { Button, Input, Label, Modal, TextField } from '@heroui/react';
+import { useProjectCurrency } from '../../db/hooks';
 import { createExpense } from '../../db/repos';
-import { formatCRC, parseAmount } from '../../lib/money';
+import { currencySymbol, formatMoney, parseAmount } from '../../lib/money';
 
 export const MAX_NAME = 60;
 const MAX_INSTALLMENTS = 60;
@@ -29,6 +30,7 @@ export function ExpenseForm({ projectId, isOpen, onOpenChange }: Props) {
   const [amount, setAmount] = useState('');
   const [countStr, setCountStr] = useState('');
   const [total, setTotal] = useState('');
+  const currency = useProjectCurrency(projectId);
   const [rows, setRows] = useState<Row[]>([]);
 
   const trimmed = name.trim();
@@ -125,7 +127,7 @@ export function ExpenseForm({ projectId, isOpen, onOpenChange }: Props) {
 
               {type === 'single' ? (
                 <TextField fullWidth>
-                  <Label>Monto planeado (₡)</Label>
+                  <Label>Monto planeado ({currencySymbol(currency)})</Label>
                   <Input
                     value={amount}
                     inputMode="numeric"
@@ -148,7 +150,7 @@ export function ExpenseForm({ projectId, isOpen, onOpenChange }: Props) {
                     <>
                       <div className="flex items-end gap-2">
                         <TextField fullWidth>
-                          <Label>Monto total (₡)</Label>
+                          <Label>Monto total ({currencySymbol(currency)})</Label>
                           <Input
                             value={total}
                             inputMode="numeric"
@@ -184,7 +186,7 @@ export function ExpenseForm({ projectId, isOpen, onOpenChange }: Props) {
                         ))}
                       </ol>
                       <p className="text-sm font-bold tabular-nums text-ink">
-                        Total planeado: {formatCRC(plannedSum)}
+                        Total planeado: {formatMoney(plannedSum, currency)}
                       </p>
                     </>
                   )}

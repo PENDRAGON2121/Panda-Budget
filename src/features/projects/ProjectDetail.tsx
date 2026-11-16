@@ -5,11 +5,11 @@ import { Link, useParams } from 'react-router-dom';
 import { useAllPayments, useExpenses, useProject } from '../../db/hooks';
 import type { Expense, Payment } from '../../db/types';
 import { expenseProgress } from '../../lib/calc';
-import { formatCRC } from '../../lib/money';
+import { formatMoney } from '../../lib/money';
 import { ExpenseForm } from '../expenses/ExpenseForm';
 import { ProjectSummaryCard } from './ProjectSummaryCard';
 
-function ExpenseRow({ expense, payments }: { expense: Expense; payments: Payment[] }) {
+function ExpenseRow({ expense, payments, currency }: { expense: Expense; payments: Payment[]; currency: string }) {
   const p = expenseProgress(expense, payments);
   const shown = Math.min(100, Math.max(0, p.pct));
   return (
@@ -24,7 +24,7 @@ function ExpenseRow({ expense, payments }: { expense: Expense; payments: Payment
             </span>
           </div>
           <div className={`text-[11px] tabular-nums ${p.over ? 'font-bold text-danger' : 'text-ink-muted'}`}>
-            {formatCRC(p.paid)} de {formatCRC(expense.plannedAmount)}
+            {formatMoney(p.paid, currency)} de {formatMoney(expense.plannedAmount, currency)}
           </div>
           <ProgressBar aria-label={`Progreso de ${expense.name}`} value={shown} className="w-full">
             <ProgressBar.Track className="h-1.5">
@@ -86,7 +86,7 @@ export function ProjectDetail() {
             </Card.Content>
           </Card>
         ) : (
-          expenses.map((e) => <ExpenseRow key={e.id} expense={e} payments={payments} />)
+          expenses.map((e) => <ExpenseRow key={e.id} expense={e} payments={payments} currency={project.currency} />)
         )}
       </section>
       )}

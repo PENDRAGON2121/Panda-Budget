@@ -56,3 +56,28 @@ test('creating a project persists it', async () => {
   expect(p.name).toBe('Viaje');
   expect(p.totalBudget).toBe(500000);
 });
+
+test('a USD project renders $ amounts, not ₡', async () => {
+  await createProject({ name: 'Viaje', currency: 'USD', totalBudget: 1500 });
+  render(<MemoryRouter><ProjectsScreen /></MemoryRouter>);
+  expect(await screen.findByText('Viaje')).toBeInTheDocument();
+  expect(screen.getByText('$1.500')).toBeInTheDocument();
+  expect(screen.queryByText('₡1.500')).not.toBeInTheDocument();
+});
+
+test('new project is created in the profile default currency (USD)', async () => {
+  localStorage.setItem('panda-wallet:default-currency', 'USD');
+  try {
+    const user = userEvent.setup();
+    render(<ProjectForm isOpen onOpenChange={() => {}} />);
+    await user.type(screen.getByLabelText(/nombre/i), 'Viaje USD');
+    await user.click(screen.getByRole('button', { name: /crear proyecto/i }));
+    await waitFor(async () => {
+      const all = await db.projects.toArray();
+      expect(all).toHaveLength(1);
+      expect(all[0].currency).toBe('USD');
+    });
+  } finally {
+    localStorage.clear();
+  }
+});

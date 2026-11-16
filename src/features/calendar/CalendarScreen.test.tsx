@@ -65,3 +65,16 @@ test('month navigation changes the header and selection', async () => {
   expect(screen.getByText('Abril 2026')).toBeInTheDocument();
   expect(screen.getByText('Sin registros este día')).toBeInTheDocument();
 });
+
+test('mixed-currency day shows one total per currency, never mixed', async () => {
+  const crc = await createProject({ name: 'Casa', currency: 'CRC', totalBudget: 5000000 });
+  const usd = await createProject({ name: 'Viaje', currency: 'USD', totalBudget: 5000 });
+  const e1 = await createExpense({ projectId: crc.id, name: 'Cocina', type: 'single', plannedAmount: 2000000 });
+  const e2 = await createExpense({ projectId: usd.id, name: 'Vuelos', type: 'single', plannedAmount: 900 });
+  await addPayment({ expenseId: e1.id, amount: 1800000, date: may(15) });
+  await addPayment({ expenseId: e2.id, amount: 500, date: may(15) });
+  renderCal();
+  expect(await screen.findByText('₡1.800.000 + $500 · 2 pagos')).toBeInTheDocument();
+  expect(screen.getByText('$500')).toBeInTheDocument();
+  expect(screen.getByText('₡1.800.000')).toBeInTheDocument();
+});

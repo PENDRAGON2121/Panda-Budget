@@ -1,7 +1,7 @@
 import { Button, Card } from '@heroui/react';
 import type { Installment, Payment } from '../../db/types';
 import { installmentStatus } from '../../lib/calc';
-import { formatCRC } from '../../lib/money';
+import { formatMoney } from '../../lib/money';
 import { ReceiptThumb } from '../payments/ReceiptThumb';
 
 const fmtDate = (ms: number) =>
@@ -11,10 +11,12 @@ export function InstallmentTimeline({
   installments,
   payments,
   onPay,
+  currency = 'CRC',
 }: {
   installments: Installment[];
   payments: Payment[];
   onPay?: (installmentId: string) => void;
+  currency?: string;
 }) {
   return (
     <ol className="relative flex flex-col gap-2.5 pl-7 before:absolute before:bottom-3 before:left-[9px] before:top-2 before:w-0.5 before:bg-shade">
@@ -69,7 +71,7 @@ export function InstallmentTimeline({
                     status === 'pendiente' ? 'text-ink-muted' : 'text-ink'
                   }`}
                 >
-                  {formatCRC(inst.plannedAmount)}
+                  {formatMoney(inst.plannedAmount, currency)}
                 </div>
                 {receiptId && <ReceiptThumb receiptId={receiptId} />}
                 {status !== 'pagada' && onPay && (

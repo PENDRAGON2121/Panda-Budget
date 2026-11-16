@@ -46,6 +46,7 @@ export function CalendarScreen({ initialDate }: { initialDate?: Date }) {
           expenseName: e?.name ?? 'Gasto',
           expenseIcon: e?.icon,
           projectName: (e && pr.get(e.projectId)?.name) ?? '',
+          currency: (e && pr.get(e.projectId)?.currency) ?? 'CRC',
         };
       });
   }, [payments, expenses, projects, selected]);

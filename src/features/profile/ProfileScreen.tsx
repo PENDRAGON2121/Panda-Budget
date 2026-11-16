@@ -27,13 +27,13 @@ export function ProfileScreen() {
       <Card className="shadow-card">
         <Card.Content className="flex flex-col gap-3">
           <RadioGroup
-            aria-label="Moneda predeterminada"
+            aria-label="Moneda predeterminada para nuevos proyectos"
             value={currency}
             onChange={onChange}
             name="currency"
           >
             <span className="font-display text-[15px] font-extrabold text-ink">
-              Moneda predeterminada
+              Moneda predeterminada para nuevos proyectos
             </span>
             <Radio value="CRC">
               <Radio.Control>

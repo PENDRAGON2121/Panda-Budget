@@ -1,7 +1,7 @@
 import { Card } from '@heroui/react';
 import type { Expense, Payment, Project } from '../../db/types';
 import { projectSummary } from '../../lib/calc';
-import { formatCRC } from '../../lib/money';
+import { formatMoney } from '../../lib/money';
 import { DistributionBar } from './DistributionBar';
 
 interface Props {
@@ -22,12 +22,12 @@ export function ProjectSummaryCard({ project, expenses, payments }: Props) {
           </span>
         </div>
         <div className="my-1 font-sans text-3xl font-extrabold tabular-nums tracking-tight text-ink">
-          {formatCRC(project.totalBudget)}
+          {formatMoney(project.totalBudget, project.currency)}
         </div>
         <div className="mt-2 flex gap-6">
           <div>
             <span className="text-[11.5px] font-semibold text-ink-muted">Pagado</span>
-            <b data-testid="pagado" className="block text-sm font-extrabold tabular-nums">{formatCRC(s.paid)}</b>
+            <b data-testid="pagado" className="block text-sm font-extrabold tabular-nums">{formatMoney(s.paid, project.currency)}</b>
           </div>
           <div>
             <span className="text-[11.5px] font-semibold text-ink-muted">Disponible</span>
@@ -35,7 +35,7 @@ export function ProjectSummaryCard({ project, expenses, payments }: Props) {
               data-testid="disponible"
               className={`block text-sm font-extrabold tabular-nums ${s.available < 0 ? 'text-danger' : ''}`}
             >
-              {formatCRC(s.available)}
+              {formatMoney(s.available, project.currency)}
             </b>
           </div>
         </div>

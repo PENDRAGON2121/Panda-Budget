@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { formatCRC, parseAmount } from './money';
+import { formatCRC, parseAmount, formatMoney } from './money';
 
 describe('formatCRC', () => {
   it('formats zero', () => expect(formatCRC(0)).toBe('₡0'));
@@ -22,4 +22,12 @@ describe('parseAmount', () => {
   it('strips spaces and commas', () => expect(parseAmount(' 1,200 ')).toBe(1200));
   it('never negative', () => expect(parseAmount('-500')).toBe(500));
   it('round-trips', () => expect(parseAmount(formatCRC(38000000))).toBe(38000000));
+});
+
+describe('formatMoney', () => {
+  it('USD uses $ prefix and period grouping', () => expect(formatMoney(1500, 'USD')).toBe('$1.500'));
+  it('CRC uses ₡ prefix', () => expect(formatMoney(38000000, 'CRC')).toBe('₡38.000.000'));
+  it('unknown codes fall back to ₡', () => expect(formatMoney(2500, 'EUR')).toBe('₡2.500'));
+  it('negative keeps sign before symbol', () => expect(formatMoney(-1500, 'USD')).toBe('-$1.500'));
+  it('formatCRC delegates to CRC', () => expect(formatCRC(1500)).toBe(formatMoney(1500, 'CRC')));
 });

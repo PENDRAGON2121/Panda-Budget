@@ -56,3 +56,18 @@ export function useReceipt(id: string | undefined) {
   /** undefined = loading; null = none/not found. */
   return useLiveQuery(async () => (id ? ((await db.receipts.get(id)) ?? null) : null), [id]);
 }
+
+/** Currency code of a project ('CRC' while loading / unknown). */
+export function useProjectCurrency(projectId: string | undefined): string {
+  return useLiveQuery(async () => (projectId ? (await db.projects.get(projectId))?.currency : undefined), [projectId]) ?? 'CRC';
+}
+
+/** Currency code of the project that owns an expense ('CRC' while loading / unknown). */
+export function useExpenseCurrency(expenseId: string | undefined): string {
+  return (
+    useLiveQuery(async () => {
+      const e = expenseId ? await db.expenses.get(expenseId) : undefined;
+      return e ? (await db.projects.get(e.projectId))?.currency : undefined;
+    }, [expenseId]) ?? 'CRC'
+  );
+}

@@ -2,7 +2,7 @@ import { Card, ProgressBar } from '@heroui/react';
 import { motion } from 'motion/react';
 import { Link } from 'react-router-dom';
 import type { Project } from '../../db/types';
-import { formatCRC } from '../../lib/money';
+import { formatMoney } from '../../lib/money';
 
 interface Props {
   project: Project;
@@ -20,7 +20,7 @@ export function ProjectCard({ project, pct, expenseCount }: Props) {
           <div aria-hidden className="text-2xl">{project.icon ?? '📁'}</div>
           <h3 className="break-words font-display text-[15px] font-black text-ink">{project.name}</h3>
           <div className="font-sans text-base font-bold tabular-nums text-ink">
-            {formatCRC(project.totalBudget)}
+            {formatMoney(project.totalBudget, project.currency)}
           </div>
           <ProgressBar aria-label={`Progreso de ${project.name}`} value={shown} className="w-full">
             <ProgressBar.Track className="h-1.5">
