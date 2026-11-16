@@ -8,8 +8,9 @@ android {
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
         // Overridden by CI (Task 16) via APP_VERSION_CODE / APP_VERSION_NAME.
-        versionCode (System.getenv("APP_VERSION_CODE") ?: "1").toInteger()
-        versionName System.getenv("APP_VERSION_NAME") ?: "0.0.1"
+        // Assignment form on purpose: `versionCode (x).toInteger()` parses as `versionCode(x).toInteger()` in Groovy.
+        versionCode = Integer.parseInt(System.getenv("APP_VERSION_CODE") ?: "1")
+        versionName = System.getenv("APP_VERSION_NAME") ?: "0.0.1"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         aaptOptions {
              // Files and dirs to omit from the packaged assets dir, modified to accommodate modern web apps.
